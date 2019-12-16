@@ -3,6 +3,7 @@ module Control.Effect.Parser
 ( -- * Parser effect
   Parser(..)
 , accept
+, position
   -- * Re-exports
 , Algebra
 , Has
@@ -37,3 +38,6 @@ instance Effect Parser where
 
 accept :: Has Parser sig m => (Char -> Maybe a) -> m a
 accept p = send (Accept p pure)
+
+position :: Has Parser sig m => m Pos
+position = send (Position pure)
