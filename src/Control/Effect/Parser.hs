@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, LambdaCase, StandaloneDeriving #-}
 module Control.Effect.Parser
-( -- * Re-exports
-  Algebra
+( -- * Parser effect
+  Parser(..)
+  -- * Re-exports
+, Algebra
 , Has
 , run
 ) where
