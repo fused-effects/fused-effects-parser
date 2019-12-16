@@ -2,6 +2,7 @@
 module Control.Effect.Parser
 ( -- * Parser effect
   Parser(..)
+, accept
   -- * Re-exports
 , Algebra
 , Has
@@ -32,3 +33,7 @@ instance Effect Parser where
     Label m s  k -> Label (hdl (m <$ ctx)) s (hdl . fmap k)
     Unexpected s -> Unexpected s
     Position   k -> Position (hdl . (<$ ctx) . k)
+
+
+accept :: Has Parser sig m => (Char -> Maybe a) -> m a
+accept p = send (Accept p pure)
