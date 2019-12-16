@@ -23,3 +23,10 @@ instance HFunctor Parser where
     Label m s  k -> Label (f m) s (f . k)
     Unexpected s -> Unexpected s
     Position   k -> Position      (f . k)
+
+instance Effect Parser where
+  thread ctx hdl = \case
+    Accept p   k -> Accept p (hdl . (<$ ctx) . k)
+    Label m s  k -> Label (hdl (m <$ ctx)) s (hdl . fmap k)
+    Unexpected s -> Unexpected s
+    Position   k -> Position (hdl . (<$ ctx) . k)
