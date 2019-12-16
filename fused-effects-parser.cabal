@@ -37,6 +37,7 @@ library
   import: common
   hs-source-dirs:      src
   exposed-modules:
+    Control.Carrier.Parser.Church
     Control.Effect.Parser
   build-depends:
       base ^>= 4.12
