@@ -1,2 +1,8 @@
 module Control.Effect.Parser
-() where
+( -- * Re-exports
+  Algebra
+, Has
+, run
+) where
+
+import Control.Algebra

@@ -20,7 +20,9 @@ library
   hs-source-dirs:      src
   exposed-modules:
     Control.Effect.Parser
-  build-depends:       base ^>= 4.12
+  build-depends:
+      base ^>= 4.12
+    , fused-effects ^>= 1
 
 test-suite fused-effects-parser-test
   default-language:    Haskell2010
