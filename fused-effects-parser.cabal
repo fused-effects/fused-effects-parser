@@ -23,6 +23,7 @@ library
   build-depends:
       base ^>= 4.12
     , fused-effects ^>= 1
+    , semantic-source ^>= 0
 
 test-suite fused-effects-parser-test
   default-language:    Haskell2010
