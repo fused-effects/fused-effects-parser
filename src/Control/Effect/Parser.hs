@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
 module Control.Effect.Parser
 ( -- * Re-exports
   Algebra
@@ -14,3 +14,5 @@ data Parser m k
   | forall a . Label (m a) String (a -> m k)
   | Unexpected String
   | Position (Pos -> m k)
+
+deriving instance Functor m => Functor (Parser m)
