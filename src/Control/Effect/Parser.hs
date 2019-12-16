@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, LambdaCase, StandaloneDeriving #-}
 module Control.Effect.Parser
 ( -- * Re-exports
   Algebra
@@ -16,3 +16,10 @@ data Parser m k
   | Position (Pos -> m k)
 
 deriving instance Functor m => Functor (Parser m)
+
+instance HFunctor Parser where
+  hmap f = \case
+    Accept p   k -> Accept p      (f . k)
+    Label m s  k -> Label (f m) s (f . k)
+    Unexpected s -> Unexpected s
+    Position   k -> Position      (f . k)
