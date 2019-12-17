@@ -138,10 +138,10 @@ prettyLevel = \case
 
 
 data Notice = Notice
-  { noticeLevel   :: Maybe Level
-  , noticeExcerpt :: {-# UNPACK #-} !Excerpt
-  , noticeReason  :: Doc AnsiStyle
-  , noticeContext :: [Doc AnsiStyle]
+  { level   :: Maybe Level
+  , excerpt :: {-# UNPACK #-} !Excerpt
+  , reason  :: Doc AnsiStyle
+  , context :: [Doc AnsiStyle]
   }
   deriving (Show)
 
