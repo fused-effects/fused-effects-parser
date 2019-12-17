@@ -47,7 +47,7 @@ library
     , prettyprinter-ansi-terminal ^>= 1.1
     , semantic-source ^>= 0
 
-test-suite fused-effects-parser-test
+test-suite test
   import: common
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
