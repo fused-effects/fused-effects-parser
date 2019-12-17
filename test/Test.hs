@@ -7,6 +7,7 @@ import Control.Carrier.Reader
 import Source.Span (Pos(..))
 import Test.Tasty
 import Test.Tasty.HUnit
+import Text.Parser.Char
 
 main :: IO ()
 main = defaultMain $ testGroup "unit tests"
@@ -18,6 +19,9 @@ parserTests = testGroup "ParserC (Church)"
   [ testGroup "position"
     [ testCase "at start" $ do
       parsesInto position "" (Pos 0 0)
+
+    , testCase "at end" $ do
+      parsesInto (char 'x' *> position) "x" (Pos 0 1)
     ]
   ]
 
