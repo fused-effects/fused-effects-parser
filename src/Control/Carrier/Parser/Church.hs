@@ -14,6 +14,8 @@ import Control.Monad (ap)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal
 import Source.Span as Span
+import Text.Parser.Char
+import Text.Parser.Combinators
 
 newtype ParserC m a = ParserC
   { runParserC
@@ -40,6 +42,16 @@ instance Monad (ParserC m) where
   m >>= f = ParserC (\ just nothing fail -> runParserC m (\ pos input a -> runParserC (f a) just nothing fail pos input) nothing fail)
 
 instance MonadPlus (ParserC m)
+
+instance (Algebra sig m, Effect sig) => Parsing (ParserC m) where
+  try = call
+  eof = notFollowedBy anyChar <?> "end of input"
+  unexpected s = send (Unexpected s)
+  m <?> s = send (Label m s pure)
+  notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . show))
+
+instance (Algebra sig m, Effect sig) => CharParsing (ParserC m) where
+  satisfy p = accept (\ c -> if p c then Just c else Nothing)
 
 instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg = \case
