@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveTraversable, RankNTypes #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Parser.Church
 ( -- * Parser carrier
   ParserC(..)
@@ -6,7 +6,10 @@ module Control.Carrier.Parser.Church
 , module Control.Effect.Parser
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
+import Control.Effect.Cut
+import Control.Effect.NonDet
 import Control.Effect.Parser
 import Control.Monad (MonadPlus, ap)
 import Data.Text.Prettyprint.Doc
@@ -38,6 +41,27 @@ instance Monad (ParserC m) where
   m >>= f = ParserC (\ just nothing fail -> runParserC m (\ pos input a -> runParserC (f a) just nothing fail pos input) nothing fail)
 
 instance MonadPlus (ParserC m)
+
+instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
+  alg = \case
+    L parser -> case parser of
+      Accept p k -> ParserC (\ just nothing _ pos input -> case input of
+        c:cs | Just a <- p c -> just (advancePos c pos) cs a
+             | otherwise     -> nothing pos (Just (pretty "unexpected " <> pretty c))
+        _                    -> nothing pos (Just (pretty "unexpected EOF"))) >>= k
+      Label m s k -> ParserC (\ just nothing fail -> runParserC m just (\ p r -> nothing p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s)))) >>= k
+      Unexpected s -> ParserC $ \ _ nothing _ pos _ -> nothing pos (Just (pretty s))
+      Position k -> ParserC (\ just _ _ pos input -> just pos input pos) >>= k
+    R (L cut) -> case cut of
+      Cutfail -> ParserC $ \ _ _ fail pos _ -> fail pos Nothing
+      Call m k -> ParserC (\ just nothing _ -> runParserC m just nothing nothing) >>= k
+    R (R (L nondet)) -> case nondet of
+      L Empty      -> empty
+      R (Choose k) -> k True <|> k False
+    R (R (R other)) -> ParserC $ \ just nothing _ pos input -> alg (thread (success pos input ()) (result runParser failure) other) >>= result just nothing where
+      runParser p s m = runParserC m (\ p s -> pure . success p s) failure failure p s
+      success pos input a = Result pos (Right (input, a))
+      failure pos reason = pure (Result pos (Left reason))
 
 
 data Result a = Result
