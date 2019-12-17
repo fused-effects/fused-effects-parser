@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveTraversable, ExistentialQuantification, LambdaCase, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, LambdaCase, StandaloneDeriving #-}
 module Control.Effect.Parser
 ( -- * Parser effect
   Parser(..)
@@ -8,9 +8,6 @@ module Control.Effect.Parser
 , line
 , Path(..)
 , path
-, Excerpt(..)
-, Excerpted(..)
-, unExcerpted
 , excerpted
   -- * Re-exports
 , Algebra
@@ -19,6 +16,7 @@ module Control.Effect.Parser
 ) where
 
 import Control.Algebra
+import Control.Effect.Parser.Excerpt (Excerpt(Excerpt), Excerpted(..))
 import Control.Effect.Reader
 import qualified Source.Span as Span
 
@@ -66,23 +64,6 @@ newtype Path = Path { unPath :: FilePath }
 path :: Has (Reader Path) sig m => m FilePath
 path = asks unPath
 
-
-data Excerpt = Excerpt
-  { excerptPath :: !FilePath
-  , excerptLine :: !String
-  , excerptSpan :: {-# UNPACK #-} !Span.Span
-  }
-  deriving (Eq, Ord, Show)
-
-instance Semigroup Excerpt where
-  Excerpt _ l s1 <> Excerpt p _ s2 = Excerpt p l (s1 <> s2)
-
-
-data Excerpted a = a :~ Excerpt
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-unExcerpted :: Excerpted a -> a
-unExcerpted (a :~ _) = a
 
 excerpted :: (Has Parser sig m, Has (Reader Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpted a)
 excerpted m = do

@@ -18,6 +18,7 @@ import Control.Carrier.Reader
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import Control.Effect.Parser
+import Control.Effect.Parser.Excerpt
 import Control.Effect.Throw
 import Control.Monad (ap)
 import Control.Monad.IO.Class

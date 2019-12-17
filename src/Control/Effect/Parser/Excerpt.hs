@@ -1,2 +1,25 @@
+{-# LANGUAGE DeriveTraversable #-}
 module Control.Effect.Parser.Excerpt
-() where
+( Excerpt(..)
+, Excerpted(..)
+, unExcerpted
+) where
+
+import qualified Source.Span as Span
+
+data Excerpt = Excerpt
+  { excerptPath :: !FilePath
+  , excerptLine :: !String
+  , excerptSpan :: {-# UNPACK #-} !Span.Span
+  }
+  deriving (Eq, Ord, Show)
+
+instance Semigroup Excerpt where
+  Excerpt _ l s1 <> Excerpt p _ s2 = Excerpt p l (s1 <> s2)
+
+
+data Excerpted a = a :~ Excerpt
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+unExcerpted :: Excerpted a -> a
+unExcerpted (a :~ _) = a
