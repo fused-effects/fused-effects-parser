@@ -4,6 +4,7 @@ module Control.Carrier.Parser.Church
   ParserC(..)
 , Level(..)
 , prettyLevel
+, Notice(..)
   -- * Parser effect
 , module Control.Effect.Parser
 ) where
@@ -104,6 +105,15 @@ prettyLevel :: Level -> Doc AnsiStyle
 prettyLevel = \case
   Warn  -> magenta (pretty "warning")
   Error -> red     (pretty "error")
+
+
+data Notice = Notice
+  { noticeLevel   :: Maybe Level
+  , noticeExcerpt :: {-# UNPACK #-} !Excerpt
+  , noticeReason  :: Doc AnsiStyle
+  , noticeContext :: [Doc AnsiStyle]
+  }
+  deriving (Show)
 red, magenta :: Doc AnsiStyle -> Doc AnsiStyle
 red     = annotate $ color Red
 magenta = annotate $ color Magenta
