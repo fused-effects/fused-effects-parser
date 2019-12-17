@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, RankNTypes #-}
+{-# LANGUAGE DeriveTraversable, RankNTypes #-}
 module Control.Carrier.Parser.Church
 ( -- * Parser carrier
   ParserC(..)
@@ -22,3 +22,10 @@ newtype ParserC m a = ParserC
     -> m r
   }
   deriving (Functor)
+
+
+data Result a = Result
+  { resultPos   :: {-# UNPACK #-} !Pos
+  , resultState :: Either (Maybe (Doc AnsiStyle)) (String, a)
+  }
+  deriving (Foldable, Functor, Show, Traversable)
