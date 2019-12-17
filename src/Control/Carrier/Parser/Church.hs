@@ -2,6 +2,7 @@
 module Control.Carrier.Parser.Church
 ( -- * Parser carrier
   ParserC(..)
+, Level(..)
   -- * Parser effect
 , module Control.Effect.Parser
 ) where
@@ -91,3 +92,9 @@ result success failure (Result pos state) = either (failure pos) (uncurry (succe
 advancePos :: Char -> Pos -> Pos
 advancePos '\n' p = Pos (succ (Span.line p)) 0
 advancePos _    p = p { Span.column = succ (Span.column p) }
+
+
+data Level
+  = Warn
+  | Error
+  deriving (Eq, Ord, Show)
