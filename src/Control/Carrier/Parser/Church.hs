@@ -3,6 +3,7 @@ module Control.Carrier.Parser.Church
 ( -- * Parser carrier
   ParserC(..)
 , Level(..)
+, prettyLevel
   -- * Parser effect
 , module Control.Effect.Parser
 ) where
@@ -13,7 +14,7 @@ import Control.Effect.NonDet
 import Control.Effect.Parser
 import Control.Monad (ap)
 import Data.Text.Prettyprint.Doc
-import Data.Text.Prettyprint.Doc.Render.Terminal
+import Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle, Color(..), color)
 import Source.Span as Span
 import Text.Parser.Char (CharParsing(..))
 import Text.Parser.Combinators
@@ -98,3 +99,11 @@ data Level
   = Warn
   | Error
   deriving (Eq, Ord, Show)
+
+prettyLevel :: Level -> Doc AnsiStyle
+prettyLevel = \case
+  Warn  -> magenta (pretty "warning")
+  Error -> red     (pretty "error")
+red, magenta :: Doc AnsiStyle -> Doc AnsiStyle
+red     = annotate $ color Red
+magenta = annotate $ color Magenta
