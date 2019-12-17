@@ -11,7 +11,7 @@ import Control.Effect.Parser
 import Control.Monad (MonadPlus, ap)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal
-import Source.Span
+import Source.Span as Span
 
 newtype ParserC m a = ParserC
   { runParserC
@@ -48,3 +48,8 @@ data Result a = Result
 
 result :: (Pos -> String -> a -> b) -> (Pos -> Maybe (Doc AnsiStyle) -> b) -> Result a -> b
 result success failure (Result pos state) = either (failure pos) (uncurry (success pos)) state
+
+
+advancePos :: Char -> Pos -> Pos
+advancePos '\n' p = Pos (succ (Span.line p)) 0
+advancePos _    p = p { Span.column = succ (Span.column p) }
