@@ -11,6 +11,7 @@ module Control.Effect.Parser
 , Excerpt(..)
 , Excerpted(..)
 , unExcerpted
+, excerpted
   -- * Re-exports
 , Algebra
 , Has
@@ -82,3 +83,12 @@ data Excerpted a = a :~ Excerpt
 
 unExcerpted :: Excerpted a -> a
 unExcerpted (a :~ _) = a
+
+excerpted :: (Has Parser sig m, Has (Reader Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpted a)
+excerpted m = do
+  path <- path
+  line <- line
+  start <- position
+  a <- m
+  end <- position
+  pure (a :~ Excerpt path line (Span.Span start end))
