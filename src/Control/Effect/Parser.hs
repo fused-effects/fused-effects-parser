@@ -67,7 +67,7 @@ path = asks unPath
 
 
 data Excerpt = Excerpt
-  { excerptPath :: !Path
+  { excerptPath :: !FilePath
   , excerptLine :: !String
   , excerptSpan :: {-# UNPACK #-} !Span.Span
   }
