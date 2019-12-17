@@ -4,6 +4,8 @@ module Control.Effect.Parser
   Parser(..)
 , accept
 , position
+, Lines(..)
+, line
   -- * Re-exports
 , Algebra
 , Has
@@ -11,13 +13,14 @@ module Control.Effect.Parser
 ) where
 
 import Control.Algebra
-import Source.Span
+import Control.Effect.Reader
+import qualified Source.Span as Span
 
 data Parser m k
   = forall a . Accept (Char -> Maybe a) (a -> m k)
   | forall a . Label (m a) String (a -> m k)
   | Unexpected String
-  | Position (Pos -> m k)
+  | Position (Span.Pos -> m k)
 
 deriving instance Functor m => Functor (Parser m)
 
@@ -39,5 +42,13 @@ instance Effect Parser where
 accept :: Has Parser sig m => (Char -> Maybe a) -> m a
 accept p = send (Accept p pure)
 
-position :: Has Parser sig m => m Pos
+position :: Has Parser sig m => m Span.Pos
 position = send (Position pure)
+
+
+newtype Lines = Lines { unLines :: [String] }
+
+line :: (Has Parser sig m, Has (Reader Lines) sig m) => m String
+line = do
+  pos <- position
+  asks ((!! Span.line pos) . unLines)
