@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE DeriveFunctor, RankNTypes #-}
 module Control.Carrier.Parser.Church
 ( -- * Parser carrier
   ParserC(..)
@@ -18,3 +18,4 @@ newtype ParserC m a = ParserC
     -> String
     -> m r
   }
+  deriving (Functor)
