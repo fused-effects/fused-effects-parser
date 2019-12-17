@@ -6,6 +6,8 @@ module Control.Effect.Parser
 , position
 , Lines(..)
 , line
+, Path(..)
+, path
   -- * Re-exports
 , Algebra
 , Has
@@ -52,3 +54,9 @@ line :: (Has Parser sig m, Has (Reader Lines) sig m) => m String
 line = do
   pos <- position
   asks ((!! Span.line pos) . unLines)
+
+
+newtype Path = Path { unPath :: FilePath }
+
+path :: Has (Reader Path) sig m => m FilePath
+path = asks unPath
