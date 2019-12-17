@@ -55,3 +55,4 @@ test-suite test
   build-depends:
       base
     , fused-effects-parser
+    , tasty ^>= 1.2
