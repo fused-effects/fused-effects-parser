@@ -8,9 +8,9 @@ module Control.Effect.Parser.Excerpt
 import qualified Source.Span as Span
 
 data Excerpt = Excerpt
-  { excerptPath :: !FilePath
-  , excerptLine :: !String
-  , excerptSpan :: {-# UNPACK #-} !Span.Span
+  { path :: !FilePath
+  , line :: !String
+  , span :: {-# UNPACK #-} !Span.Span
   }
   deriving (Eq, Ord, Show)
 
