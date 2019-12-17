@@ -2,8 +2,11 @@
 module Control.Carrier.Parser.Church
 ( -- * Parser carrier
   ParserC(..)
+  -- * Parser effect
+, module Control.Effect.Parser
 ) where
 
+import Control.Effect.Parser
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal
 import Source.Span
