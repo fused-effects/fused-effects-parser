@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Parser.Church
 ( -- * Parser carrier
-  ParserC(..)
+  runParser
+, ParserC(..)
 , Level(..)
 , prettyLevel
 , Notice(..)
@@ -11,12 +12,14 @@ module Control.Carrier.Parser.Church
 ) where
 
 import Control.Algebra
+import Control.Carrier.Reader
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import Control.Effect.Parser
 import Control.Monad (ap)
 import Data.Foldable (fold)
 import Data.List (isSuffixOf)
+import Data.Maybe (fromMaybe)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle, Color(..), color)
 import qualified Data.Text.Prettyprint.Doc.Render.Terminal as ANSI
@@ -24,6 +27,17 @@ import Source.Span as Span
 import Text.Parser.Char (CharParsing(..))
 import Text.Parser.Combinators
 import Text.Parser.Token (TokenParsing)
+
+runParser :: Applicative m => FilePath -> Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
+runParser path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure pos input)) where
+  success _ _ a = pure (Right a)
+  failure pos reason = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
+  inputLines = lines input
+  lines "" = [""]
+  lines s  = let (line, rest) = takeLine s in line : lines rest
+  takeLine ""          = ("", "")
+  takeLine ('\n':rest) = ("\n", rest)
+  takeLine (c   :rest) = let (cs, rest') = takeLine rest in (c:cs, rest')
 
 newtype ParserC m a = ParserC
   { runParserC
