@@ -16,6 +16,7 @@ import Data.Text.Prettyprint.Doc.Render.Terminal
 import Source.Span as Span
 import Text.Parser.Char
 import Text.Parser.Combinators
+import Text.Parser.Token
 
 newtype ParserC m a = ParserC
   { runParserC
@@ -52,6 +53,8 @@ instance (Algebra sig m, Effect sig) => Parsing (ParserC m) where
 
 instance (Algebra sig m, Effect sig) => CharParsing (ParserC m) where
   satisfy p = accept (\ c -> if p c then Just c else Nothing)
+
+instance (Algebra sig m, Effect sig) => TokenParsing (ParserC m)
 
 instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg = \case
