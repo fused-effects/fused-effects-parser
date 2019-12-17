@@ -15,9 +15,9 @@ import Control.Monad (ap)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal
 import Source.Span as Span
-import Text.Parser.Char
+import Text.Parser.Char (CharParsing(..))
 import Text.Parser.Combinators
-import Text.Parser.Token
+import Text.Parser.Token (TokenParsing)
 
 newtype ParserC m a = ParserC
   { runParserC
