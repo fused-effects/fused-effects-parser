@@ -7,11 +7,10 @@ module Control.Carrier.Parser.Church
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import Control.Effect.Parser
-import Control.Monad (MonadPlus, ap)
+import Control.Monad (ap)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal
 import Source.Span as Span
