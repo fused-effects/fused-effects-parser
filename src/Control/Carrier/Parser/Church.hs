@@ -16,9 +16,9 @@ module Control.Carrier.Parser.Church
 import Control.Algebra
 import Control.Carrier.Reader
 import Control.Effect.Cut
-import Control.Effect.Error
 import Control.Effect.NonDet
 import Control.Effect.Parser
+import Control.Effect.Throw
 import Control.Monad (ap)
 import Control.Monad.IO.Class
 import Data.Foldable (fold)
@@ -32,10 +32,10 @@ import Text.Parser.Char (CharParsing(..))
 import Text.Parser.Combinators
 import Text.Parser.Token (TokenParsing)
 
-parseString :: Has (Error Notice) sig m => ParserC (ReaderC Path (ReaderC Lines m)) a -> Pos -> String -> m a
+parseString :: Has (Throw Notice) sig m => ParserC (ReaderC Path (ReaderC Lines m)) a -> Pos -> String -> m a
 parseString p pos input = runParser "(interactive)" pos input p >>= either throwError pure
 
-parseFile :: (Has (Error Notice) sig m, MonadIO m) => ParserC (ReaderC Path (ReaderC Lines m)) a -> FilePath -> m a
+parseFile :: (Has (Throw Notice) sig m, MonadIO m) => ParserC (ReaderC Path (ReaderC Lines m)) a -> FilePath -> m a
 parseFile p path = do
   input <- liftIO (readFile path)
   runParser path (Pos 0 0) input p >>= either throwError pure
