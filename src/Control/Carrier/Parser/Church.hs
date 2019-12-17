@@ -8,7 +8,7 @@ module Control.Carrier.Parser.Church
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Parser
-import Control.Monad (ap)
+import Control.Monad (MonadPlus, ap)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal
 import Source.Span
@@ -36,6 +36,8 @@ instance Alternative (ParserC m) where
 
 instance Monad (ParserC m) where
   m >>= f = ParserC (\ just nothing fail -> runParserC m (\ pos input a -> runParserC (f a) just nothing fail pos input) nothing fail)
+
+instance MonadPlus (ParserC m)
 
 
 data Result a = Result
