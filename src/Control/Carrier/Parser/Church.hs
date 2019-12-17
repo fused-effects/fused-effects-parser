@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Parser.Church
 ( -- * Parser carrier
-  parseFile
+  parseString
+, parseFile
 , runParser
 , ParserC(..)
 , Level(..)
@@ -30,6 +31,9 @@ import Source.Span as Span
 import Text.Parser.Char (CharParsing(..))
 import Text.Parser.Combinators
 import Text.Parser.Token (TokenParsing)
+
+parseString :: Has (Error Notice) sig m => ParserC (ReaderC Path (ReaderC Lines m)) a -> Pos -> String -> m a
+parseString p pos input = runParser "(interactive)" pos input p >>= either throwError pure
 
 parseFile :: (Has (Error Notice) sig m, MonadIO m) => ParserC (ReaderC Path (ReaderC Lines m)) a -> FilePath -> m a
 parseFile p path = do
