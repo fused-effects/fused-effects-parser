@@ -6,6 +6,7 @@ module Control.Carrier.Parser.Church
 , module Control.Effect.Parser
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Parser
 import Control.Monad (ap)
 import Data.Text.Prettyprint.Doc
@@ -27,6 +28,11 @@ newtype ParserC m a = ParserC
 instance Applicative (ParserC m) where
   pure a = ParserC (\ just _ _ pos input -> just pos input a)
   (<*>) = ap
+
+instance Alternative (ParserC m) where
+  empty = ParserC (\ _ nothing _ pos _ -> nothing pos Nothing)
+
+  ParserC l <|> ParserC r = ParserC (\ just nothing fail pos input -> l just (const (const (r just nothing fail pos input))) fail pos input)
 
 instance Monad (ParserC m) where
   m >>= f = ParserC (\ just nothing fail -> runParserC m (\ pos input a -> runParserC (f a) just nothing fail pos input) nothing fail)
