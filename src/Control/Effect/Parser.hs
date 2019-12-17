@@ -8,6 +8,7 @@ module Control.Effect.Parser
 , line
 , Path(..)
 , path
+, Excerpt(..)
   -- * Re-exports
 , Algebra
 , Has
@@ -61,3 +62,11 @@ newtype Path = Path { unPath :: FilePath }
 
 path :: Has (Reader Path) sig m => m FilePath
 path = asks unPath
+
+
+data Excerpt = Excerpt
+  { excerptPath :: !Path
+  , excerptLine :: !String
+  , excerptSpan :: {-# UNPACK #-} !Span.Span
+  }
+  deriving (Eq, Ord, Show)
