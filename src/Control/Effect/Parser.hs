@@ -57,6 +57,7 @@ line = do
 
 
 newtype Path = Path { unPath :: FilePath }
+  deriving (Eq, Ord, Show)
 
 path :: Has (Reader Path) sig m => m FilePath
 path = asks unPath
