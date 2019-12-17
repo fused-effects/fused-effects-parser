@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Parser.Church
 ( -- * Parser carrier
-  runParser
+  parseFile
+, runParser
 , ParserC(..)
 , Level(..)
 , prettyLevel
@@ -14,9 +15,11 @@ module Control.Carrier.Parser.Church
 import Control.Algebra
 import Control.Carrier.Reader
 import Control.Effect.Cut
+import Control.Effect.Error
 import Control.Effect.NonDet
 import Control.Effect.Parser
 import Control.Monad (ap)
+import Control.Monad.IO.Class
 import Data.Foldable (fold)
 import Data.List (isSuffixOf)
 import Data.Maybe (fromMaybe)
@@ -27,6 +30,11 @@ import Source.Span as Span
 import Text.Parser.Char (CharParsing(..))
 import Text.Parser.Combinators
 import Text.Parser.Token (TokenParsing)
+
+parseFile :: (Has (Error Notice) sig m, MonadIO m) => ParserC (ReaderC Path (ReaderC Lines m)) a -> FilePath -> m a
+parseFile p path = do
+  input <- liftIO (readFile path)
+  runParser path (Pos 0 0) input p >>= either throwError pure
 
 runParser :: Applicative m => FilePath -> Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
 runParser path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure pos input)) where
