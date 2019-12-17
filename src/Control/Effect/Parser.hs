@@ -10,6 +10,7 @@ module Control.Effect.Parser
 , path
 , Excerpt(..)
 , Excerpted(..)
+, unExcerpted
   -- * Re-exports
 , Algebra
 , Has
@@ -78,3 +79,6 @@ instance Semigroup Excerpt where
 
 data Excerpted a = a :~ Excerpt
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+unExcerpted :: Excerpted a -> a
+unExcerpted (a :~ _) = a
