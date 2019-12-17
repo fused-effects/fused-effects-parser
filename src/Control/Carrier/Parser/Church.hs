@@ -7,6 +7,7 @@ module Control.Carrier.Parser.Church
 ) where
 
 import Control.Effect.Parser
+import Control.Monad (ap)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal
 import Source.Span
@@ -22,6 +23,13 @@ newtype ParserC m a = ParserC
     -> m r
   }
   deriving (Functor)
+
+instance Applicative (ParserC m) where
+  pure a = ParserC (\ just _ _ pos input -> just pos input a)
+  (<*>) = ap
+
+instance Monad (ParserC m) where
+  m >>= f = ParserC (\ just nothing fail -> runParserC m (\ pos input a -> runParserC (f a) just nothing fail pos input) nothing fail)
 
 
 data Result a = Result
