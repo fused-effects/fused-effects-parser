@@ -42,6 +42,8 @@ library
   build-depends:
       base ^>= 4.12
     , fused-effects ^>= 1
+    , prettyprinter ^>= 1.5
+    , prettyprinter-ansi-terminal ^>= 1.1
     , semantic-source ^>= 0
 
 test-suite fused-effects-parser-test
