@@ -54,5 +54,8 @@ test-suite test
   main-is:             Test.hs
   build-depends:
       base
+    , fused-effects
     , fused-effects-parser
+    , semantic-source
     , tasty ^>= 1.2
+    , tasty-hunit ^>= 0.10
