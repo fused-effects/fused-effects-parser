@@ -22,6 +22,9 @@ parserTests = testGroup "ParserC (Church)"
 
     , testCase "at end" $ do
       parsesInto (char 'x' *> position) "x" (Pos 0 1)
+
+    , testCase "after newline" $ do
+      parsesInto (newline *> position) "\n" (Pos 1 0)
     ]
   ]
 
