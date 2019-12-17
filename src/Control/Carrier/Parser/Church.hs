@@ -45,3 +45,6 @@ data Result a = Result
   , resultState :: Either (Maybe (Doc AnsiStyle)) (String, a)
   }
   deriving (Foldable, Functor, Show, Traversable)
+
+result :: (Pos -> String -> a -> b) -> (Pos -> Maybe (Doc AnsiStyle) -> b) -> Result a -> b
+result success failure (Result pos state) = either (failure pos) (uncurry (success pos)) state
