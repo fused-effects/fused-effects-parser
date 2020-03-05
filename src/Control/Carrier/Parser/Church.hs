@@ -123,7 +123,6 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       L Empty      -> empty
       R (Choose k) -> k True <|> k False
     R (R (R other)) -> ParserC $ \ just nothing _ pos input -> alg (thread (success pos input ()) (result (runParser (\ p s -> pure . success p s) failure failure) failure) other) >>= result just nothing where
-      success pos input a = Result pos (Right (input, a))
       failure pos reason = pure (Result pos (Left reason))
 
 
@@ -132,6 +131,9 @@ data Result a = Result
   , resultState :: Either (Maybe (Doc AnsiStyle)) (String, a)
   }
   deriving (Foldable, Functor, Show, Traversable)
+
+success :: Pos -> String -> a -> Result a
+success p i a = Result p (Right (i, a))
 
 result :: (Pos -> String -> a -> b) -> (Pos -> Maybe (Doc AnsiStyle) -> b) -> Result a -> b
 result success failure (Result pos state) = either (failure pos) (uncurry (success pos)) state
