@@ -72,6 +72,7 @@ data Input = Input
   { pos :: {-# UNPACK #-} !Pos
   , str :: !String
   }
+  deriving (Eq, Ord, Show)
 
 newtype ParserC m a = ParserC
   { runParserC
