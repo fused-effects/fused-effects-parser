@@ -1,4 +1,4 @@
--- GHCI settings for fused-effects-parser, collected by running cabal repl -v and checking out the flags cabal passes to ghc.
+-- GHCI settings for script/repl, collected by running cabal repl -v and checking out the flags cabal passes to ghc.
 -- These live here instead of script/repl for ease of commenting.
 -- These live here instead of .ghci so cabal repl remains unaffected.
 -- These live here instead of script/ghci-flags so ghcide remains unaffected.
@@ -6,7 +6,7 @@
 -- Basic verbosity
 :set -v1
 
--- Compile to object code
+-- Compile to object code, write interface files.
 :set -fwrite-interface -fobject-code
 
 -- Bonus: silence “add these modules to your .cabal file” warnings for files we :load
@@ -24,3 +24,7 @@
 :seti -Wno-safe
 :seti -Wno-unsafe
 :seti -Wno-star-is-type
+:seti -Wno-missing-deriving-strategies
+
+-- We have this one on in the project but not in the REPL to reduce noise
+:seti -Wno-type-defaults
