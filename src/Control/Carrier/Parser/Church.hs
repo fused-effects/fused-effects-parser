@@ -122,7 +122,9 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
     R (R (L nondet)) -> case nondet of
       L Empty      -> empty
       R (Choose k) -> k True <|> k False
-    R (R (R other)) -> ParserC $ \ just nothing _ pos input -> alg (thread (success pos input ()) (result (runParser (\ p s -> pure . success p s) (fmap pure . failure) (fmap pure . failure)) (fmap pure . failure)) other) >>= result just nothing
+    R (R (R other)) -> ParserC $ \ just nothing _ pos input -> do
+      a <- alg (thread (success pos input ()) (result (runParser (\ p s -> pure . success p s) (fmap pure . failure) (fmap pure . failure)) (fmap pure . failure)) other)
+      result just nothing a
 
 
 data Result a = Result
