@@ -28,13 +28,6 @@ data Parser m k
 
 deriving instance Functor m => Functor (Parser m)
 
-instance Effect Parser where
-  thread ctx hdl = \case
-    Accept p   k -> Accept p (hdl . (<$ ctx) . k)
-    Label m s  k -> Label (hdl (m <$ ctx)) s (hdl . fmap k)
-    Unexpected s -> Unexpected s
-    Position   k -> Position (hdl . (<$ ctx) . k)
-
 
 accept :: Has Parser sig m => (Char -> Maybe a) -> m a
 accept p = send (Accept p pure)
