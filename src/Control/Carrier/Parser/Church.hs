@@ -70,7 +70,7 @@ runParser
   -> Input
   -> ParserC m a
   -> m r
-runParser just nothing fail input (ParserC run) = run just nothing fail input
+runParser leaf nil fail input (ParserC run) = run leaf nil fail input
 
 data Input = Input
   { pos :: {-# UNPACK #-} !Pos
@@ -90,16 +90,16 @@ newtype ParserC m a = ParserC
   deriving (Functor)
 
 instance Applicative (ParserC m) where
-  pure a = ParserC (\ just _ _ input -> just input a)
+  pure a = ParserC (\ leaf _ _ input -> leaf input a)
   (<*>) = ap
 
 instance Alternative (ParserC m) where
-  empty = ParserC (\ _ nothing _ input -> nothing input Nothing)
+  empty = ParserC (\ _ nil _ input -> nil input Nothing)
 
-  ParserC l <|> ParserC r = ParserC (\ just nothing fail input -> l just (const (const (r just nothing fail input))) fail input)
+  ParserC l <|> ParserC r = ParserC (\ leaf nil fail input -> l leaf (const (const (r leaf nil fail input))) fail input)
 
 instance Monad (ParserC m) where
-  ParserC m >>= f = ParserC (\ just nothing fail -> m (\ input -> runParser just nothing fail input . f) nothing fail)
+  ParserC m >>= f = ParserC (\ leaf nil fail -> m (\ input -> runParser leaf nil fail input . f) nil fail)
 
 instance MonadPlus (ParserC m)
 
@@ -118,34 +118,34 @@ instance (Algebra sig m, Effect sig) => TokenParsing (ParserC m)
 instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg = \case
     L parser -> case parser of
-      Accept p k   -> ParserC (\ just nothing _ input -> case str input of
-        c:_ | Just a <- p c -> just (advance input) a
-            | otherwise     -> nothing input (Just (pretty "unexpected " <> pretty c))
-        _                   -> nothing input (Just (pretty "unexpected EOF"))) >>= k
-      Label m s k  -> ParserC (\ just nothing fail -> runParserC m just (\ p r -> nothing p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s)))) >>= k
-      Unexpected s -> ParserC $ \ _ nothing _ input -> nothing input (Just (pretty s))
-      Position k   -> ParserC (\ just _ _ input -> just input (pos input)) >>= k
+      Accept p k   -> ParserC (\ leaf nil _ input -> case str input of
+        c:_ | Just a <- p c -> leaf (advance input) a
+            | otherwise     -> nil input (Just (pretty "unexpected " <> pretty c))
+        _                   -> nil input (Just (pretty "unexpected EOF"))) >>= k
+      Label m s k  -> ParserC (\ leaf nil fail -> runParserC m leaf (\ p r -> nil p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s)))) >>= k
+      Unexpected s -> ParserC $ \ _ nil _ input -> nil input (Just (pretty s))
+      Position k   -> ParserC (\ leaf _ _ input -> leaf input (pos input)) >>= k
 
     R (L cut) -> case cut of
       Cutfail  -> ParserC $ \ _ _ fail input -> fail input Nothing
-      Call m k -> ParserC (\ just nothing _ -> runParserC m just nothing nothing) >>= k
+      Call m k -> ParserC (\ leaf nil _ -> runParserC m leaf nil nil) >>= k
 
     R (R (L nondet)) -> case nondet of
       L Empty      -> empty
       R (Choose k) -> k True <|> k False
 
-    R (R (R other)) -> ParserC $ \ just nothing fail input -> do
+    R (R (R other)) -> ParserC $ \ leaf nil fail input -> do
       res <- alg (thread (Compose (input, pure ())) dst other)
-      runIdentity (uncurry (runParser (coerce just) (coerce nothing) (coerce fail)) (getCompose res))
+      runIdentity (uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) (getCompose res))
     where
     dst :: Compose ((,) Input) (ParserC Identity) (ParserC m a) -> m (Compose ((,) Input) (ParserC Identity) a)
     dst = runIdentity
         . uncurry (runParser
           (fmap pure . runParser
             (\ i a -> pure (Compose (i, pure a)))
-            (\ i e -> pure (Compose (i, ParserC (\ _ nothing _ i -> nothing i e))))
+            (\ i e -> pure (Compose (i, ParserC (\ _ nil _ i -> nil i e))))
             (\ i e -> pure (Compose (i, ParserC (\ _ _ fail i -> fail i e)))))
-          (\ i e -> pure (pure (Compose (i, ParserC (\ _ nothing _ i -> nothing i e)))))
+          (\ i e -> pure (pure (Compose (i, ParserC (\ _ nil _ i -> nil i e)))))
           (\ i e -> pure (pure (Compose (i, ParserC (\ _ _ fail i -> fail i e))))))
         . getCompose
 
