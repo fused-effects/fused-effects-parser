@@ -9,7 +9,7 @@ module Control.Carrier.Parser.Church
 ( -- * Parser carrier
   parseString
 , parseFile
-, runParser
+, parseInput
 , ParserC(..)
 , Level(..)
 , prettyLevel
@@ -38,15 +38,15 @@ import Text.Parser.Combinators
 import Text.Parser.Token (TokenParsing)
 
 parseString :: Has (Throw Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
-parseString pos input p = runParser "(interactive)" pos input p >>= either throwError pure
+parseString pos input p = parseInput "(interactive)" pos input p >>= either throwError pure
 
 parseFile :: (Has (Throw Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 parseFile path p = do
   input <- liftIO (readFile path)
-  runParser path (Pos 0 0) input p >>= either throwError pure
+  parseInput path (Pos 0 0) input p >>= either throwError pure
 
-runParser :: Applicative m => FilePath -> Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
-runParser path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure pos input))
+parseInput :: Applicative m => FilePath -> Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
+parseInput path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure pos input))
   where
   success _ _ a = pure (Right a)
   failure pos reason = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
