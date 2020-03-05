@@ -143,13 +143,13 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
         . uncurry (runParser
           (fmap pure . runParser
             (\ i a -> pure (Compose (i, pure a)))
-            (\ i e -> pure (Compose (i, emptyWith e)))
-            (\ i e -> pure (Compose (i, cutfailWith e))))
-          (\ i e -> pure (pure (Compose (i, emptyWith e))))
-          (\ i e -> pure (pure (Compose (i, cutfailWith e)))))
+            emptyk
+            cutfailk)
+          (fmap pure . emptyk)
+          (fmap pure . cutfailk))
         . getCompose
-    emptyWith   e = ParserC $ \ _ nil _    i -> nil  i e
-    cutfailWith e = ParserC $ \ _ _   fail i -> fail i e
+    emptyk   i e = pure (Compose (i, ParserC (\ _ nil _    i -> nil  i e)))
+    cutfailk i e = pure (Compose (i, ParserC (\ _ _   fail i -> fail i e)))
 
 
 advance :: Input -> Input
