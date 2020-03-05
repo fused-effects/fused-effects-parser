@@ -104,7 +104,7 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
     R (R (L nondet)) -> case nondet of
       L Empty      -> empty
       R (Choose k) -> hdl (k True <$ ctx) <|> hdl (k False <$ ctx)
-    R (R (R other)) -> ParserC $ \ just nothing _ pos input -> thread (success pos input ctx) (result (\ p s -> runParser p s . hdl) failure) other >>= result just nothing where
+    R (R (R other)) -> ParserC $ \ just nothing _ pos input -> thread (success pos input ctx) (result failure (\ p s -> runParser p s . hdl)) other >>= result nothing just where
       runParser p s m = runParserC m (\ p s -> pure . success p s) failure failure p s
       success pos input a = Result pos (Right (input, a))
       failure pos reason = pure (Result pos (Left reason))
@@ -116,8 +116,8 @@ data Result a = Result
   }
   deriving (Foldable, Functor, Show, Traversable)
 
-result :: (Pos -> String -> a -> b) -> (Pos -> Maybe (Doc AnsiStyle) -> b) -> Result a -> b
-result success failure (Result pos state) = either (failure pos) (uncurry (success pos)) state
+result :: (Pos -> Maybe (Doc AnsiStyle) -> b) -> (Pos -> String -> a -> b) -> Result a -> b
+result failure success (Result pos state) = either (failure pos) (uncurry (success pos)) state
 
 
 advancePos :: Char -> Pos -> Pos
