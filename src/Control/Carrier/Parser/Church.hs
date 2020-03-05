@@ -145,9 +145,9 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       L Empty      -> empty
       R (Choose k) -> k True <|> k False
 
-    R (R (R other)) -> ParserC $ \ leaf nil fail input -> do
-      res <- alg (thread (Compose (input, pure ())) dst other)
-      runIdentity (uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) (getCompose res))
+    R (R (R other)) -> ParserC $ \ leaf nil fail input ->
+      alg (thread (Compose (input, pure ())) dst other)
+      >>= runIdentity . uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) . getCompose
     where
     dst :: Compose ((,) Input) (ParserC Identity) (ParserC m a) -> m (Compose ((,) Input) (ParserC Identity) a)
     dst = runIdentity
