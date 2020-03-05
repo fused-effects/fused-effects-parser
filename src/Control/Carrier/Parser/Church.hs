@@ -40,7 +40,8 @@ parseFile path p = do
   runParser path (Pos 0 0) input p >>= either throwError pure
 
 runParser :: Applicative m => FilePath -> Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
-runParser path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure pos input)) where
+runParser path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure pos input))
+  where
   success _ _ a = pure (Right a)
   failure pos reason = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
   inputLines = lines input
