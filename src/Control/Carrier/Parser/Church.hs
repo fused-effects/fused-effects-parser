@@ -141,10 +141,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
     dst :: Compose ((,) Input) (ParserC Identity) (ParserC m a) -> m (Compose ((,) Input) (ParserC Identity) a)
     dst = runIdentity
         . uncurry (runParser
-          (fmap pure . runParser
-            (\ i a -> pure (Compose (i, pure a)))
-            emptyk
-            cutfailk)
+          (fmap pure . runParser (\ i a -> pure (Compose (i, pure a))) emptyk cutfailk)
           (fmap pure . emptyk)
           (fmap pure . cutfailk))
         . getCompose
