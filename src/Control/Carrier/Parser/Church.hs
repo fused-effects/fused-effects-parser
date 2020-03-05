@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Parser.Church
@@ -31,6 +32,9 @@ import Control.Effect.Parser.Notice
 import Control.Effect.Throw
 import Control.Monad (ap)
 import Control.Monad.IO.Class
+import Data.Coerce (coerce)
+import Data.Functor.Compose
+import Data.Functor.Identity
 import Data.Maybe (fromMaybe)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle)
@@ -130,10 +134,20 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       L Empty      -> empty
       R (Choose k) -> k True <|> k False
 
-    R (R (R other)) -> ParserC $ \ just nothing _ input -> do
-      let fail i e = pure (failure i e)
-      a <- alg (thread (success input ()) (result fail (runParser (\ i -> pure . success i) fail fail)) other)
-      result nothing just a
+    R (R (R other)) -> ParserC $ \ just nothing fail input -> do
+      res <- alg (thread (Compose (input, pure ())) dst other)
+      runIdentity (uncurry (runParser (coerce just) (coerce nothing) (coerce fail)) (getCompose res))
+    where
+    dst :: Compose ((,) Input) (ParserC Identity) (ParserC m a) -> m (Compose ((,) Input) (ParserC Identity) a)
+    dst = runIdentity
+        . uncurry (runParser
+          (fmap pure . runParser
+            (\ i a -> pure (Compose (i, pure a)))
+            (\ i _ -> pure (Compose (i, empty)))
+            (\ i _ -> pure (Compose (i, cutfail))))
+          (\ i _ -> pure (pure (Compose (i, empty))))
+          (\ i _ -> pure (pure (Compose (i, cutfail)))))
+        . getCompose
 
 
 data Result a = Result
