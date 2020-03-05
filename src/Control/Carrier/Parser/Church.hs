@@ -98,16 +98,20 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
       Label m s k -> ParserC (\ just nothing fail -> runParserC (hdl (m <$ ctx)) just (\ p r -> nothing p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s)))) >>= hdl . fmap k
       Unexpected s -> ParserC $ \ _ nothing _ pos _ -> nothing pos (Just (pretty s))
       Position k -> ParserC (\ just _ _ pos input -> just pos input pos) >>= hdl . (<$ ctx) . k
+
     R (L cut) -> case cut of
       Cutfail -> ParserC $ \ _ _ fail pos _ -> fail pos Nothing
       Call m k -> ParserC (\ just nothing _ -> runParserC (hdl (m <$ ctx)) just nothing nothing) >>= hdl . fmap k
+
     R (R (L nondet)) -> case nondet of
       L Empty      -> empty
       R (Choose k) -> hdl (k True <$ ctx) <|> hdl (k False <$ ctx)
-    R (R (R other)) -> ParserC $ \ just nothing _ pos input -> thread (success pos input ctx) (result failure (\ p s -> runParser p s . hdl)) other >>= result nothing just where
-      runParser p s m = runParserC m (\ p s -> pure . success p s) failure failure p s
-      success pos input a = Result pos (Right (input, a))
-      failure pos reason = pure (Result pos (Left reason))
+
+    R (R (R other)) -> ParserC $ \ just nothing _ pos input -> thread (success pos input ctx) (result failure (\ p s -> runParser p s . hdl)) other >>= result nothing just
+    where
+    runParser p s m = runParserC m (\ p s -> pure . success p s) failure failure p s
+    success pos input a = Result pos (Right (input, a))
+    failure pos reason = pure (Result pos (Left reason))
 
 
 data Result a = Result
