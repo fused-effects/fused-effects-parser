@@ -31,6 +31,7 @@ import Control.Effect.Parser.Excerpt
 import Control.Effect.Parser.Notice
 import Control.Effect.Throw
 import Control.Monad (ap)
+import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Data.Coerce (coerce)
 import Data.Functor.Compose
@@ -100,6 +101,9 @@ instance Alternative (ParserC m) where
 
 instance Monad (ParserC m) where
   ParserC m >>= f = ParserC (\ leaf nil fail -> m (\ input -> runParser leaf nil fail input . f) nil fail)
+
+instance (Algebra sig m, Effect sig) => Fail.MonadFail (ParserC m) where
+  fail = unexpected
 
 instance MonadPlus (ParserC m)
 
