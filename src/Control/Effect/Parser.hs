@@ -1,4 +1,7 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, LambdaCase, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module Control.Effect.Parser
 ( -- * Parser effect
   Parser(..)
@@ -15,9 +18,9 @@ module Control.Effect.Parser
 , run
 ) where
 
-import Control.Algebra
-import Control.Effect.Parser.Excerpt (Excerpt(Excerpt), Excerpted(..))
-import Control.Effect.Reader
+import           Control.Algebra
+import           Control.Effect.Parser.Excerpt (Excerpt(Excerpt), Excerpted(..))
+import           Control.Effect.Reader
 import qualified Source.Span as Span
 
 data Parser m k
