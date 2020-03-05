@@ -6,13 +6,13 @@ module Control.Effect.Parser.Notice
 , prettyNotice
 ) where
 
-import Control.Effect.Parser.Excerpt
-import Data.Foldable (fold)
-import Data.List (isSuffixOf)
-import Data.Text.Prettyprint.Doc
-import Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle, Color(..), color)
+import           Control.Effect.Parser.Excerpt
+import           Data.Foldable (fold)
+import           Data.List (isSuffixOf)
+import           Data.Text.Prettyprint.Doc
+import           Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle, Color(..), color)
 import qualified Data.Text.Prettyprint.Doc.Render.Terminal as ANSI
-import Source.Span as Span
+import           Source.Span as Span
 
 data Level
   = Warn
