@@ -106,6 +106,9 @@ instance Monad (ParserC m) where
 instance (Algebra sig m, Effect sig) => Fail.MonadFail (ParserC m) where
   fail = unexpected
 
+instance MonadIO m => MonadIO (ParserC m) where
+  liftIO = lift . liftIO
+
 instance MonadPlus (ParserC m)
 
 instance MonadTrans ParserC where
