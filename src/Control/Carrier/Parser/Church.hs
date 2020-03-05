@@ -34,8 +34,8 @@ import Text.Parser.Token (TokenParsing)
 parseString :: Has (Throw Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 parseString pos input p = runParser "(interactive)" pos input p >>= either throwError pure
 
-parseFile :: (Has (Throw Notice) sig m, MonadIO m) => ParserC (ReaderC Path (ReaderC Lines m)) a -> FilePath -> m a
-parseFile p path = do
+parseFile :: (Has (Throw Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
+parseFile path p = do
   input <- liftIO (readFile path)
   runParser path (Pos 0 0) input p >>= either throwError pure
 
