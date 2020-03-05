@@ -10,6 +10,7 @@ module Control.Carrier.Parser.Church
   parseString
 , parseFile
 , parseInput
+, runParser
 , ParserC(..)
 , Level(..)
 , prettyLevel
@@ -56,6 +57,16 @@ parseInput path pos input m = runReader (Lines inputLines) (runReader (Path path
   takeLine ""          = ("", "")
   takeLine ('\n':rest) = ("\n", rest)
   takeLine (c   :rest) = let (cs, rest') = takeLine rest in (c:cs, rest')
+
+runParser
+  :: (Pos -> String -> a -> m r)
+  -> (Pos -> Maybe (Doc AnsiStyle) -> m r)
+  -> (Pos -> Maybe (Doc AnsiStyle) -> m r)
+  -> Pos
+  -> String
+  -> ParserC m a
+  -> m r
+runParser just nothing fail pos input (ParserC run) = run just nothing fail pos input
 
 newtype ParserC m a = ParserC
   { runParserC
