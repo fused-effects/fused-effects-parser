@@ -31,8 +31,8 @@ import Text.Parser.Char (CharParsing(..))
 import Text.Parser.Combinators
 import Text.Parser.Token (TokenParsing)
 
-parseString :: Has (Throw Notice) sig m => ParserC (ReaderC Path (ReaderC Lines m)) a -> Pos -> String -> m a
-parseString p pos input = runParser "(interactive)" pos input p >>= either throwError pure
+parseString :: Has (Throw Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
+parseString pos input p = runParser "(interactive)" pos input p >>= either throwError pure
 
 parseFile :: (Has (Throw Notice) sig m, MonadIO m) => ParserC (ReaderC Path (ReaderC Lines m)) a -> FilePath -> m a
 parseFile p path = do
