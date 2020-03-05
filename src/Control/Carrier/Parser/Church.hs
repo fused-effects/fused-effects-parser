@@ -89,22 +89,22 @@ instance Algebra sig m => CharParsing (ParserC m) where
 instance Algebra sig m => TokenParsing (ParserC m)
 
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
-  alg = \case
+  alg ctx hdl = \case
     L parser -> case parser of
       Accept p k -> ParserC (\ just nothing _ pos input -> case input of
         c:cs | Just a <- p c -> just (advancePos c pos) cs a
              | otherwise     -> nothing pos (Just (pretty "unexpected " <> pretty c))
-        _                    -> nothing pos (Just (pretty "unexpected EOF"))) >>= k
-      Label m s k -> ParserC (\ just nothing fail -> runParserC m just (\ p r -> nothing p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s)))) >>= k
+        _                    -> nothing pos (Just (pretty "unexpected EOF"))) >>= hdl . (<$ ctx) . k
+      Label m s k -> ParserC (\ just nothing fail -> runParserC (hdl (m <$ ctx)) just (\ p r -> nothing p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s)))) >>= hdl . fmap k
       Unexpected s -> ParserC $ \ _ nothing _ pos _ -> nothing pos (Just (pretty s))
-      Position k -> ParserC (\ just _ _ pos input -> just pos input pos) >>= k
+      Position k -> ParserC (\ just _ _ pos input -> just pos input pos) >>= hdl . (<$ ctx) . k
     R (L cut) -> case cut of
       Cutfail -> ParserC $ \ _ _ fail pos _ -> fail pos Nothing
-      Call m k -> ParserC (\ just nothing _ -> runParserC m just nothing nothing) >>= k
+      Call m k -> ParserC (\ just nothing _ -> runParserC (hdl (m <$ ctx)) just nothing nothing) >>= hdl . fmap k
     R (R (L nondet)) -> case nondet of
       L Empty      -> empty
-      R (Choose k) -> k True <|> k False
-    R (R (R other)) -> ParserC $ \ just nothing _ pos input -> alg (thread (success pos input ()) (result runParser failure) other) >>= result just nothing where
+      R (Choose k) -> hdl (k True <$ ctx) <|> hdl (k False <$ ctx)
+    R (R (R other)) -> ParserC $ \ just nothing _ pos input -> thread (success pos input ctx) (result (\ p s -> runParser p s . hdl) failure) other >>= result just nothing where
       runParser p s m = runParserC m (\ p s -> pure . success p s) failure failure p s
       success pos input a = Result pos (Right (input, a))
       failure pos reason = pure (Result pos (Left reason))
