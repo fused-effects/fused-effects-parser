@@ -156,9 +156,6 @@ data Result a = Result
   }
   deriving (Foldable, Functor, Show, Traversable)
 
-success :: Input -> a -> Result a
-success i a = Result i (Right a)
-
 
 advance :: Input -> Input
 advance (Input pos (c:cs)) = Input (advancePos c pos) cs
