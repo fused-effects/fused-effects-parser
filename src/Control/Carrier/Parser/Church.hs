@@ -120,12 +120,15 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       Label m s k  -> ParserC (\ just nothing fail -> runParserC m just (\ p r -> nothing p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s)))) >>= k
       Unexpected s -> ParserC $ \ _ nothing _ input -> nothing (pos input) (Just (pretty s))
       Position k   -> ParserC (\ just _ _ input -> just input (pos input)) >>= k
+
     R (L cut) -> case cut of
       Cutfail  -> ParserC $ \ _ _ fail input -> fail (pos input) Nothing
       Call m k -> ParserC (\ just nothing _ -> runParserC m just nothing nothing) >>= k
+
     R (R (L nondet)) -> case nondet of
       L Empty      -> empty
       R (Choose k) -> k True <|> k False
+
     R (R (R other)) -> ParserC $ \ just nothing _ input -> do
       let fail p s = pure (failure p s)
       a <- alg (thread (success input ()) (result fail (runParser (\ i -> pure . success i) fail fail)) other)
