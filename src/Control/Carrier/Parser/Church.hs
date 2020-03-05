@@ -159,9 +159,6 @@ data Result a = Result
 success :: Input -> a -> Result a
 success i a = Result i (Right a)
 
-failure :: Input -> Maybe (Doc AnsiStyle) -> Result a
-failure i e = Result i (Left e)
-
 
 advance :: Input -> Input
 advance (Input pos (c:cs)) = Input (advancePos c pos) cs
