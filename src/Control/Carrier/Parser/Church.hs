@@ -123,8 +123,8 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       L Empty      -> empty
       R (Choose k) -> k True <|> k False
     R (R (R other)) -> ParserC $ \ just nothing _ pos input -> do
-      a <- alg (thread (success pos input ()) (result (runParser (\ p s -> pure . success p s) (fmap pure . failure) (fmap pure . failure)) (fmap pure . failure)) other)
-      result just nothing a
+      a <- alg (thread (success pos input ()) (result (fmap pure . failure) (runParser (\ p s -> pure . success p s) (fmap pure . failure) (fmap pure . failure))) other)
+      result nothing just a
 
 
 data Result a = Result
@@ -139,8 +139,8 @@ success p i a = Result p (Right (i, a))
 failure :: Pos -> Maybe (Doc AnsiStyle) -> Result a
 failure p r = Result p (Left r)
 
-result :: (Pos -> String -> a -> b) -> (Pos -> Maybe (Doc AnsiStyle) -> b) -> Result a -> b
-result success failure (Result pos state) = either (failure pos) (uncurry (success pos)) state
+result :: (Pos -> Maybe (Doc AnsiStyle) -> b) -> (Pos -> String -> a -> b) -> Result a -> b
+result failure success (Result pos state) = either (failure pos) (uncurry (success pos)) state
 
 
 advancePos :: Char -> Pos -> Pos
