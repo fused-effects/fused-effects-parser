@@ -109,15 +109,15 @@ instance (Algebra sig m, Effect sig) => TokenParsing (ParserC m)
 instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg = \case
     L parser -> case parser of
-      Accept p k -> ParserC (\ just nothing _ pos input -> case input of
+      Accept p k   -> ParserC (\ just nothing _ pos input -> case input of
         c:cs | Just a <- p c -> just (advancePos c pos) cs a
              | otherwise     -> nothing pos (Just (pretty "unexpected " <> pretty c))
         _                    -> nothing pos (Just (pretty "unexpected EOF"))) >>= k
-      Label m s k -> ParserC (\ just nothing fail -> runParserC m just (\ p r -> nothing p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s)))) >>= k
+      Label m s k  -> ParserC (\ just nothing fail -> runParserC m just (\ p r -> nothing p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s)))) >>= k
       Unexpected s -> ParserC $ \ _ nothing _ pos _ -> nothing pos (Just (pretty s))
-      Position k -> ParserC (\ just _ _ pos input -> just pos input pos) >>= k
+      Position k   -> ParserC (\ just _ _ pos input -> just pos input pos) >>= k
     R (L cut) -> case cut of
-      Cutfail -> ParserC $ \ _ _ fail pos _ -> fail pos Nothing
+      Cutfail  -> ParserC $ \ _ _ fail pos _ -> fail pos Nothing
       Call m k -> ParserC (\ just nothing _ -> runParserC m just nothing nothing) >>= k
     R (R (L nondet)) -> case nondet of
       L Empty      -> empty
