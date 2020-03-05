@@ -11,6 +11,7 @@ module Control.Carrier.Parser.Church
 , parseFile
 , parseInput
 , runParser
+, Input(..)
 , ParserC(..)
 , Level(..)
 , prettyLevel
@@ -67,6 +68,11 @@ runParser
   -> ParserC m a
   -> m r
 runParser just nothing fail pos input (ParserC run) = run just nothing fail pos input
+
+data Input = Input
+  { pos   :: {-# UNPACK #-} !Pos
+  , input :: !String
+  }
 
 newtype ParserC m a = ParserC
   { runParserC
