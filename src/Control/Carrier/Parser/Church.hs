@@ -162,9 +162,6 @@ success i a = Result i (Right a)
 failure :: Input -> Maybe (Doc AnsiStyle) -> Result a
 failure i e = Result i (Left e)
 
-result :: (Input -> Maybe (Doc AnsiStyle) -> b) -> (Input -> a -> b) -> Result a -> b
-result failure success (Result input state) = either (failure input) (success input) state
-
 
 advance :: Input -> Input
 advance (Input pos (c:cs)) = Input (advancePos c pos) cs
