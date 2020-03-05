@@ -51,7 +51,7 @@ parseInput :: Applicative m => FilePath -> Pos -> String -> ParserC (ReaderC Pat
 parseInput path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure (Input pos input)))
   where
   success _ a = pure (Right a)
-  failure pos reason = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
+  failure (Input pos _) reason = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
   inputLines = lines input
   lines "" = [""]
   lines s  = let (line, rest) = takeLine s in line : lines rest
@@ -61,8 +61,8 @@ parseInput path pos input m = runReader (Lines inputLines) (runReader (Path path
 
 runParser
   :: (Input -> a -> m r)
-  -> (Pos -> Maybe (Doc AnsiStyle) -> m r)
-  -> (Pos -> Maybe (Doc AnsiStyle) -> m r)
+  -> (Input -> Maybe (Doc AnsiStyle) -> m r)
+  -> (Input -> Maybe (Doc AnsiStyle) -> m r)
   -> Input
   -> ParserC m a
   -> m r
@@ -77,9 +77,9 @@ data Input = Input
 newtype ParserC m a = ParserC
   { runParserC
     :: forall r
-    .  (Input -> a -> m r)                   -- success
-    -> (Pos -> Maybe (Doc AnsiStyle) -> m r) -- empty
-    -> (Pos -> Maybe (Doc AnsiStyle) -> m r) -- cut
+    .  (Input -> a -> m r)                     -- success
+    -> (Input -> Maybe (Doc AnsiStyle) -> m r) -- empty
+    -> (Input -> Maybe (Doc AnsiStyle) -> m r) -- cut
     -> Input
     -> m r
   }
@@ -90,7 +90,7 @@ instance Applicative (ParserC m) where
   (<*>) = ap
 
 instance Alternative (ParserC m) where
-  empty = ParserC (\ _ nothing _ input -> nothing (pos input) Nothing)
+  empty = ParserC (\ _ nothing _ input -> nothing input Nothing)
 
   ParserC l <|> ParserC r = ParserC (\ just nothing fail input -> l just (const (const (r just nothing fail input))) fail input)
 
@@ -116,14 +116,14 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
     L parser -> case parser of
       Accept p k   -> ParserC (\ just nothing _ input -> case str input of
         c:_ | Just a <- p c -> just (advance input) a
-            | otherwise     -> nothing (pos input) (Just (pretty "unexpected " <> pretty c))
-        _                   -> nothing (pos input) (Just (pretty "unexpected EOF"))) >>= k
+            | otherwise     -> nothing input (Just (pretty "unexpected " <> pretty c))
+        _                   -> nothing input (Just (pretty "unexpected EOF"))) >>= k
       Label m s k  -> ParserC (\ just nothing fail -> runParserC m just (\ p r -> nothing p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s)))) >>= k
-      Unexpected s -> ParserC $ \ _ nothing _ input -> nothing (pos input) (Just (pretty s))
+      Unexpected s -> ParserC $ \ _ nothing _ input -> nothing input (Just (pretty s))
       Position k   -> ParserC (\ just _ _ input -> just input (pos input)) >>= k
 
     R (L cut) -> case cut of
-      Cutfail  -> ParserC $ \ _ _ fail input -> fail (pos input) Nothing
+      Cutfail  -> ParserC $ \ _ _ fail input -> fail input Nothing
       Call m k -> ParserC (\ just nothing _ -> runParserC m just nothing nothing) >>= k
 
     R (R (L nondet)) -> case nondet of
@@ -131,25 +131,25 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       R (Choose k) -> k True <|> k False
 
     R (R (R other)) -> ParserC $ \ just nothing _ input -> do
-      let fail p e = pure (failure p e)
+      let fail i e = pure (failure i e)
       a <- alg (thread (success input ()) (result fail (runParser (\ i -> pure . success i) fail fail)) other)
       result nothing just a
 
 
 data Result a = Result
-  { resultPos   :: {-# UNPACK #-} !Pos
-  , resultState :: Either (Maybe (Doc AnsiStyle)) (String, a)
+  { resultInput :: {-# UNPACK #-} !Input
+  , resultState :: Either (Maybe (Doc AnsiStyle)) a
   }
   deriving (Foldable, Functor, Show, Traversable)
 
 success :: Input -> a -> Result a
-success (Input p i) a = Result p (Right (i, a))
+success i a = Result i (Right a)
 
-failure :: Pos -> Maybe (Doc AnsiStyle) -> Result a
-failure p r = Result p (Left r)
+failure :: Input -> Maybe (Doc AnsiStyle) -> Result a
+failure i e = Result i (Left e)
 
-result :: (Pos -> Maybe (Doc AnsiStyle) -> b) -> (Input -> a -> b) -> Result a -> b
-result failure success (Result pos state) = either (failure pos) (uncurry (success . Input pos)) state
+result :: (Input -> Maybe (Doc AnsiStyle) -> b) -> (Input -> a -> b) -> Result a -> b
+result failure success (Result input state) = either (failure input) (success input) state
 
 
 advance :: Input -> Input
