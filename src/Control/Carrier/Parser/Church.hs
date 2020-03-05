@@ -123,7 +123,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       L Empty      -> empty
       R (Choose k) -> k True <|> k False
     R (R (R other)) -> ParserC $ \ just nothing _ pos input -> do
-      let fail = fmap pure . failure
+      let fail p s = pure (failure p s)
       a <- alg (thread (success pos input ()) (result fail (runParser (\ p s -> pure . success p s) fail fail)) other)
       result nothing just a
 
