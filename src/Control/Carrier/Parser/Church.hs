@@ -70,8 +70,8 @@ runParser
 runParser just nothing fail pos input (ParserC run) = run just nothing fail pos input
 
 data Input = Input
-  { pos   :: {-# UNPACK #-} !Pos
-  , input :: !String
+  { pos :: {-# UNPACK #-} !Pos
+  , str :: !String
   }
 
 newtype ParserC m a = ParserC
