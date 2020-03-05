@@ -130,7 +130,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       R (Choose k) -> k True <|> k False
 
     R (R (R other)) -> ParserC $ \ just nothing _ input -> do
-      let fail p s = pure (failure p s)
+      let fail p e = pure (failure p e)
       a <- alg (thread (success input ()) (result fail (runParser (\ i -> pure . success i) fail fail)) other)
       result nothing just a
 
