@@ -150,13 +150,6 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
         . getCompose
 
 
-data Result a = Result
-  { resultInput :: {-# UNPACK #-} !Input
-  , resultState :: Either (Maybe (Doc AnsiStyle)) a
-  }
-  deriving (Foldable, Functor, Show, Traversable)
-
-
 advance :: Input -> Input
 advance (Input pos (c:cs)) = Input (advancePos c pos) cs
 advance i                  = i
