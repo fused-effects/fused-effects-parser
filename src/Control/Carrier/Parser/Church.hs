@@ -76,19 +76,19 @@ instance Monad (ParserC m) where
 
 instance MonadPlus (ParserC m)
 
-instance (Algebra sig m, Effect sig) => Parsing (ParserC m) where
+instance Algebra sig m => Parsing (ParserC m) where
   try = call
   eof = notFollowedBy anyChar <?> "end of input"
   unexpected s = send (Unexpected s)
   m <?> s = send (Label m s pure)
   notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . show))
 
-instance (Algebra sig m, Effect sig) => CharParsing (ParserC m) where
+instance Algebra sig m => CharParsing (ParserC m) where
   satisfy p = accept (\ c -> if p c then Just c else Nothing)
 
-instance (Algebra sig m, Effect sig) => TokenParsing (ParserC m)
+instance Algebra sig m => TokenParsing (ParserC m)
 
-instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
+instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg = \case
     L parser -> case parser of
       Accept p k -> ParserC (\ just nothing _ pos input -> case input of
