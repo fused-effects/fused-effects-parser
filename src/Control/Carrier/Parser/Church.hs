@@ -150,6 +150,10 @@ result :: (Pos -> Maybe (Doc AnsiStyle) -> b) -> (Pos -> String -> a -> b) -> Re
 result failure success (Result pos state) = either (failure pos) (uncurry (success pos)) state
 
 
+advance :: Input -> Input
+advance (Input pos (c:cs)) = Input (advancePos c pos) cs
+advance i                  = i
+
 advancePos :: Char -> Pos -> Pos
 advancePos '\n' p = Pos (succ (Span.line p)) 0
 advancePos _    p = p { Span.column = succ (Span.column p) }
