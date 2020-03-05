@@ -33,6 +33,7 @@ import Control.Effect.Throw
 import Control.Monad (ap)
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.Coerce (coerce)
 import Data.Functor.Compose
 import Data.Functor.Identity
@@ -106,6 +107,9 @@ instance (Algebra sig m, Effect sig) => Fail.MonadFail (ParserC m) where
   fail = unexpected
 
 instance MonadPlus (ParserC m)
+
+instance MonadTrans ParserC where
+  lift m = ParserC $ \ leaf _ _ input -> m >>= leaf input
 
 instance (Algebra sig m, Effect sig) => Parsing (ParserC m) where
   try = call
