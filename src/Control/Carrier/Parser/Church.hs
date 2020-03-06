@@ -37,6 +37,7 @@ import Data.Coerce (coerce)
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Maybe (fromMaybe)
+import Data.Set (Set)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle)
 import Source.Span as Span
@@ -58,7 +59,7 @@ runParserWith :: Applicative m => FilePath -> Input -> ParserC (ReaderC Path (Re
 runParserWith path input = runReader (Lines inputLines) . runReader (Path path) . runParser success failure failure input
   where
   success _ a = pure (Right a)
-  failure (Input pos _) reason = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
+  failure (Input pos _) reason _expected = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
   inputLines = lines (str input)
   lines "" = [""]
   lines s  = let (line, rest) = takeLine s in line : lines rest
@@ -69,8 +70,8 @@ runParserWith path input = runReader (Lines inputLines) . runReader (Path path) 
 
 runParser
   :: (Input -> a -> m r)
-  -> (Input -> Maybe (Doc AnsiStyle) -> m r)
-  -> (Input -> Maybe (Doc AnsiStyle) -> m r)
+  -> (Input -> Maybe (Doc AnsiStyle) -> Set String -> m r)
+  -> (Input -> Maybe (Doc AnsiStyle) -> Set String -> m r)
   -> Input
   -> ParserC m a
   -> m r
@@ -86,9 +87,9 @@ data Input = Input
 newtype ParserC m a = ParserC
   { runParserC
     :: forall r
-    .  (Input -> a -> m r)                     -- success
-    -> (Input -> Maybe (Doc AnsiStyle) -> m r) -- empty
-    -> (Input -> Maybe (Doc AnsiStyle) -> m r) -- cut
+    .  (Input -> a -> m r)                                   -- success
+    -> (Input -> Maybe (Doc AnsiStyle) -> Set String -> m r) -- empty
+    -> (Input -> Maybe (Doc AnsiStyle) -> Set String -> m r) -- cut
     -> Input
     -> m r
   }
@@ -102,10 +103,10 @@ instance Applicative (ParserC m) where
   {-# INLINE (<*>) #-}
 
 instance Alternative (ParserC m) where
-  empty = emptyWith Nothing
+  empty = emptyWith Nothing mempty
   {-# INLINE empty #-}
 
-  ParserC l <|> ParserC r = ParserC (\ leaf nil fail input -> l leaf (const (\ e -> r leaf (\ i e' -> nil i (e' <|> e)) fail input)) fail input)
+  ParserC l <|> ParserC r = ParserC (\ leaf nil fail input -> l leaf (const (\ e a -> r leaf (\ i e' a' -> nil i (e' <|> e) (a <> a')) fail input)) fail input)
   {-# INLINE (<|>) #-}
 
 instance Monad (ParserC m) where
@@ -119,7 +120,7 @@ instance (Algebra sig m, Effect sig) => Fail.MonadFail (ParserC m) where
 instance MonadFix m => MonadFix (ParserC m) where
   mfix f = ParserC $ \ leaf nil fail input ->
     mfix (distParser input . f . run . fromParser input . snd)
-    >>= run . uncurry (runParser (fmap pure . leaf) (fmap pure . nil) (fmap pure . fail))
+    >>= run . uncurry (runParser (fmap pure . leaf) (\ i -> fmap pure . nil i) (\ i -> fmap pure . fail i))
     where
     fromParser = runParser (const pure) (error "mfix ParserC: empty") (error "mfix ParserC: cutfail")
   {-# INLINE mfix #-}
@@ -162,8 +163,8 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       Accept p k   ->
         ParserC (\ leaf nil _ input -> case str input of
           c:_ | Just a <- p c -> leaf (advance input) a
-              | otherwise     -> nil input (Just (pretty "unexpected " <> pretty c))
-          _                   -> nil input (Just (pretty "unexpected EOF")))
+              | otherwise     -> nil input (Just (pretty "unexpected " <> pretty c)) mempty
+          _                   -> nil input (Just (pretty "unexpected EOF")) mempty)
         >>= k
 
       Label m s k  ->
@@ -172,14 +173,14 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
           (\ i -> fail i . (<|> Just (pretty s))))
         >>= k
 
-      Unexpected s -> ParserC $ \ _ nil _ input -> nil input (Just (pretty s))
+      Unexpected s -> ParserC $ \ _ nil _ input -> nil input (Just (pretty s)) mempty
 
       Position k   ->
         ParserC (\ leaf _ _ input -> leaf input (pos input))
         >>= k
 
     R (L cut) -> case cut of
-      Cutfail  -> cutfailWith Nothing
+      Cutfail  -> cutfailWith Nothing mempty
 
       Call m k ->
         ParserC (\ leaf nil _ -> runParserC m leaf nil nil)
@@ -198,8 +199,8 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
     dst = fmap runIdentity
         . runParser
           (fmap pure . distParser)
-          (fmap pure . emptyk)
-          (fmap pure . cutfailk)
+          (\ i -> fmap pure . emptyk i)
+          (\ i -> fmap pure . cutfailk i)
   {-# INLINE alg #-}
 
 distParser :: Applicative m => Input -> ParserC m a -> m (Input, ParserC Identity a)
@@ -210,31 +211,31 @@ purek :: Applicative m => Input -> a -> m (Input, ParserC n a)
 purek    i a = pure (i, pure a)
 {-# INLINE purek #-}
 
-emptyk :: Applicative m => Input -> Maybe (Doc AnsiStyle) -> m (Input, ParserC n a)
-emptyk   i e = pure (i, emptyWith e)
+emptyk :: Applicative m => Input -> Maybe (Doc AnsiStyle) -> Set String -> m (Input, ParserC n a)
+emptyk   i a e = pure (i, emptyWith a e)
 {-# INLINE emptyk #-}
 
-cutfailk :: Applicative m => Input -> Maybe (Doc AnsiStyle) -> m (Input, ParserC n a)
-cutfailk i e = pure (i, cutfailWith e)
+cutfailk :: Applicative m => Input -> Maybe (Doc AnsiStyle) -> Set String -> m (Input, ParserC n a)
+cutfailk i a e = pure (i, cutfailWith a e)
 {-# INLINE cutfailk #-}
 
 
 -- | Fail to parse, providing the given document as a reason.
 --
 -- @
--- 'emptyWith' 'Nothing' = 'empty'
+-- 'emptyWith' 'Nothing' 'mempty' = 'empty'
 -- @
-emptyWith :: Maybe (Doc AnsiStyle) -> ParserC m a
-emptyWith e = ParserC (\ _ nil _    i -> nil  i e)
+emptyWith :: Maybe (Doc AnsiStyle) -> Set String -> ParserC m a
+emptyWith a e = ParserC (\ _ nil _    i -> nil  i a e)
 {-# INLINE emptyWith #-}
 
 -- | Fail to parse and prevent backtracking, providing the given document as a reason.
 --
 -- @
--- 'cutfailWith' 'Nothing' = 'cutfail'
+-- 'cutfailWith' 'Nothing' 'mempty' = 'cutfail'
 -- @
-cutfailWith :: Maybe (Doc AnsiStyle) -> ParserC m a
-cutfailWith e = ParserC (\ _ _   fail i -> fail i e)
+cutfailWith :: Maybe (Doc AnsiStyle) -> Set String -> ParserC m a
+cutfailWith a e = ParserC (\ _ _   fail i -> fail i a e)
 {-# INLINE cutfailWith #-}
 
 
