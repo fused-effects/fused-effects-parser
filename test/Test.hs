@@ -31,7 +31,7 @@ parserTests = testGroup "ParserC (Church)"
     ]
   , testGroup "<?>"
     [ testCase "replaces labels" $
-      failsWith (char 'a' <?> "s") "b" (\ Notice{ reason } -> show reason @?= "s")
+      failsWith (char 'a' <?> "c") "b" (\ Notice{ reason } -> show reason @?= "c")
     ]
   ]
 
