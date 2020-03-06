@@ -122,10 +122,9 @@ instance (Algebra sig m, Effect sig) => Fail.MonadFail (ParserC m) where
 
 instance MonadFix m => MonadFix (ParserC m) where
   mfix f = ParserC $ \ leaf nil fail input ->
-    mfix (toParser input . f . run . fromParser input . snd)
+    mfix (distParser input . f . run . fromParser input . snd)
     >>= run . uncurry (runParser (fmap pure . leaf) (fmap pure . nil) (fmap pure . fail))
     where
-    toParser   = runParser purek emptyk cutfailk
     fromParser = runParser (const pure) (error "mfix ParserC: empty") (error "mfix ParserC: cutfail")
   {-# INLINE mfix #-}
 
@@ -191,6 +190,10 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
           (fmap pure . emptyk)
           (fmap pure . cutfailk))
   {-# INLINE alg #-}
+
+distParser :: Applicative m => Input -> ParserC m a -> m (Input, ParserC Identity a)
+distParser = runParser purek emptyk cutfailk
+{-# INLINE distParser #-}
 
 purek :: Applicative m => Input -> a -> m (Input, ParserC n a)
 purek    i a = pure (i, pure a)
