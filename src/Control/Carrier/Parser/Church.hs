@@ -14,6 +14,7 @@ module Control.Carrier.Parser.Church
 , runParser
 , Input(..)
 , ParserC(..)
+, emptyWith
 , Level(..)
 , prettyLevel
 , Notice(..)
