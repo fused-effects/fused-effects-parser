@@ -157,7 +157,7 @@ instance (Algebra sig m, Effect sig) => Parsing (ParserC m) where
   m <?> s = send (Label m s pure)
   {-# INLINE (<?>) #-}
 
-  notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . show))
+  notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . ("unexpected " <>) . show))
   {-# INLINE notFollowedBy #-}
 
 instance (Algebra sig m, Effect sig) => CharParsing (ParserC m) where
