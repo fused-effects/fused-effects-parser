@@ -180,15 +180,15 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       R (Choose k) -> k True <|> k False
 
     R (R (R other)) -> ParserC $ \ leaf nil fail input ->
-      alg (thread (Compose (input, pure ())) (fmap Compose . dst . getCompose) other)
+      alg (thread (Compose (input, pure ())) (fmap Compose . uncurry dst . getCompose) other)
       >>= runIdentity . uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) . getCompose
     where
-    dst :: (Input, ParserC Identity (ParserC m a)) -> m (Input, ParserC Identity a)
-    dst = runIdentity
-        . uncurry (runParser
+    dst :: Input -> ParserC Identity (ParserC m a) -> m (Input, ParserC Identity a)
+    dst = fmap runIdentity
+        . runParser
           (fmap pure . distParser)
           (fmap pure . emptyk)
-          (fmap pure . cutfailk))
+          (fmap pure . cutfailk)
   {-# INLINE alg #-}
 
 distParser :: Applicative m => Input -> ParserC m a -> m (Input, ParserC Identity a)
