@@ -46,7 +46,8 @@ prettyNotice (Notice level (Excerpt path line span) reason _expected context) = 
     [ blue (pretty '|') <+> pretty line <> if "\n" `isSuffixOf` line then mempty else blue (pretty "<EOF>") <> hardline
     , blue (pretty '|') <+> caret span
     ])
-  : context) where
+  : context)
+  where
   caret span = pretty (replicate (Span.column (Span.start span)) ' ') <> prettySpan span
 
   prettySpan (Span start end)
