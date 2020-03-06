@@ -195,7 +195,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
           (fmap pure . cutfailk))
         . getCompose
     emptyk   i e = pure (Compose (i, emptyWith e))
-    cutfailk i e = pure (Compose (i, ParserC (\ _ _   fail i -> fail i e)))
+    cutfailk i e = pure (Compose (i, cutfailWith e))
   {-# INLINE alg #-}
 
 -- | Fail to parse, providing the given document as a reason.
