@@ -15,6 +15,7 @@ module Control.Carrier.Parser.Church
 , Input(..)
 , ParserC(..)
 , emptyWith
+, cutfailWith
 , Level(..)
 , prettyLevel
 , Notice(..)
@@ -205,6 +206,10 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
 emptyWith :: Maybe (Doc AnsiStyle) -> ParserC m a
 emptyWith e = ParserC (\ _ nil _    i -> nil  i e)
 {-# INLINE emptyWith #-}
+
+cutfailWith :: Maybe (Doc AnsiStyle) -> ParserC m a
+cutfailWith e = ParserC (\ _ _   fail i -> fail i e)
+{-# INLINE cutfailWith #-}
 
 
 advance :: Input -> Input
