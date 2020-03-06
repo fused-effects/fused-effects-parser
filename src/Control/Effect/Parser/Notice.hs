@@ -44,13 +44,13 @@ prettyNotice (Notice level (Excerpt path line span) reason expected context) = v
     : if null expected then [] else pretty "expected" <> colon : punctuate comma (map pretty (Set.toList expected)))))
   : blue (pretty (succ (Span.line (Span.start span)))) <+> align (fold
     [ blue (pretty '|') <+> pretty line <> if "\n" `isSuffixOf` line then mempty else blue (pretty "<end of input>") <> hardline
-    , blue (pretty '|') <+> caret span
+    , blue (pretty '|') <+> padding span <> caret span
     ])
   : context)
   where
-  caret span = pretty (replicate (Span.column (Span.start span)) ' ') <> prettySpan span
+  padding span = pretty (replicate (Span.column (Span.start span)) ' ')
 
-  prettySpan (Span start end)
+  caret (Span start end)
     | start == end                     = green (pretty '^')
     | Span.line start == Span.line end = green (pretty (replicate (Span.column end - Span.column start) '~'))
     | otherwise                        = green (pretty "^…")
