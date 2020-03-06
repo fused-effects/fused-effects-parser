@@ -33,6 +33,8 @@ parserTests = testGroup "ParserC (Church)"
   , testGroup "<?>"
     [ testCase "replaces labels" $
       failsWith (char 'a' <?> "c") "b" (\ Notice{ Notice.expected } -> expected @?= singleton "c")
+    , testCase "applies outermost" $
+      failsWith ((char 'a' <?> "b") <?> "c") "d" (\ Notice{ Notice.expected } -> expected @?= singleton "c")
     ]
   ]
 
