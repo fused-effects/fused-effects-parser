@@ -55,7 +55,7 @@ runParserWithFile path p = do
 {-# INLINE runParserWithFile #-}
 
 runParserWith :: Applicative m => FilePath -> Input -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
-runParserWith path input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure input))
+runParserWith path input = runReader (Lines inputLines) . runReader (Path path) . runParser success failure failure input
   where
   success _ a = pure (Right a)
   failure (Input pos _) reason = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
