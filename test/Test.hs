@@ -17,13 +17,13 @@ main = defaultMain $ testGroup "unit tests"
 parserTests :: TestTree
 parserTests = testGroup "ParserC (Church)"
   [ testGroup "position"
-    [ testCase "at start" $ do
+    [ testCase "at start" $
       parsesInto position "" (Pos 0 0)
 
-    , testCase "at end" $ do
+    , testCase "at end" $
       parsesInto (char 'x' *> position) "x" (Pos 0 1)
 
-    , testCase "after newline" $ do
+    , testCase "after newline" $
       parsesInto (newline *> position) "\n" (Pos 1 0)
     ]
   ]
