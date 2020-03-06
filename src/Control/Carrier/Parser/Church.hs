@@ -31,6 +31,7 @@ import Control.Effect.Parser.Excerpt
 import Control.Effect.Parser.Notice
 import Control.Effect.Throw
 import Control.Monad (ap)
+import Control.Monad.Fix
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -105,6 +106,18 @@ instance Monad (ParserC m) where
 
 instance (Algebra sig m, Effect sig) => Fail.MonadFail (ParserC m) where
   fail = unexpected
+
+instance MonadFix m => MonadFix (ParserC m) where
+  mfix f = ParserC $ \ leaf nil fail input ->
+    mfix (toParser input . f . run . fromParser input . snd)
+    >>= run . uncurry (runParser (fmap pure . leaf) (fmap pure . nil) (fmap pure . fail))
+    where
+    toParser :: Input -> ParserC m a -> m (Input, ParserC Identity a)
+    toParser   = runParser
+      (\ i a -> pure (i, pure a))
+      (\ i e -> pure (i, ParserC (\ _ nil _    i -> nil  i e)))
+      (\ i e -> pure (i, ParserC (\ _ _   fail i -> fail i e)))
+    fromParser = runParser (const pure) (error "mfix ParserC: empty") (error "mfix ParserC: cutfail")
 
 instance MonadIO m => MonadIO (ParserC m) where
   liftIO = lift . liftIO
