@@ -172,7 +172,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       Position k   -> ParserC (\ leaf _ _ input -> leaf input (pos input)) >>= k
 
     R (L cut) -> case cut of
-      Cutfail  -> ParserC $ \ _ _ fail input -> fail input Nothing
+      Cutfail  -> cutfailWith Nothing
       Call m k -> ParserC (\ leaf nil _ -> runParserC m leaf nil nil) >>= k
 
     R (R (L nondet)) -> case nondet of
