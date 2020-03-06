@@ -184,18 +184,17 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       R (Choose k) -> k True <|> k False
 
     R (R (R other)) -> ParserC $ \ leaf nil fail input ->
-      alg (thread (Compose (input, pure ())) dst other)
+      alg (thread (Compose (input, pure ())) (fmap Compose . dst . getCompose) other)
       >>= runIdentity . uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) . getCompose
     where
-    dst :: Compose ((,) Input) (ParserC Identity) (ParserC m a) -> m (Compose ((,) Input) (ParserC Identity) a)
+    dst :: (Input, ParserC Identity (ParserC m a)) -> m (Input, ParserC Identity a)
     dst = runIdentity
         . uncurry (runParser
-          (fmap pure . runParser (\ i a -> pure (Compose (i, pure a))) emptyk cutfailk)
+          (fmap pure . runParser (\ i a -> pure (i, pure a)) emptyk cutfailk)
           (fmap pure . emptyk)
           (fmap pure . cutfailk))
-        . getCompose
-    emptyk   i e = pure (Compose (i, emptyWith e))
-    cutfailk i e = pure (Compose (i, cutfailWith e))
+    emptyk   i e = pure (i, emptyWith e)
+    cutfailk i e = pure (i, cutfailWith e)
   {-# INLINE alg #-}
 
 -- | Fail to parse, providing the given document as a reason.
