@@ -38,6 +38,8 @@ parserTests = testGroup "ParserC (Church)"
       failsWith ((char 'a' <?> "b") <?> "c") "d" (\ Notice{ Notice.expected } -> expected @?= singleton "c")
     , testCase "is joined by <|>" $
       failsWith ((char 'a' <?> "b") <|> (char 'c' <?> "d")) "e" (\ Notice{ Notice.expected } -> expected @?= fromList ["b", "d"])
+    , testCase "replaces joined labels <|>" $
+      failsWith (((char 'a' <?> "b") <|> (char 'c' <?> "d")) <?> "e") "f" (\ Notice{ Notice.expected } -> expected @?= singleton "e")
     ]
   ]
 
