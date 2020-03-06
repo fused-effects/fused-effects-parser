@@ -48,11 +48,13 @@ import Text.Parser.Token (TokenParsing)
 
 parseString :: Has (Throw Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 parseString pos input p = parseInput "(interactive)" pos input p >>= either throwError pure
+{-# INLINE parseString #-}
 
 parseFile :: (Has (Throw Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 parseFile path p = do
   input <- liftIO (readFile path)
   parseInput path (Pos 0 0) input p >>= either throwError pure
+{-# INLINE parseFile #-}
 
 parseInput :: Applicative m => FilePath -> Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
 parseInput path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure (Input pos input)))
@@ -65,6 +67,7 @@ parseInput path pos input m = runReader (Lines inputLines) (runReader (Path path
   takeLine ""          = ("", "")
   takeLine ('\n':rest) = ("\n", rest)
   takeLine (c   :rest) = let (cs, rest') = takeLine rest in (c:cs, rest')
+{-# INLINE parseInput #-}
 
 runParser
   :: (Input -> a -> m r)
@@ -74,6 +77,7 @@ runParser
   -> ParserC m a
   -> m r
 runParser leaf nil fail input (ParserC run) = run leaf nil fail input
+{-# INLINE runParser #-}
 
 data Input = Input
   { pos :: {-# UNPACK #-} !Pos
@@ -94,19 +98,25 @@ newtype ParserC m a = ParserC
 
 instance Applicative (ParserC m) where
   pure a = ParserC (\ leaf _ _ input -> leaf input a)
+  {-# INLINE pure #-}
 
   (<*>) = ap
+  {-# INLINE (<*>) #-}
 
 instance Alternative (ParserC m) where
   empty = ParserC (\ _ nil _ input -> nil input Nothing)
+  {-# INLINE empty #-}
 
   ParserC l <|> ParserC r = ParserC (\ leaf nil fail input -> l leaf (const (\ e -> r leaf (\ i e' -> nil i (e' <|> e)) fail input)) fail input)
+  {-# INLINE (<|>) #-}
 
 instance Monad (ParserC m) where
   ParserC m >>= f = ParserC (\ leaf nil fail -> m (\ input -> runParser leaf nil fail input . f) nil fail)
+  {-# INLINE (>>=) #-}
 
 instance (Algebra sig m, Effect sig) => Fail.MonadFail (ParserC m) where
   fail = unexpected
+  {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (ParserC m) where
   mfix f = ParserC $ \ leaf nil fail input ->
@@ -118,28 +128,37 @@ instance MonadFix m => MonadFix (ParserC m) where
       (\ i e -> pure (i, ParserC (\ _ nil _    i -> nil  i e)))
       (\ i e -> pure (i, ParserC (\ _ _   fail i -> fail i e)))
     fromParser = runParser (const pure) (error "mfix ParserC: empty") (error "mfix ParserC: cutfail")
+  {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (ParserC m) where
   liftIO = lift . liftIO
+  {-# INLINE liftIO #-}
 
 instance MonadPlus (ParserC m)
 
 instance MonadTrans ParserC where
   lift m = ParserC $ \ leaf _ _ input -> m >>= leaf input
+  {-# INLINE lift #-}
 
 instance (Algebra sig m, Effect sig) => Parsing (ParserC m) where
   try = call
+  {-# INLINE try #-}
 
   eof = notFollowedBy anyChar <?> "end of input"
+  {-# INLINE eof #-}
 
   unexpected s = send (Unexpected s)
+  {-# INLINE unexpected #-}
 
   m <?> s = send (Label m s pure)
+  {-# INLINE (<?>) #-}
 
   notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . show))
+  {-# INLINE notFollowedBy #-}
 
 instance (Algebra sig m, Effect sig) => CharParsing (ParserC m) where
   satisfy p = accept (\ c -> if p c then Just c else Nothing)
+  {-# INLINE satisfy #-}
 
 instance (Algebra sig m, Effect sig) => TokenParsing (ParserC m)
 
@@ -175,12 +194,15 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
         . getCompose
     emptyk   i e = pure (Compose (i, ParserC (\ _ nil _    i -> nil  i e)))
     cutfailk i e = pure (Compose (i, ParserC (\ _ _   fail i -> fail i e)))
+  {-# INLINE alg #-}
 
 
 advance :: Input -> Input
 advance (Input pos (c:cs)) = Input (advancePos c pos) cs
 advance i                  = i
+{-# INLINE advance #-}
 
 advancePos :: Char -> Pos -> Pos
 advancePos '\n' p = Pos (succ (Span.line p)) 0
 advancePos _    p = p { Span.column = succ (Span.column p) }
+{-# INLINE advancePos #-}
