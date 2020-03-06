@@ -173,7 +173,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
         ParserC (\ leaf nil _ input -> case str input of
           c:_ | Just a <- p c -> leaf (advance input) a
               | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
-          _                   -> nil (Err input (Just (pretty "unexpected EOF")) mempty))
+          _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty))
         >>= k
 
       Label m s k  ->
