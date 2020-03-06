@@ -59,7 +59,7 @@ runParserWith :: Applicative m => FilePath -> Input -> ParserC (ReaderC Path (Re
 runParserWith path input = runReader (Lines inputLines) . runReader (Path path) . runParser success failure failure input
   where
   success _ a = pure (Right a)
-  failure (Input pos _) reason _expected = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
+  failure (Input pos _) reason expected = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) expected []))
   inputLines = lines (str input)
   lines "" = [""]
   lines s  = let (line, rest) = takeLine s in line : lines rest
