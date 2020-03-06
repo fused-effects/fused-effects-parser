@@ -4,6 +4,7 @@ module Main
 
 import Control.Carrier.Parser.Church
 import Control.Carrier.Reader
+import Control.Effect.Parser.Notice
 import Source.Span (Pos(..))
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -30,6 +31,6 @@ parserTests = testGroup "ParserC (Church)"
 
 
 parsesInto :: (Eq a, Show a) => ParserC (ReaderC Path (ReaderC Lines (Either Notice))) a -> String -> a -> Assertion
-parsesInto p s expected = case parseString p (Pos 0 0) s of
+parsesInto p s expected = case runParserWithString (Pos 0 0) s p of
   Left  err    -> assertFailure (show err)
   Right actual -> actual @?= expected
