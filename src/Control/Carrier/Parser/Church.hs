@@ -152,7 +152,7 @@ instance (Algebra sig m, Effect sig) => Parsing (ParserC m) where
   eof = notFollowedBy anyChar <?> "end of input"
   {-# INLINE eof #-}
 
-  unexpected s = send (Unexpected s)
+  unexpected s = ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
   {-# INLINE unexpected #-}
 
   m <?> s = ParserC $ \ leaf nil fail -> runParserC m leaf
@@ -181,7 +181,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
 
       Label m s k  -> (m <?> s) >>= k
 
-      Unexpected s -> ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
+      Unexpected s -> unexpected s
 
       Position k   ->
         ParserC (\ leaf _ _ input -> leaf input (pos input))
