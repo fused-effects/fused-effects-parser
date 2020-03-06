@@ -50,7 +50,7 @@ prettyNotice (Notice level (Excerpt path line span) reason expected context) = v
   where
   pos (Pos l c) = bold (pretty (succ l)) <> colon <> bold (pretty (succ c))
 
-  padding span = pretty (replicate (Span.column (Span.start span)) ' ')
+  padding (Span (Pos _ c) _) = pretty (replicate c ' ')
 
   caret (Span start end)
     | start == end                     = green (pretty '^')
