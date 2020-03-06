@@ -9,7 +9,8 @@ module Control.Effect.Parser.Notice
 import           Control.Effect.Parser.Excerpt
 import           Data.Foldable (fold)
 import           Data.List (isSuffixOf)
-import           Data.Set hiding (fold)
+import           Data.Maybe (fromMaybe)
+import           Data.Set hiding (fold, map)
 import           Data.Text.Prettyprint.Doc
 import           Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle, Color(..), color)
 import qualified Data.Text.Prettyprint.Doc.Render.Terminal as ANSI
@@ -29,7 +30,7 @@ prettyLevel = \case
 data Notice = Notice
   { level    :: Maybe Level
   , excerpt  :: {-# UNPACK #-} !Excerpt
-  , reason   :: Doc AnsiStyle
+  , reason   :: Maybe (Doc AnsiStyle)
   , expected :: Set String
   , context  :: [Doc AnsiStyle]
   }
@@ -37,7 +38,7 @@ data Notice = Notice
 
 prettyNotice :: Notice -> Doc AnsiStyle
 prettyNotice (Notice level (Excerpt path line span) reason _expected context) = vsep
-  ( nest 2 (group (vsep [bold (pretty path) <> colon <> bold (pretty (succ (Span.line (Span.start span)))) <> colon <> bold (pretty (succ (Span.column (Span.start span)))) <> colon <> maybe mempty ((space <>) . (<> colon) . prettyLevel) level, reason]))
+  ( nest 2 (group (vsep [bold (pretty path) <> colon <> bold (pretty (succ (Span.line (Span.start span)))) <> colon <> bold (pretty (succ (Span.column (Span.start span)))) <> colon <> maybe mempty ((space <>) . (<> colon) . prettyLevel) level, fromMaybe (fillSep (map pretty (words "unknown error"))) reason]))
   : blue (pretty (succ (Span.line (Span.start span)))) <+> align (fold
     [ blue (pretty '|') <+> pretty line <> if "\n" `isSuffixOf` line then mempty else blue (pretty "<EOF>") <> hardline
     , blue (pretty '|') <+> caret span

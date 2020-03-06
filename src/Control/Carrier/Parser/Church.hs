@@ -39,7 +39,6 @@ import Control.Monad.Trans.Class
 import Data.Coerce (coerce)
 import Data.Functor.Compose
 import Data.Functor.Identity
-import Data.Maybe (fromMaybe)
 import Data.Set (Set, singleton)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle)
@@ -62,7 +61,7 @@ runParserWith :: Applicative m => FilePath -> Input -> ParserC (ReaderC Path (Re
 runParserWith path input = runReader (Lines inputLines) . runReader (Path path) . runParser success failure failure input
   where
   success _ a = pure (Right a)
-  failure Err{ input = Input pos _, reason, expected } = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) expected []))
+  failure Err{ input = Input pos _, reason, expected } = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) reason expected []))
   inputLines = lines (str input)
   lines "" = [""]
   lines s  = let (line, rest) = takeLine s in line : lines rest
