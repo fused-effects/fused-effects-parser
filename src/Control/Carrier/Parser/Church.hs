@@ -100,7 +100,7 @@ instance Applicative (ParserC m) where
 instance Alternative (ParserC m) where
   empty = ParserC (\ _ nil _ input -> nil input Nothing)
 
-  ParserC l <|> ParserC r = ParserC (\ leaf nil fail input -> l leaf (const (const (r leaf nil fail input))) fail input)
+  ParserC l <|> ParserC r = ParserC (\ leaf nil fail input -> l leaf (const (\ e -> r leaf (\ i e' -> nil i (e' <|> e)) fail input)) fail input)
 
 instance Monad (ParserC m) where
   ParserC m >>= f = ParserC (\ leaf nil fail -> m (\ input -> runParser leaf nil fail input . f) nil fail)
