@@ -112,7 +112,6 @@ instance MonadFix m => MonadFix (ParserC m) where
     mfix (toParser input . f . run . fromParser input . snd)
     >>= run . uncurry (runParser (fmap pure . leaf) (fmap pure . nil) (fmap pure . fail))
     where
-    toParser :: Input -> ParserC m a -> m (Input, ParserC Identity a)
     toParser   = runParser
       (\ i a -> pure (i, pure a))
       (\ i e -> pure (i, ParserC (\ _ nil _    i -> nil  i e)))
