@@ -106,7 +106,7 @@ instance Applicative (ParserC m) where
   {-# INLINE (<*>) #-}
 
 instance Alternative (ParserC m) where
-  empty = ParserC (\ _ nil _ input -> nil input Nothing)
+  empty = emptyWith Nothing
   {-# INLINE empty #-}
 
   ParserC l <|> ParserC r = ParserC (\ leaf nil fail input -> l leaf (const (\ e -> r leaf (\ i e' -> nil i (e' <|> e)) fail input)) fail input)
