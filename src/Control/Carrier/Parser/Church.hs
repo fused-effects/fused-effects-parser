@@ -186,7 +186,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
     dst :: (Input, ParserC Identity (ParserC m a)) -> m (Input, ParserC Identity a)
     dst = runIdentity
         . uncurry (runParser
-          (fmap pure . runParser purek emptyk cutfailk)
+          (fmap pure . distParser)
           (fmap pure . emptyk)
           (fmap pure . cutfailk))
   {-# INLINE alg #-}
