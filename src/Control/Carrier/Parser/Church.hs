@@ -129,9 +129,13 @@ instance MonadTrans ParserC where
 
 instance (Algebra sig m, Effect sig) => Parsing (ParserC m) where
   try = call
+
   eof = notFollowedBy anyChar <?> "end of input"
+
   unexpected s = send (Unexpected s)
+
   m <?> s = send (Label m s pure)
+
   notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . show))
 
 instance (Algebra sig m, Effect sig) => CharParsing (ParserC m) where
