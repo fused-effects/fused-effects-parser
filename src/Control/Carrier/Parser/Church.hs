@@ -45,21 +45,21 @@ import Text.Parser.Combinators
 import Text.Parser.Token (TokenParsing)
 
 runParserWithString :: Has (Throw Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
-runParserWithString pos input p = runParserWith "(interactive)" pos input p >>= either throwError pure
+runParserWithString pos input p = runParserWith "(interactive)" (Input pos input) p >>= either throwError pure
 {-# INLINE runParserWithString #-}
 
 runParserWithFile :: (Has (Throw Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 runParserWithFile path p = do
   input <- liftIO (readFile path)
-  runParserWith path (Pos 0 0) input p >>= either throwError pure
+  runParserWith path (Input (Pos 0 0) input) p >>= either throwError pure
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Applicative m => FilePath -> Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
-runParserWith path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure (Input pos input)))
+runParserWith :: Applicative m => FilePath -> Input -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
+runParserWith path input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure input))
   where
   success _ a = pure (Right a)
   failure (Input pos _) reason = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
-  inputLines = lines input
+  inputLines = lines (str input)
   lines "" = [""]
   lines s  = let (line, rest) = takeLine s in line : lines rest
   takeLine ""          = ("", "")
