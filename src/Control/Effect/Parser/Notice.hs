@@ -33,13 +33,6 @@ data Notice = Notice
   }
   deriving (Show)
 
-instance Eq Notice where
-  Notice l1 e1 r1 c1 == Notice l2 e2 r2 c2
-    =  l1 == l2
-    && e1 == e2
-    && show r1 == show r2
-    && map show c1 == map show c2
-
 prettyNotice :: Notice -> Doc AnsiStyle
 prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
   ( nest 2 (group (vsep [bold (pretty path) <> colon <> bold (pretty (succ (Span.line (Span.start span)))) <> colon <> bold (pretty (succ (Span.column (Span.start span)))) <> colon <> maybe mempty ((space <>) . (<> colon) . prettyLevel) level, reason]))
