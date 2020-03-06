@@ -27,6 +27,8 @@ parserTests = testGroup "ParserC (Church)"
     , testCase "after newline" $
       parsesInto (newline *> position) "\n" (Pos 1 0)
     ]
+  , testGroup "<?>"
+    []
   ]
 
 
