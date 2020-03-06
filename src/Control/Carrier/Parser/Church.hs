@@ -171,7 +171,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
         >>= k
 
       Label m s k  ->
-        ParserC (\ leaf nil fail -> runParserC m leaf (\ p r -> nil p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s))))
+        ParserC (\ leaf nil fail -> runParserC m leaf (\ i r -> nil i (r <|> Just (pretty s))) (\ i r -> fail i (r <|> Just (pretty s))))
         >>= k
 
       Unexpected s -> ParserC $ \ _ nil _ input -> nil input (Just (pretty s))
