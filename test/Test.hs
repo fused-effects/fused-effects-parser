@@ -33,13 +33,13 @@ parserTests = testGroup "ParserC (Church)"
     ]
   , testGroup "<?>"
     [ testCase "replaces labels" $
-      failsWith (char 'a' <?> "c") "b" (\ Notice{ Notice.expected } -> expected @?= singleton "c")
+      failsWith (char 'a' <?> "c") "b" (hasExpectation (singleton "c"))
     , testCase "applies outermost" $
-      failsWith ((char 'a' <?> "b") <?> "c") "d" (\ Notice{ Notice.expected } -> expected @?= singleton "c")
+      failsWith ((char 'a' <?> "b") <?> "c") "d" (hasExpectation (singleton "c"))
     , testCase "is joined by <|>" $
-      failsWith ((char 'a' <?> "b") <|> (char 'c' <?> "d")) "e" (\ Notice{ Notice.expected } -> expected @?= fromList ["b", "d"])
+      failsWith ((char 'a' <?> "b") <|> (char 'c' <?> "d")) "e" (hasExpectation (fromList ["b", "d"]))
     , testCase "replaces joined labels <|>" $
-      failsWith (((char 'a' <?> "b") <|> (char 'c' <?> "d")) <?> "e") "f" (\ Notice{ Notice.expected } -> expected @?= singleton "e")
+      failsWith (((char 'a' <?> "b") <|> (char 'c' <?> "d")) <?> "e") "f" (hasExpectation (singleton "e"))
     ]
   ]
 
@@ -53,3 +53,6 @@ failsWith :: Show a => ParserC (ReaderC Path (ReaderC Lines (Either Notice))) a 
 failsWith p s f = case runParserWithString (Pos 0 0) s p of
   Left  err    -> f err
   Right actual -> assertFailure (show actual)
+
+hasExpectation :: Set String -> Notice -> Assertion
+hasExpectation expected' Notice{ Notice.expected } = expected @?= expected'
