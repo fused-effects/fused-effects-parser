@@ -16,10 +16,6 @@ module Control.Carrier.Parser.Church
 , ParserC(..)
 , emptyWith
 , cutfailWith
-, Level(..)
-, prettyLevel
-, Notice(..)
-, prettyNotice
   -- * Parser effect
 , module Control.Effect.Parser
 ) where
