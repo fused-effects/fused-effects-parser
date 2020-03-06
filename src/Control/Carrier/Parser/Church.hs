@@ -13,6 +13,7 @@ module Control.Carrier.Parser.Church
 , runParserWith
 , runParser
 , Input(..)
+, Err(..)
 , ParserC(..)
 , emptyWith
 , cutfailWith
@@ -83,6 +84,13 @@ data Input = Input
   , str :: !String
   }
   deriving (Eq, Ord, Show)
+
+data Err = Err
+  { input    :: {-# UNPACK #-} !Input
+  , reason   :: !(Maybe (Doc AnsiStyle))
+  , expected :: !(Set String)
+  }
+  deriving (Show)
 
 newtype ParserC m a = ParserC
   { runParserC

@@ -5,7 +5,7 @@ module Main
 
 import Control.Carrier.Parser.Church
 import Control.Carrier.Reader
-import Control.Effect.Parser.Notice
+import Control.Effect.Parser.Notice as Notice
 import Source.Span (Pos(..))
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -31,7 +31,7 @@ parserTests = testGroup "ParserC (Church)"
     ]
   , testGroup "<?>"
     [ testCase "replaces labels" $
-      failsWith (char 'a' <?> "c") "b" (\ Notice{ reason } -> show reason @?= "c")
+      failsWith (char 'a' <?> "c") "b" (\ Notice{ Notice.reason } -> show reason @?= "c")
     ]
   ]
 
