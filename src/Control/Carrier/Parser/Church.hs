@@ -30,8 +30,8 @@ import Control.Effect.Parser.Excerpt
 import Control.Effect.Parser.Notice
 import Control.Effect.Throw
 import Control.Monad (ap)
-import Control.Monad.Fix
 import Control.Monad.Fail as Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Coerce (coerce)
