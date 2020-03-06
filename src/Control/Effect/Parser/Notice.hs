@@ -43,7 +43,7 @@ prettyNotice (Notice level (Excerpt path line span) reason expected context) = v
     : fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> (if null expected then mempty else comma)
     : if null expected then [] else pretty "expected" <> colon : punctuate comma (map pretty (Set.toList expected)))))
   : blue (pretty (succ (Span.line (Span.start span)))) <+> align (fold
-    [ blue (pretty '|') <+> pretty line <> if "\n" `isSuffixOf` line then mempty else blue (pretty "<EOF>") <> hardline
+    [ blue (pretty '|') <+> pretty line <> if "\n" `isSuffixOf` line then mempty else blue (pretty "<end of input>") <> hardline
     , blue (pretty '|') <+> caret span
     ])
   : context)
