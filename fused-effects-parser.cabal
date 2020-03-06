@@ -43,6 +43,7 @@ library
     Control.Effect.Parser.Notice
   build-depends:
       base >= 4.12 && < 5
+    , containers >= 0.5 && < 0.7
     , fused-effects ^>= 1
     , parsers ^>= 0.12
     , prettyprinter ^>= 1.5
