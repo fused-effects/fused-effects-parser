@@ -94,6 +94,7 @@ newtype ParserC m a = ParserC
 
 instance Applicative (ParserC m) where
   pure a = ParserC (\ leaf _ _ input -> leaf input a)
+
   (<*>) = ap
 
 instance Alternative (ParserC m) where
