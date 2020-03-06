@@ -128,7 +128,7 @@ instance MonadFix m => MonadFix (ParserC m) where
     toParser   = runParser
       (\ i a -> pure (i, pure a))
       (\ i e -> pure (i, emptyWith e))
-      (\ i e -> pure (i, ParserC (\ _ _   fail i -> fail i e)))
+      (\ i e -> pure (i, cutfailWith e))
     fromParser = runParser (const pure) (error "mfix ParserC: empty") (error "mfix ParserC: cutfail")
   {-# INLINE mfix #-}
 
