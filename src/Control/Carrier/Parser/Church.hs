@@ -169,22 +169,27 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
               | otherwise     -> nil input (Just (pretty "unexpected " <> pretty c))
           _                   -> nil input (Just (pretty "unexpected EOF")))
         >>= k
+
       Label m s k  ->
         ParserC (\ leaf nil fail -> runParserC m leaf (\ p r -> nil p (r <|> Just (pretty s))) (\ p r -> fail p (r <|> Just (pretty s))))
         >>= k
+
       Unexpected s -> ParserC $ \ _ nil _ input -> nil input (Just (pretty s))
+
       Position k   ->
         ParserC (\ leaf _ _ input -> leaf input (pos input))
         >>= k
 
     R (L cut) -> case cut of
       Cutfail  -> cutfailWith Nothing
+
       Call m k ->
         ParserC (\ leaf nil _ -> runParserC m leaf nil nil)
         >>= k
 
     R (R (L nondet)) -> case nondet of
       L Empty      -> empty
+
       R (Choose k) -> k True <|> k False
 
     R (R (R other)) -> ParserC $ \ leaf nil fail input ->
