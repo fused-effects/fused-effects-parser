@@ -155,9 +155,7 @@ instance (Algebra sig m, Effect sig) => Parsing (ParserC m) where
   unexpected s = send (Unexpected s)
   {-# INLINE unexpected #-}
 
-  m <?> s = ParserC $ \ leaf nil fail -> runParserC m leaf
-    (\ err -> nil  err{ expected = singleton s })
-    (\ err -> fail err{ expected = singleton s })
+  m <?> s = send (Label m s pure)
   {-# INLINE (<?>) #-}
 
   notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . show))
@@ -179,7 +177,11 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
           _                   -> nil (Err input (Just (pretty "unexpected EOF")) mempty))
         >>= k
 
-      Label m s k  -> (m <?> s) >>= k
+      Label m s k  ->
+        ParserC (\ leaf nil fail -> runParserC m leaf
+          (\ err -> nil  err{ expected = singleton s })
+          (\ err -> fail err{ expected = singleton s }))
+        >>= k
 
       Unexpected s -> ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
 
