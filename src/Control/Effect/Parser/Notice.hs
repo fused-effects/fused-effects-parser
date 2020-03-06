@@ -10,7 +10,7 @@ import           Control.Effect.Parser.Excerpt
 import           Data.Foldable (fold)
 import           Data.List (isSuffixOf)
 import           Data.Maybe (fromMaybe)
-import           Data.Set hiding (fold, map)
+import qualified Data.Set as Set
 import           Data.Text.Prettyprint.Doc
 import           Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle, Color(..), color)
 import qualified Data.Text.Prettyprint.Doc.Render.Terminal as ANSI
@@ -31,7 +31,7 @@ data Notice = Notice
   { level    :: Maybe Level
   , excerpt  :: {-# UNPACK #-} !Excerpt
   , reason   :: Maybe (Doc AnsiStyle)
-  , expected :: Set String
+  , expected :: Set.Set String
   , context  :: [Doc AnsiStyle]
   }
   deriving (Show)
