@@ -193,10 +193,20 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
           (fmap pure . runParser purek emptyk cutfailk)
           (fmap pure . emptyk)
           (fmap pure . cutfailk))
-    purek    i a = pure (i, pure a)
-    emptyk   i e = pure (i, emptyWith e)
-    cutfailk i e = pure (i, cutfailWith e)
   {-# INLINE alg #-}
+
+purek :: Applicative m => Input -> a -> m (Input, ParserC n a)
+purek    i a = pure (i, pure a)
+{-# INLINE purek #-}
+
+emptyk :: Applicative m => Input -> Maybe (Doc AnsiStyle) -> m (Input, ParserC n a)
+emptyk   i e = pure (i, emptyWith e)
+{-# INLINE emptyk #-}
+
+cutfailk :: Applicative m => Input -> Maybe (Doc AnsiStyle) -> m (Input, ParserC n a)
+cutfailk i e = pure (i, cutfailWith e)
+{-# INLINE cutfailk #-}
+
 
 -- | Fail to parse, providing the given document as a reason.
 --
