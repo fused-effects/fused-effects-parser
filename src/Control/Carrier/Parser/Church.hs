@@ -196,6 +196,9 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
     cutfailk i e = pure (Compose (i, ParserC (\ _ _   fail i -> fail i e)))
   {-# INLINE alg #-}
 
+emptyWith :: Maybe (Doc AnsiStyle) -> ParserC m a
+emptyWith e = ParserC (\ _ nil _    i -> nil  i e)
+
 
 advance :: Input -> Input
 advance (Input pos (c:cs)) = Input (advancePos c pos) cs
