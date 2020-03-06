@@ -197,6 +197,11 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
     cutfailk i e = pure (Compose (i, ParserC (\ _ _   fail i -> fail i e)))
   {-# INLINE alg #-}
 
+-- | Fail to parse, providing the given document as a reason.
+--
+-- @
+-- 'emptyWith' 'Nothing' = 'empty'
+-- @
 emptyWith :: Maybe (Doc AnsiStyle) -> ParserC m a
 emptyWith e = ParserC (\ _ nil _    i -> nil  i e)
 {-# INLINE emptyWith #-}
