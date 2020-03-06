@@ -199,6 +199,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
 
 emptyWith :: Maybe (Doc AnsiStyle) -> ParserC m a
 emptyWith e = ParserC (\ _ nil _    i -> nil  i e)
+{-# INLINE emptyWith #-}
 
 
 advance :: Input -> Input
