@@ -8,9 +8,9 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Parser.Church
 ( -- * Parser carrier
-  parseString
-, parseFile
-, parseInput
+  runParserWithString
+, runParserWithFile
+, runParserWith
 , runParser
 , Input(..)
 , ParserC(..)
@@ -44,18 +44,18 @@ import Text.Parser.Char (CharParsing(..))
 import Text.Parser.Combinators
 import Text.Parser.Token (TokenParsing)
 
-parseString :: Has (Throw Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
-parseString pos input p = parseInput "(interactive)" pos input p >>= either throwError pure
-{-# INLINE parseString #-}
+runParserWithString :: Has (Throw Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
+runParserWithString pos input p = runParserWith "(interactive)" pos input p >>= either throwError pure
+{-# INLINE runParserWithString #-}
 
-parseFile :: (Has (Throw Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
-parseFile path p = do
+runParserWithFile :: (Has (Throw Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
+runParserWithFile path p = do
   input <- liftIO (readFile path)
-  parseInput path (Pos 0 0) input p >>= either throwError pure
-{-# INLINE parseFile #-}
+  runParserWith path (Pos 0 0) input p >>= either throwError pure
+{-# INLINE runParserWithFile #-}
 
-parseInput :: Applicative m => FilePath -> Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
-parseInput path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure (Input pos input)))
+runParserWith :: Applicative m => FilePath -> Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
+runParserWith path pos input m = runReader (Lines inputLines) (runReader (Path path) (runParserC m success failure failure (Input pos input)))
   where
   success _ a = pure (Right a)
   failure (Input pos _) reason = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) (fromMaybe (pretty "unknown error") reason) []))
@@ -65,7 +65,7 @@ parseInput path pos input m = runReader (Lines inputLines) (runReader (Path path
   takeLine ""          = ("", "")
   takeLine ('\n':rest) = ("\n", rest)
   takeLine (c   :rest) = let (cs, rest') = takeLine rest in (c:cs, rest')
-{-# INLINE parseInput #-}
+{-# INLINE runParserWith #-}
 
 runParser
   :: (Input -> a -> m r)
