@@ -193,7 +193,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
           (fmap pure . emptyk)
           (fmap pure . cutfailk))
         . getCompose
-    emptyk   i e = pure (Compose (i, ParserC (\ _ nil _    i -> nil  i e)))
+    emptyk   i e = pure (Compose (i, emptyWith e))
     cutfailk i e = pure (Compose (i, ParserC (\ _ _   fail i -> fail i e)))
   {-# INLINE alg #-}
 
