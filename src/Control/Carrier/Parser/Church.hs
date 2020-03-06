@@ -125,10 +125,7 @@ instance MonadFix m => MonadFix (ParserC m) where
     mfix (toParser input . f . run . fromParser input . snd)
     >>= run . uncurry (runParser (fmap pure . leaf) (fmap pure . nil) (fmap pure . fail))
     where
-    toParser   = runParser
-      (\ i a -> pure (i, pure a))
-      (\ i e -> pure (i, emptyWith e))
-      (\ i e -> pure (i, cutfailWith e))
+    toParser   = runParser purek emptyk cutfailk
     fromParser = runParser (const pure) (error "mfix ParserC: empty") (error "mfix ParserC: cutfail")
   {-# INLINE mfix #-}
 
