@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns #-}
 module Main
 ( main
 ) where
@@ -9,6 +10,7 @@ import Source.Span (Pos(..))
 import Test.Tasty
 import Test.Tasty.HUnit
 import Text.Parser.Char
+import Text.Parser.Combinators
 
 main :: IO ()
 main = defaultMain $ testGroup "unit tests"
@@ -28,7 +30,9 @@ parserTests = testGroup "ParserC (Church)"
       parsesInto (newline *> position) "\n" (Pos 1 0)
     ]
   , testGroup "<?>"
-    []
+    [ testCase "replaces labels" $
+      failsWith (char 'a' <?> "s") "b" (\ Notice{ reason } -> show reason @?= "s")
+    ]
   ]
 
 
@@ -36,3 +40,8 @@ parsesInto :: (Eq a, Show a) => ParserC (ReaderC Path (ReaderC Lines (Either Not
 parsesInto p s expected = case runParserWithString (Pos 0 0) s p of
   Left  err    -> assertFailure (show err)
   Right actual -> actual @?= expected
+
+failsWith :: Show a => ParserC (ReaderC Path (ReaderC Lines (Either Notice))) a -> String -> (Notice -> Assertion) -> Assertion
+failsWith p s f = case runParserWithString (Pos 0 0) s p of
+  Left  err    -> f err
+  Right actual -> assertFailure (show actual)
