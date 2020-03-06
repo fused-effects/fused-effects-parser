@@ -52,10 +52,10 @@ prettyNotice (Notice level (Excerpt path line span) reason expected context) = v
 
   padding (Span (Pos _ c) _) = pretty (replicate c ' ')
 
-  caret (Span start end)
-    | start == end                     = green (pretty '^')
-    | Span.line start == Span.line end = green (pretty (replicate (Span.column end - Span.column start) '~'))
-    | otherwise                        = green (pretty "^…")
+  caret (Span start@(Pos sl sc) end@(Pos el ec))
+    | start == end = green (pretty '^')
+    | sl    == el  = green (pretty (replicate (ec - sc) '~'))
+    | otherwise    = green (pretty "^…")
 
   bold = annotate ANSI.bold
 
