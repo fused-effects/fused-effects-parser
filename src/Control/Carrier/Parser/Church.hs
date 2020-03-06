@@ -40,7 +40,7 @@ import Data.Coerce (coerce)
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Maybe (fromMaybe)
-import Data.Set (Set, insert)
+import Data.Set (Set, singleton)
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle)
 import Source.Span as Span
@@ -179,8 +179,8 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
 
       Label m s k  ->
         ParserC (\ leaf nil fail -> runParserC m leaf
-          (\ err -> nil  err{ expected = insert s (expected err) })
-          (\ err -> fail err{ expected = insert s (expected err) }))
+          (\ err -> nil  err{ expected = singleton s })
+          (\ err -> fail err{ expected = singleton s }))
         >>= k
 
       Unexpected s -> ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
