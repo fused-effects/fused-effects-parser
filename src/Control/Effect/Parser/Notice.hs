@@ -39,7 +39,7 @@ data Notice = Notice
 prettyNotice :: Notice -> Doc AnsiStyle
 prettyNotice (Notice level (Excerpt path line span) reason expected context) = vsep
   ( nest 2 (group (fillSep
-    ( bold (pretty path) <> colon <> pos (Span.start span) <> colon <> maybe mempty ((space <>) . (<> colon) . prettyLevel) level
+    ( bold (pretty path) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . prettyLevel) level
     : fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> (if null expected then mempty else comma)
     : if null expected then [] else pretty "expected" <> colon : punctuate comma (map pretty (Set.toList expected)))))
   : blue (pretty (succ (Span.line (Span.start span)))) <+> align (fold
