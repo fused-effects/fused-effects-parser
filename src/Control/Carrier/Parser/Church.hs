@@ -62,7 +62,7 @@ runParserWith :: Applicative m => FilePath -> Input -> ParserC (ReaderC Path (Re
 runParserWith path input = runReader (Lines inputLines) . runReader (Path path) . runParser success failure failure input
   where
   success _ a = pure (Right a)
-  failure Err{ input = Input pos _, reason, expected } = pure (Left (Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) reason expected []))
+  failure = pure . Left . errToNotice (Path path) (Lines inputLines)
   inputLines = lines (str input)
   lines "" = [""]
   lines s  = let (line, rest) = takeLine s in line : lines rest
