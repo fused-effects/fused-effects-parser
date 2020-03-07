@@ -42,7 +42,8 @@ import           Control.Monad.Trans.Class
 import           Data.Coerce (coerce)
 import           Data.Functor.Compose
 import           Data.Functor.Identity
-import           Data.Set (Set, singleton)
+import           Data.Maybe (fromMaybe)
+import           Data.Set (Set, singleton, toList)
 import           Data.Text.Prettyprint.Doc
 import           Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle)
 import           Source.Span as Span
@@ -91,10 +92,10 @@ data Err = Err
   deriving (Show)
 
 errToNotice :: Path -> Lines -> Err -> Notice.Notice
-errToNotice path inputLines Err{ input = Input pos _, reason } = Notice.Notice
+errToNotice path inputLines Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
   , excerpt = Excerpt path (inputLines ! pos) (Span pos pos)
-  , reason
+  , reason  = Just (fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected))))
   , context = []
   }
 {-# INLINE errToNotice #-}
