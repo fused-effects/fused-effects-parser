@@ -6,8 +6,8 @@ module Main
 import Control.Applicative (Alternative(..))
 import Control.Carrier.Parser.Church
 import Control.Carrier.Reader
-import Control.Effect.Parser.Notice as Notice
 import Control.Effect.Parser.Lines
+import Control.Effect.Parser.Notice as Notice
 import Data.Set
 import Source.Span (Pos(..))
 import Test.Tasty
