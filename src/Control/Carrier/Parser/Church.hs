@@ -61,9 +61,8 @@ runParserWithFile path p = do
 {-# INLINE runParserWithFile #-}
 
 runParserWith :: Has (Throw Notice) sig m => FilePath -> Input -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
-runParserWith path input = runReader inputLines . runReader (Path path) . runParser success failure failure input
+runParserWith path input = runReader inputLines . runReader (Path path) . runParser (const pure) failure failure input
   where
-  success _ = pure
   failure = throwError . errToNotice (Path path) inputLines
   inputLines = linesFromString (str input)
 {-# INLINE runParserWith #-}
