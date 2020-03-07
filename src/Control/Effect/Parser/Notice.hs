@@ -28,11 +28,11 @@ prettyLevel = \case
 
 
 data Notice = Notice
-  { level    :: Maybe Level
+  { level    :: !(Maybe Level)
   , excerpt  :: {-# UNPACK #-} !Excerpt
-  , reason   :: Maybe (Doc AnsiStyle)
-  , expected :: Set.Set String
-  , context  :: [Doc AnsiStyle]
+  , reason   :: !(Maybe (Doc AnsiStyle))
+  , expected :: !(Set.Set String)
+  , context  :: ![Doc AnsiStyle]
   }
   deriving (Show)
 
