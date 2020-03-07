@@ -15,6 +15,7 @@ module Control.Carrier.Parser.Church
 , runParserWith
 , runParser
 , Input(..)
+, pos_
 , Err(..)
 , errToNotice
 , ParserC(..)
@@ -30,6 +31,7 @@ import           Control.Effect.Cut
 import           Control.Effect.NonDet
 import           Control.Effect.Parser
 import           Control.Effect.Parser.Excerpt
+import           Control.Effect.Parser.Lens
 import           Control.Effect.Parser.Lines
 import qualified Control.Effect.Parser.Notice as Notice
 import           Control.Effect.Parser.Path
@@ -83,6 +85,10 @@ data Input = Input
   , str :: !String
   }
   deriving (Eq, Ord, Show)
+
+pos_ :: Lens' Input Pos
+pos_ = lens pos $ \ i pos -> i{ pos }
+{-# INLINE pos_ #-}
 
 
 data Err = Err
