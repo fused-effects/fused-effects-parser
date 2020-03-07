@@ -196,13 +196,13 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
     R (R (R other)) -> ParserC $ \ leaf nil fail input ->
       thread (Compose (input, pure ctx)) (fmap Compose . uncurry dst . getCompose) other
       >>= runIdentity . uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) . getCompose
-      where
-      dst :: Input -> ParserC Identity (ctx (n a)) -> m (Input, ParserC Identity (ctx a))
-      dst = fmap runIdentity
-          . runParser
-            (\ i -> pure . distParser i . hdl)
-            (pure . emptyk)
-            (pure . cutfailk)
+    where
+    dst :: Input -> ParserC Identity (ctx (n a)) -> m (Input, ParserC Identity (ctx a))
+    dst = fmap runIdentity
+        . runParser
+          (\ i -> pure . distParser i . hdl)
+          (pure . emptyk)
+          (pure . cutfailk)
   {-# INLINE alg #-}
 
 distParser :: Applicative m => Input -> ParserC m a -> m (Input, ParserC Identity a)
