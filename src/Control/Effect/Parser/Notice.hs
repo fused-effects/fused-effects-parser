@@ -1,13 +1,18 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module Control.Effect.Parser.Notice
 ( Level(..)
 , prettyLevel
 , Notice(..)
+, level_
+, excerpt_
+, reason_
+, context_
 , prettyNotice
 ) where
 
 import           Control.Effect.Parser.Excerpt
-import           Data.Foldable (fold)
+import           Control.Effect.Parser.Lens
 import           Data.List (isSuffixOf)
 import           Data.Text.Prettyprint.Doc
 import           Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle, Color(..), color)
@@ -26,27 +31,45 @@ prettyLevel = \case
 
 
 data Notice = Notice
-  { level   :: Maybe Level
-  , excerpt :: {-# UNPACK #-} !Excerpt
-  , reason  :: Doc AnsiStyle
-  , context :: [Doc AnsiStyle]
+  { level    :: !(Maybe Level)
+  , excerpt  :: {-# UNPACK #-} !Excerpt
+  , reason   :: !(Doc AnsiStyle)
+  , context  :: ![Doc AnsiStyle]
   }
   deriving (Show)
 
+level_ :: Lens' Notice (Maybe Level)
+level_ = lens level $ \ n level -> n{ level }
+
+excerpt_ :: Lens' Notice Excerpt
+excerpt_ = lens excerpt $ \ n excerpt -> n{ excerpt }
+
+reason_ :: Lens' Notice (Doc AnsiStyle)
+reason_ = lens reason $ \ n reason -> n{ reason }
+
+context_ :: Lens' Notice [Doc AnsiStyle]
+context_ = lens context $ \ n context -> n{ context }
+
 prettyNotice :: Notice -> Doc AnsiStyle
 prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
-  ( nest 2 (group (vsep [bold (pretty path) <> colon <> bold (pretty (succ (Span.line (Span.start span)))) <> colon <> bold (pretty (succ (Span.column (Span.start span)))) <> colon <> maybe mempty ((space <>) . (<> colon) . prettyLevel) level, reason]))
-  : blue (pretty (succ (Span.line (Span.start span)))) <+> align (fold
-    [ blue (pretty '|') <+> pretty line <> if "\n" `isSuffixOf` line then mempty else blue (pretty "<EOF>") <> hardline
-    , blue (pretty '|') <+> caret span
+  ( nest 2 (group (fillSep
+    [ bold (pretty path) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . prettyLevel) level
+    , reason
+    ]))
+  : blue (pretty (succ (Span.line (Span.start span)))) <+> align (vcat
+    [ blue (pretty '|') <+> pretty line <> if "\n" `isSuffixOf` line then mempty else blue (pretty "<end of input>")
+    , blue (pretty '|') <+> padding span <> caret span
     ])
-  : context) where
-  caret span = pretty (replicate (Span.column (Span.start span)) ' ') <> prettySpan span
+  : context)
+  where
+  pos (Pos l c) = bold (pretty (succ l)) <> colon <> bold (pretty (succ c))
 
-  prettySpan (Span start end)
-    | start == end                     = green (pretty '^')
-    | Span.line start == Span.line end = green (pretty (replicate (Span.column end - Span.column start) '~'))
-    | otherwise                        = green (pretty "^…")
+  padding (Span (Pos _ c) _) = pretty (replicate c ' ')
+
+  caret (Span start@(Pos sl sc) end@(Pos el ec))
+    | start == end = green (pretty '^')
+    | sl    == el  = green (pretty (replicate (ec - sc) '~'))
+    | otherwise    = green (pretty "^…")
 
   bold = annotate ANSI.bold
 
