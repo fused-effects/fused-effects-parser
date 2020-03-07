@@ -34,6 +34,7 @@ instance Semigroup Excerpt where
 
 path_ :: Lens' Excerpt Path
 path_ = lens path $ \ e path -> e{ path }
+{-# INLINE path_ #-}
 
 
 data Excerpted a = a :~ Excerpt
