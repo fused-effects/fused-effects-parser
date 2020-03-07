@@ -30,6 +30,7 @@ import Control.Effect.Cut
 import Control.Effect.NonDet
 import Control.Effect.Parser
 import Control.Effect.Parser.Excerpt
+import Control.Effect.Parser.Lines
 import Control.Effect.Parser.Notice (Level(..), Notice(Notice))
 import Control.Effect.Throw
 import Control.Monad (ap)

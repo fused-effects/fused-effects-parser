@@ -7,9 +7,6 @@ module Control.Effect.Parser
   Parser(..)
 , accept
 , position
-, Lines(..)
-, linesFromString
-, line
 , Path(..)
 , path
   -- * Re-exports
@@ -53,31 +50,6 @@ accept p = send (Accept p pure)
 position :: Has Parser sig m => m Span.Pos
 position = send (Position pure)
 {-# INLINE position #-}
-
-
-newtype Lines = Lines { getLines :: [String] }
-
-linesFromString :: String -> Lines
-linesFromString = Lines . go
-  where
-  go = \case
-    "" -> [""]
-    s  -> let (line, rest) = takeLine s in line : go rest
-{-# INLINE linesFromString #-}
-
-takeLine :: String -> (String, String)
-takeLine = go id where
-  go line = \case
-    ""        -> (line "", "")
-    '\n':rest -> (line "\n", rest)
-    c   :rest -> go (line . (c:)) rest
-{-# INLINE takeLine #-}
-
-line :: (Has Parser sig m, Has (Reader Lines) sig m) => m String
-line = do
-  pos <- position
-  asks ((!! Span.line pos) . getLines)
-{-# INLINE line #-}
 
 
 newtype Path = Path { getPath :: FilePath }

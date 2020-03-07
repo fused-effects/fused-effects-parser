@@ -7,6 +7,7 @@ module Control.Effect.Parser.Excerpt
 ) where
 
 import           Control.Effect.Parser as Parser
+import           Control.Effect.Parser.Lines as Parser
 import           Control.Effect.Reader
 import qualified Source.Span as Span
 
