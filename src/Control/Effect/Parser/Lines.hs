@@ -39,5 +39,5 @@ infixl 9 !
 line :: (Has Parser sig m, Has (Reader Lines) sig m) => m String
 line = do
   pos <- position
-  asks ((!! Span.line pos) . getLines)
+  asks (! pos)
 {-# INLINE line #-}
