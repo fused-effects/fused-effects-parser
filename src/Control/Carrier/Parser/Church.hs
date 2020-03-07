@@ -24,43 +24,43 @@ module Control.Carrier.Parser.Church
 , module Control.Effect.Parser
 ) where
 
-import Control.Algebra
-import Control.Carrier.Reader
-import Control.Effect.Cut
-import Control.Effect.NonDet
-import Control.Effect.Parser
-import Control.Effect.Parser.Excerpt
-import Control.Effect.Parser.Lines
-import Control.Effect.Parser.Notice (Level(..), Notice(Notice))
-import Control.Effect.Parser.Path
-import Control.Effect.Throw
-import Control.Monad (ap)
-import Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import Data.Coerce (coerce)
-import Data.Functor.Compose
-import Data.Functor.Identity
-import Data.Set (Set, singleton)
-import Data.Text.Prettyprint.Doc
-import Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle)
-import Source.Span as Span
-import Text.Parser.Char (CharParsing(..))
-import Text.Parser.Combinators
-import Text.Parser.Token (TokenParsing)
+import           Control.Algebra
+import           Control.Carrier.Reader
+import           Control.Effect.Cut
+import           Control.Effect.NonDet
+import           Control.Effect.Parser
+import           Control.Effect.Parser.Excerpt
+import           Control.Effect.Parser.Lines
+import qualified Control.Effect.Parser.Notice as Notice
+import           Control.Effect.Parser.Path
+import           Control.Effect.Throw
+import           Control.Monad (ap)
+import           Control.Monad.Fail as Fail
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
+import           Data.Coerce (coerce)
+import           Data.Functor.Compose
+import           Data.Functor.Identity
+import           Data.Set (Set, singleton)
+import           Data.Text.Prettyprint.Doc
+import           Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle)
+import           Source.Span as Span
+import           Text.Parser.Char (CharParsing(..))
+import           Text.Parser.Combinators
+import           Text.Parser.Token (TokenParsing)
 
-runParserWithString :: Has (Throw Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
+runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 runParserWithString pos input = runParserWith (Path "(interactive)") (Input pos input)
 {-# INLINE runParserWithString #-}
 
-runParserWithFile :: (Has (Throw Notice) sig m, MonadIO m) => Path -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
+runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => Path -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 runParserWithFile path p = do
   input <- liftIO (readFile (getPath path))
   runParserWith path (Input (Pos 0 0) input) p
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Has (Throw Notice) sig m => Path -> Input -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
+runParserWith :: Has (Throw Notice.Notice) sig m => Path -> Input -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 runParserWith path input = runReader inputLines . runReader path . runParser (const pure) failure failure input
   where
   failure = throwError . errToNotice path inputLines
@@ -90,8 +90,13 @@ data Err = Err
   }
   deriving (Show)
 
-errToNotice :: Path -> Lines -> Err -> Notice
-errToNotice path inputLines Err{ input = Input pos _, reason } = Notice (Just Error) (Excerpt path (inputLines ! pos) (Span pos pos)) reason []
+errToNotice :: Path -> Lines -> Err -> Notice.Notice
+errToNotice path inputLines Err{ input = Input pos _, reason } = Notice.Notice
+  { level   = Just Notice.Error
+  , excerpt = Excerpt path (inputLines ! pos) (Span pos pos)
+  , reason
+  , context = []
+  }
 {-# INLINE errToNotice #-}
 
 newtype ParserC m a = ParserC
