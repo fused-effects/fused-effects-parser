@@ -13,7 +13,7 @@ import           Control.Effect.Reader
 import qualified Source.Span as Span
 
 data Excerpt = Excerpt
-  { path :: !FilePath
+  { path :: !Path
   , line :: !String
   , span :: {-# UNPACK #-} !Span.Span
   }

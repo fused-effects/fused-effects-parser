@@ -10,6 +10,6 @@ import Data.Text.Prettyprint.Doc
 newtype Path = Path { getPath :: FilePath }
   deriving (Eq, Ord, Pretty, Show)
 
-path :: Has (Reader Path) sig m => m FilePath
-path = asks getPath
+path :: Has (Reader Path) sig m => m Path
+path = ask
 {-# INLINE path #-}
