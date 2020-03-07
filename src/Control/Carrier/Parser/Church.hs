@@ -63,15 +63,7 @@ runParserWith path input = runReader inputLines . runReader (Path path) . runPar
   where
   success _ a = pure (Right a)
   failure = pure . Left . errToNotice (Path path) inputLines
-  inputLines = Lines (lines (str input))
-  lines = \case
-    "" -> [""]
-    s  -> let (line, rest) = takeLine s in line : lines rest
-  takeLine = go id where
-    go line = \case
-      ""        -> (line "", "")
-      '\n':rest -> (line "\n", rest)
-      c   :rest -> go (line . (c:)) rest
+  inputLines = linesFromString (str input)
 {-# INLINE runParserWith #-}
 
 runParser

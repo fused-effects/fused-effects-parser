@@ -8,6 +8,7 @@ module Control.Effect.Parser
 , accept
 , position
 , Lines(..)
+, linesFromString
 , line
 , Path(..)
 , path
@@ -21,6 +22,7 @@ module Control.Effect.Parser
 import           Control.Algebra
 import           Control.Effect.Parser.Excerpt (Excerpt(Excerpt), Excerpted(..))
 import           Control.Effect.Reader
+import           Prelude hiding (lines)
 import qualified Source.Span as Span
 
 data Parser m k
@@ -54,6 +56,20 @@ position = send (Position pure)
 
 
 newtype Lines = Lines { getLines :: [String] }
+
+linesFromString :: String -> Lines
+linesFromString = Lines . go
+  where
+  go = \case
+    "" -> [""]
+    s  -> let (line, rest) = takeLine s in line : go rest
+
+takeLine :: String -> (String, String)
+takeLine = go id where
+  go line = \case
+    ""        -> (line "", "")
+    '\n':rest -> (line "\n", rest)
+    c   :rest -> go (line . (c:)) rest
 
 line :: (Has Parser sig m, Has (Reader Lines) sig m) => m String
 line = do
