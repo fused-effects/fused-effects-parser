@@ -7,7 +7,6 @@ module Control.Effect.Parser.Notice
 ) where
 
 import           Control.Effect.Parser.Excerpt
-import           Data.Foldable (fold)
 import           Data.List (isSuffixOf)
 import           Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
@@ -42,8 +41,8 @@ prettyNotice (Notice level (Excerpt path line span) reason expected context) = v
     ( bold (pretty path) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . prettyLevel) level
     : fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> (if null expected then mempty else comma)
     : if null expected then [] else pretty "expected" <> colon : punctuate comma (map pretty (Set.toList expected)))))
-  : blue (pretty (succ (Span.line (Span.start span)))) <+> align (fold
-    [ blue (pretty '|') <+> pretty line <> if "\n" `isSuffixOf` line then mempty else blue (pretty "<end of input>") <> hardline
+  : blue (pretty (succ (Span.line (Span.start span)))) <+> align (vcat
+    [ blue (pretty '|') <+> pretty line <> if "\n" `isSuffixOf` line then mempty else blue (pretty "<end of input>")
     , blue (pretty '|') <+> padding span <> caret span
     ])
   : context)
