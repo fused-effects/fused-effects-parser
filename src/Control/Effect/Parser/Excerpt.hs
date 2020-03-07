@@ -21,6 +21,7 @@ data Excerpt = Excerpt
 
 instance Semigroup Excerpt where
   Excerpt _ l s1 <> Excerpt p _ s2 = Excerpt p l (s1 <> s2)
+  {-# INLINE (<>) #-}
 
 
 data Excerpted a = a :~ Excerpt
