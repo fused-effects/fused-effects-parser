@@ -84,6 +84,7 @@ data Input = Input
   }
   deriving (Eq, Ord, Show)
 
+
 data Err = Err
   { input    :: {-# UNPACK #-} !Input
   , reason   :: !(Maybe (Doc AnsiStyle))
