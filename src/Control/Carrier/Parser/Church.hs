@@ -51,20 +51,20 @@ import Text.Parser.Combinators
 import Text.Parser.Token (TokenParsing)
 
 runParserWithString :: Has (Throw Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
-runParserWithString pos input p = runParserWith "(interactive)" (Input pos input) p >>= either throwError pure
+runParserWithString pos input = runParserWith "(interactive)" (Input pos input)
 {-# INLINE runParserWithString #-}
 
 runParserWithFile :: (Has (Throw Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 runParserWithFile path p = do
   input <- liftIO (readFile path)
-  runParserWith path (Input (Pos 0 0) input) p >>= either throwError pure
+  runParserWith path (Input (Pos 0 0) input) p
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Applicative m => FilePath -> Input -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
+runParserWith :: Has (Throw Notice) sig m => FilePath -> Input -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 runParserWith path input = runReader inputLines . runReader (Path path) . runParser success failure failure input
   where
-  success _ a = pure (Right a)
-  failure = pure . Left . errToNotice (Path path) inputLines
+  success _ = pure
+  failure = throwError . errToNotice (Path path) inputLines
   inputLines = linesFromString (str input)
 {-# INLINE runParserWith #-}
 
