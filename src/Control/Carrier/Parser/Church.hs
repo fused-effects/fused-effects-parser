@@ -64,8 +64,9 @@ runParserWith path input = runReader inputLines . runReader (Path path) . runPar
   success _ a = pure (Right a)
   failure = pure . Left . errToNotice (Path path) inputLines
   inputLines = Lines (lines (str input))
-  lines "" = [""]
-  lines s  = let (line, rest) = takeLine s in line : lines rest
+  lines = \case
+    "" -> [""]
+    s  -> let (line, rest) = takeLine s in line : lines rest
   takeLine = \case
     ""        -> ("", "")
     '\n':rest -> ("\n", rest)
