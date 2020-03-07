@@ -61,11 +61,11 @@ line = do
   asks ((!! Span.line pos) . getLines)
 
 
-newtype Path = Path { unPath :: FilePath }
+newtype Path = Path { getPath :: FilePath }
   deriving (Eq, Ord, Show)
 
 path :: Has (Reader Path) sig m => m FilePath
-path = asks unPath
+path = asks getPath
 
 
 excerpted :: (Has Parser sig m, Has (Reader Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpted a)
