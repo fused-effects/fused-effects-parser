@@ -54,10 +54,10 @@ runParserWithString :: Has (Throw Notice) sig m => Pos -> String -> ParserC (Rea
 runParserWithString pos input = runParserWith (Path "(interactive)") (Input pos input)
 {-# INLINE runParserWithString #-}
 
-runParserWithFile :: (Has (Throw Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
+runParserWithFile :: (Has (Throw Notice) sig m, MonadIO m) => Path -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
 runParserWithFile path p = do
-  input <- liftIO (readFile path)
-  runParserWith (Path path) (Input (Pos 0 0) input) p
+  input <- liftIO (readFile (getPath path))
+  runParserWith path (Input (Pos 0 0) input) p
 {-# INLINE runParserWithFile #-}
 
 runParserWith :: Has (Throw Notice) sig m => Path -> Input -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
