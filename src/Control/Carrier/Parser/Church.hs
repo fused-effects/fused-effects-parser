@@ -21,6 +21,7 @@ module Control.Carrier.Parser.Church
 , pos_
 , str_
 , Err(..)
+, input_
 , errToNotice
   -- * Parser effect
 , module Control.Effect.Parser
@@ -269,6 +270,10 @@ data Err = Err
   , expected :: !(Set String)
   }
   deriving (Show)
+
+input_ :: Lens' Err Input
+input_ = lens input $ \ i input -> i{ input }
+{-# INLINE input_ #-}
 
 errToNotice :: Path -> Lines -> Err -> Notice.Notice
 errToNotice path inputLines Err{ input = Input pos _, reason, expected } = Notice.Notice
