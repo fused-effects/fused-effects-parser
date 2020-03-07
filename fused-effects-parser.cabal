@@ -40,6 +40,7 @@ library
     Control.Carrier.Parser.Church
     Control.Effect.Parser
     Control.Effect.Parser.Excerpt
+    Control.Effect.Parser.Lines
     Control.Effect.Parser.Notice
   build-depends:
     , base >= 4.12 && < 5
