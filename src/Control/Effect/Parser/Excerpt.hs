@@ -4,6 +4,7 @@ module Control.Effect.Parser.Excerpt
 ( Excerpt(..)
 , path_
 , line_
+, spanned
 , excerpted
 ) where
 
@@ -39,6 +40,13 @@ line_ :: Lens' Excerpt String
 line_ = lens line $ \ e line -> e{ line }
 {-# INLINE line_ #-}
 
+
+spanned :: Has Parser sig m => m a -> m (Span.Span, a)
+spanned m = do
+  start <- position
+  a <- m
+  end <- position
+  pure (Span.Span start end, a)
 
 excerpted :: (Has Parser sig m, Has (Reader Parser.Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpt, a)
 excerpted m = do
