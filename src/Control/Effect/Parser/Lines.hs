@@ -10,6 +10,7 @@ import           Control.Effect.Reader
 import qualified Source.Span as Span
 
 newtype Lines = Lines { getLines :: [String] }
+  deriving (Eq, Ord, Show)
 
 linesFromString :: String -> Lines
 linesFromString = Lines . go
