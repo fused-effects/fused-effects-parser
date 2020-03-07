@@ -16,6 +16,7 @@ module Control.Carrier.Parser.Church
 , runParser
 , Input(..)
 , Err(..)
+, errToNotice
 , ParserC(..)
 , emptyWith
 , cutfailWith
@@ -92,6 +93,9 @@ data Err = Err
   , expected :: !(Set String)
   }
   deriving (Show)
+
+errToNotice :: Path -> Lines -> Err -> Notice
+errToNotice (Path path) (Lines inputLines) Err{ input = Input pos _, reason, expected } = Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) reason expected []
 
 newtype ParserC m a = ParserC
   { runParserC
