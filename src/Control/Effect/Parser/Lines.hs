@@ -3,6 +3,7 @@ module Control.Effect.Parser.Lines
 ( Lines(..)
 , linesFromString
 , line
+, (!)
 ) where
 
 import           Control.Effect.Parser
@@ -27,6 +28,12 @@ takeLine = go id where
     '\n':rest -> (line "\n", rest)
     c   :rest -> go (line . (c:)) rest
 {-# INLINE takeLine #-}
+
+(!) :: Lines -> Span.Pos -> String
+Lines lines ! pos = lines !! Span.line pos
+{-# INLINE (!) #-}
+
+infixl 9 !
 
 
 line :: (Has Parser sig m, Has (Reader Lines) sig m) => m String
