@@ -95,14 +95,12 @@ errToNotice path inputLines Err{ input = Input pos _, reason, expected } = Notic
 {-# INLINE errToNotice #-}
 
 newtype ParserC m a = ParserC
-  { runParserC
-    :: forall r
-    .  (Input -> a -> m r) -- success
-    -> (Err -> m r)        -- empty
-    -> (Err -> m r)        -- cut
-    -> Input
-    -> m r
-  }
+  (forall r
+  .  (Input -> a -> m r) -- success
+  -> (Err -> m r)        -- empty
+  -> (Err -> m r)        -- cut
+  -> Input
+  -> m r)
   deriving (Functor)
 
 instance Applicative (ParserC m) where
@@ -178,9 +176,12 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
         >>= k
 
       Label m s k  ->
-        ParserC (\ leaf nil fail -> runParserC m leaf
+        ParserC (\ leaf nil fail input -> runParser
+          leaf
           (\ err -> nil  err{ expected = singleton s })
-          (\ err -> fail err{ expected = singleton s }))
+          (\ err -> fail err{ expected = singleton s })
+          input
+          m)
         >>= k
 
       Unexpected s -> ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
@@ -193,7 +194,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: s
       Cutfail  -> cutfailWith Nothing mempty
 
       Call m k ->
-        ParserC (\ leaf nil _ -> runParserC m leaf nil nil)
+        ParserC (\ leaf nil _ input -> runParser leaf nil nil input m)
         >>= k
 
     R (R (L nondet)) -> case nondet of
