@@ -12,7 +12,6 @@ module Control.Effect.Parser
 , line
 , Path(..)
 , path
-, excerpted
   -- * Re-exports
 , Algebra
 , Has
@@ -20,7 +19,6 @@ module Control.Effect.Parser
 ) where
 
 import           Control.Algebra
-import           Control.Effect.Parser.Excerpt (Excerpt(Excerpt), Excerpted(..))
 import           Control.Effect.Reader
 import           Prelude hiding (lines)
 import qualified Source.Span as Span
@@ -88,14 +86,3 @@ newtype Path = Path { getPath :: FilePath }
 path :: Has (Reader Path) sig m => m FilePath
 path = asks getPath
 {-# INLINE path #-}
-
-
-excerpted :: (Has Parser sig m, Has (Reader Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpted a)
-excerpted m = do
-  path <- path
-  line <- line
-  start <- position
-  a <- m
-  end <- position
-  pure (a :~ Excerpt path line (Span.Span start end))
-{-# INLINE excerpted #-}
