@@ -1,3 +1,4 @@
+{-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module Main
 ( main
@@ -51,10 +52,8 @@ parsesInto p s expected = case runParserWithString (Pos 0 0) s p of
   Left  err    -> assertFailure (show err)
   Right actual -> actual @?= expected
 
-failsWith :: Show a => ParserC (ReaderC Path (ReaderC Lines (Either Notice))) a -> String -> (Notice -> Assertion) -> Assertion
-failsWith p s f = case runParserWithString (Pos 0 0) s p of
-  Left  err    -> f err
-  Right actual -> assertFailure (show actual)
+failsWith :: Show a => ParserC IO a -> String -> (Err -> Assertion) -> Assertion
+failsWith p s f = runParser (const (assertFailure . show)) f f (Input (Pos 0 0) s) p
 
-hasExpectation :: Set String -> Notice -> Assertion
-hasExpectation expected' Notice{ Notice.expected } = expected @?= expected'
+hasExpectation :: Set String -> Err -> Assertion
+hasExpectation expected' Err{ expected } = expected @?= expected'
