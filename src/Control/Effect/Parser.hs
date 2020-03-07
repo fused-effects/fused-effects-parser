@@ -50,9 +50,11 @@ instance Effect Parser where
 
 accept :: Has Parser sig m => (Char -> Maybe a) -> m a
 accept p = send (Accept p pure)
+{-# INLINE accept #-}
 
 position :: Has Parser sig m => m Span.Pos
 position = send (Position pure)
+{-# INLINE position #-}
 
 
 newtype Lines = Lines { getLines :: [String] }
@@ -63,6 +65,7 @@ linesFromString = Lines . go
   go = \case
     "" -> [""]
     s  -> let (line, rest) = takeLine s in line : go rest
+{-# INLINE linesFromString #-}
 
 takeLine :: String -> (String, String)
 takeLine = go id where
@@ -70,11 +73,13 @@ takeLine = go id where
     ""        -> (line "", "")
     '\n':rest -> (line "\n", rest)
     c   :rest -> go (line . (c:)) rest
+{-# INLINE takeLine #-}
 
 line :: (Has Parser sig m, Has (Reader Lines) sig m) => m String
 line = do
   pos <- position
   asks ((!! Span.line pos) . getLines)
+{-# INLINE line #-}
 
 
 newtype Path = Path { getPath :: FilePath }
@@ -82,6 +87,7 @@ newtype Path = Path { getPath :: FilePath }
 
 path :: Has (Reader Path) sig m => m FilePath
 path = asks getPath
+{-# INLINE path #-}
 
 
 excerpted :: (Has Parser sig m, Has (Reader Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpted a)
@@ -92,3 +98,4 @@ excerpted m = do
   a <- m
   end <- position
   pure (a :~ Excerpt path line (Span.Span start end))
+{-# INLINE excerpted #-}
