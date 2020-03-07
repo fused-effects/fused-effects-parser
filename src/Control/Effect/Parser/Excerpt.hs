@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module Control.Effect.Parser.Excerpt
 ( Excerpt(..)
 , Excerpted(..)
@@ -7,9 +8,11 @@ module Control.Effect.Parser.Excerpt
 ) where
 
 import           Control.Effect.Parser as Parser
+import           Control.Effect.Parser.Lens
 import           Control.Effect.Parser.Lines as Parser
 import           Control.Effect.Parser.Path as Parser
 import           Control.Effect.Reader
+import           Prelude hiding (span)
 import qualified Source.Span as Span
 
 data Excerpt = Excerpt
@@ -18,6 +21,9 @@ data Excerpt = Excerpt
   , span :: {-# UNPACK #-} !Span.Span
   }
   deriving (Eq, Ord, Show)
+
+instance Span.HasSpan Excerpt where
+  span_ = lens span $ \ e span -> e{ span }
 
 instance Semigroup Excerpt where
   Excerpt _ l s1 <> Excerpt p _ s2 = Excerpt p l (s1 <> s2)
