@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module Control.Effect.Parser.Excerpt
 ( Excerpt(..)
