@@ -53,12 +53,12 @@ position :: Has Parser sig m => m Span.Pos
 position = send (Position pure)
 
 
-newtype Lines = Lines { unLines :: [String] }
+newtype Lines = Lines { getLines :: [String] }
 
 line :: (Has Parser sig m, Has (Reader Lines) sig m) => m String
 line = do
   pos <- position
-  asks ((!! Span.line pos) . unLines)
+  asks ((!! Span.line pos) . getLines)
 
 
 newtype Path = Path { unPath :: FilePath }
