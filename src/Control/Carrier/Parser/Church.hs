@@ -14,14 +14,14 @@ module Control.Carrier.Parser.Church
 , runParserWithFile
 , runParserWith
 , runParser
+, ParserC(..)
+, emptyWith
+, cutfailWith
 , Input(..)
 , pos_
 , str_
 , Err(..)
 , errToNotice
-, ParserC(..)
-, emptyWith
-, cutfailWith
   -- * Parser effect
 , module Control.Effect.Parser
 ) where
@@ -80,38 +80,6 @@ runParser
   -> m r
 runParser leaf nil fail input (ParserC run) = run leaf nil fail input
 {-# INLINE runParser #-}
-
-
-data Input = Input
-  { pos :: {-# UNPACK #-} !Pos
-  , str :: !String
-  }
-  deriving (Eq, Ord, Show)
-
-pos_ :: Lens' Input Pos
-pos_ = lens pos $ \ i pos -> i{ pos }
-{-# INLINE pos_ #-}
-
-str_ :: Lens' Input String
-str_ = lens str $ \ i str -> i{ str }
-{-# INLINE str_ #-}
-
-
-data Err = Err
-  { input    :: {-# UNPACK #-} !Input
-  , reason   :: !(Maybe (Doc AnsiStyle))
-  , expected :: !(Set String)
-  }
-  deriving (Show)
-
-errToNotice :: Path -> Lines -> Err -> Notice.Notice
-errToNotice path inputLines Err{ input = Input pos _, reason, expected } = Notice.Notice
-  { level   = Just Notice.Error
-  , excerpt = Excerpt path (inputLines ! pos) (Span pos pos)
-  , reason  = fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
-  , context = []
-  }
-{-# INLINE errToNotice #-}
 
 
 newtype ParserC m a = ParserC
@@ -270,6 +238,20 @@ cutfailWith a e = ParserC (\ _ _   fail i -> fail (Err i a e))
 {-# INLINE cutfailWith #-}
 
 
+data Input = Input
+  { pos :: {-# UNPACK #-} !Pos
+  , str :: !String
+  }
+  deriving (Eq, Ord, Show)
+
+pos_ :: Lens' Input Pos
+pos_ = lens pos $ \ i pos -> i{ pos }
+{-# INLINE pos_ #-}
+
+str_ :: Lens' Input String
+str_ = lens str $ \ i str -> i{ str }
+{-# INLINE str_ #-}
+
 advance :: Input -> Input
 advance (Input pos (c:cs)) = Input (advancePos c pos) cs
 advance i                  = i
@@ -279,3 +261,20 @@ advancePos :: Char -> Pos -> Pos
 advancePos '\n' p = Pos (succ (Span.line p)) 0
 advancePos _    p = p { Span.column = succ (Span.column p) }
 {-# INLINE advancePos #-}
+
+
+data Err = Err
+  { input    :: {-# UNPACK #-} !Input
+  , reason   :: !(Maybe (Doc AnsiStyle))
+  , expected :: !(Set String)
+  }
+  deriving (Show)
+
+errToNotice :: Path -> Lines -> Err -> Notice.Notice
+errToNotice path inputLines Err{ input = Input pos _, reason, expected } = Notice.Notice
+  { level   = Just Notice.Error
+  , excerpt = Excerpt path (inputLines ! pos) (Span pos pos)
+  , reason  = fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
+  , context = []
+  }
+{-# INLINE errToNotice #-}
