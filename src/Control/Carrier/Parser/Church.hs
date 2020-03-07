@@ -256,8 +256,9 @@ str_ = lens str $ \ i str -> i{ str }
 {-# INLINE str_ #-}
 
 advance :: Input -> Input
-advance (Input pos (c:cs)) = Input (advancePos c pos) cs
-advance i                  = i
+advance = \case
+  Input pos (c:cs) -> Input (advancePos c pos) cs
+  i                -> i
 {-# INLINE advance #-}
 
 advancePos :: Char -> Pos -> Pos
