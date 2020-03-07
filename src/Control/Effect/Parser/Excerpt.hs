@@ -51,8 +51,6 @@ excerpted :: (Has Parser sig m, Has (Reader Parser.Lines) sig m, Has (Reader Pat
 excerpted m = do
   path <- Parser.path
   line <- Parser.line
-  start <- position
-  a <- m
-  end <- position
-  pure (Excerpt path line (Span.Span start end), a)
+  (span, a) <- spanned m
+  pure (Excerpt path line span, a)
 {-# INLINE excerpted #-}
