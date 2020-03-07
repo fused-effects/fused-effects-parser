@@ -16,6 +16,7 @@ module Control.Carrier.Parser.Church
 , runParser
 , Input(..)
 , pos_
+, str_
 , Err(..)
 , errToNotice
 , ParserC(..)
@@ -89,6 +90,10 @@ data Input = Input
 pos_ :: Lens' Input Pos
 pos_ = lens pos $ \ i pos -> i{ pos }
 {-# INLINE pos_ #-}
+
+str_ :: Lens' Input String
+str_ = lens str $ \ i str -> i{ str }
+{-# INLINE str_ #-}
 
 
 data Err = Err
