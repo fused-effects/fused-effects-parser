@@ -28,6 +28,7 @@ takeLine = go id where
     c   :rest -> go (line . (c:)) rest
 {-# INLINE takeLine #-}
 
+
 line :: (Has Parser sig m, Has (Reader Lines) sig m) => m String
 line = do
   pos <- position
