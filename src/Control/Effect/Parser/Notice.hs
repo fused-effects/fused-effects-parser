@@ -1,12 +1,15 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module Control.Effect.Parser.Notice
 ( Level(..)
 , prettyLevel
 , Notice(..)
+, level_
 , prettyNotice
 ) where
 
 import           Control.Effect.Parser.Excerpt
+import           Control.Effect.Parser.Lens
 import           Data.List (isSuffixOf)
 import           Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
@@ -34,6 +37,9 @@ data Notice = Notice
   , context  :: ![Doc AnsiStyle]
   }
   deriving (Show)
+
+level_ :: Lens' Notice (Maybe Level)
+level_ = lens level $ \ n level -> n{ level }
 
 prettyNotice :: Notice -> Doc AnsiStyle
 prettyNotice (Notice level (Excerpt path line span) reason expected context) = vsep
