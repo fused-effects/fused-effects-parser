@@ -28,6 +28,7 @@ data Excerpted a = a :~ Excerpt
 
 getExcerpted :: Excerpted a -> a
 getExcerpted (a :~ _) = a
+{-# INLINE getExcerpted #-}
 
 excerpted :: (Has Parser sig m, Has (Reader Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpted a)
 excerpted m = do
