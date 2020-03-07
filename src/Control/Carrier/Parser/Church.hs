@@ -59,11 +59,11 @@ runParserWithFile path p = do
 {-# INLINE runParserWithFile #-}
 
 runParserWith :: Applicative m => FilePath -> Input -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m (Either Notice a)
-runParserWith path input = runReader (Lines inputLines) . runReader (Path path) . runParser success failure failure input
+runParserWith path input = runReader inputLines . runReader (Path path) . runParser success failure failure input
   where
   success _ a = pure (Right a)
-  failure = pure . Left . errToNotice (Path path) (Lines inputLines)
-  inputLines = lines (str input)
+  failure = pure . Left . errToNotice (Path path) inputLines
+  inputLines = Lines (lines (str input))
   lines "" = [""]
   lines s  = let (line, rest) = takeLine s in line : lines rest
   takeLine ""          = ("", "")
