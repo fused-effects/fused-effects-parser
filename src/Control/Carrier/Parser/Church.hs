@@ -262,8 +262,9 @@ advance = \case
 {-# INLINE advance #-}
 
 advancePos :: Char -> Pos -> Pos
-advancePos '\n' p = Pos (succ (Span.line p)) 0
-advancePos _    p = p { Span.column = succ (Span.column p) }
+advancePos c p = case c of
+  '\n' -> Pos (succ (Span.line p)) 0
+  _    -> p { Span.column = succ (Span.column p) }
 {-# INLINE advancePos #-}
 
 
