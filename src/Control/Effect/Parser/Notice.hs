@@ -7,6 +7,7 @@ module Control.Effect.Parser.Notice
 , level_
 , excerpt_
 , reason_
+, expected_
 , prettyNotice
 ) where
 
@@ -48,6 +49,9 @@ excerpt_ = lens excerpt $ \ n excerpt -> n{ excerpt }
 
 reason_ :: Lens' Notice (Maybe (Doc AnsiStyle))
 reason_ = lens reason $ \ n reason -> n{ reason }
+
+expected_ :: Lens' Notice (Set.Set String)
+expected_ = lens expected $ \ n expected -> n{ expected }
 
 prettyNotice :: Notice -> Doc AnsiStyle
 prettyNotice (Notice level (Excerpt path line span) reason expected context) = vsep
