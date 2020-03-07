@@ -66,9 +66,10 @@ runParserWith path input = runReader inputLines . runReader (Path path) . runPar
   inputLines = Lines (lines (str input))
   lines "" = [""]
   lines s  = let (line, rest) = takeLine s in line : lines rest
-  takeLine ""          = ("", "")
-  takeLine ('\n':rest) = ("\n", rest)
-  takeLine (c   :rest) = let (cs, rest') = takeLine rest in (c:cs, rest')
+  takeLine = \case
+    ""        -> ("", "")
+    '\n':rest -> ("\n", rest)
+    c   :rest -> let (cs, rest') = takeLine rest in (c:cs, rest')
 {-# INLINE runParserWith #-}
 
 runParser
