@@ -32,6 +32,7 @@ import Control.Effect.Parser
 import Control.Effect.Parser.Excerpt
 import Control.Effect.Parser.Lines
 import Control.Effect.Parser.Notice (Level(..), Notice(Notice))
+import Control.Effect.Parser.Path
 import Control.Effect.Throw
 import Control.Monad (ap)
 import Control.Monad.Fail as Fail

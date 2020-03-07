@@ -7,8 +7,6 @@ module Control.Effect.Parser
   Parser(..)
 , accept
 , position
-, Path(..)
-, path
   -- * Re-exports
 , Algebra
 , Has
@@ -16,8 +14,6 @@ module Control.Effect.Parser
 ) where
 
 import           Control.Algebra
-import           Control.Effect.Reader
-import           Prelude hiding (lines)
 import qualified Source.Span as Span
 
 data Parser m k
@@ -50,11 +46,3 @@ accept p = send (Accept p pure)
 position :: Has Parser sig m => m Span.Pos
 position = send (Position pure)
 {-# INLINE position #-}
-
-
-newtype Path = Path { getPath :: FilePath }
-  deriving (Eq, Ord, Show)
-
-path :: Has (Reader Path) sig m => m FilePath
-path = asks getPath
-{-# INLINE path #-}
