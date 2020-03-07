@@ -96,6 +96,7 @@ data Err = Err
 
 errToNotice :: Path -> Lines -> Err -> Notice
 errToNotice (Path path) (Lines inputLines) Err{ input = Input pos _, reason, expected } = Notice (Just Error) (Excerpt path (inputLines !! Span.line pos) (Span pos pos)) reason expected []
+{-# INLINE errToNotice #-}
 
 newtype ParserC m a = ParserC
   { runParserC
