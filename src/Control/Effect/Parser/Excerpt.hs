@@ -3,6 +3,7 @@
 module Control.Effect.Parser.Excerpt
 ( Excerpt(..)
 , path_
+, line_
 , Excerpted(..)
 , getExcerpted
 , excerpted
@@ -10,7 +11,7 @@ module Control.Effect.Parser.Excerpt
 
 import           Control.Effect.Parser as Parser
 import           Control.Effect.Parser.Lens
-import           Control.Effect.Parser.Lines as Parser
+import qualified Control.Effect.Parser.Lines as Parser
 import           Control.Effect.Parser.Path (Path)
 import qualified Control.Effect.Parser.Path as Parser
 import           Control.Effect.Reader
@@ -36,6 +37,10 @@ path_ :: Lens' Excerpt Path
 path_ = lens path $ \ e path -> e{ path }
 {-# INLINE path_ #-}
 
+line_ :: Lens' Excerpt String
+line_ = lens line $ \ e line -> e{ line }
+{-# INLINE line_ #-}
+
 
 data Excerpted a = a :~ Excerpt
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -44,7 +49,7 @@ getExcerpted :: Excerpted a -> a
 getExcerpted (a :~ _) = a
 {-# INLINE getExcerpted #-}
 
-excerpted :: (Has Parser sig m, Has (Reader Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpted a)
+excerpted :: (Has Parser sig m, Has (Reader Parser.Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpted a)
 excerpted m = do
   path <- Parser.path
   line <- Parser.line
