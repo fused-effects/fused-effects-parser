@@ -2,6 +2,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Control.Effect.Parser.Excerpt
 ( Excerpt(..)
+, path_
 , Excerpted(..)
 , getExcerpted
 , excerpted
@@ -10,7 +11,8 @@ module Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser as Parser
 import           Control.Effect.Parser.Lens
 import           Control.Effect.Parser.Lines as Parser
-import           Control.Effect.Parser.Path as Parser
+import           Control.Effect.Parser.Path (Path)
+import qualified Control.Effect.Parser.Path as Parser
 import           Control.Effect.Reader
 import           Prelude hiding (span)
 import qualified Source.Span as Span
@@ -29,6 +31,9 @@ instance Span.HasSpan Excerpt where
 instance Semigroup Excerpt where
   Excerpt _ l s1 <> Excerpt p _ s2 = Excerpt p l (s1 <> s2)
   {-# INLINE (<>) #-}
+
+path_ :: Lens' Excerpt Path
+path_ = lens path $ \ e path -> e{ path }
 
 
 data Excerpted a = a :~ Excerpt
