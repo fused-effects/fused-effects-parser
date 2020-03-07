@@ -2,7 +2,7 @@
 module Control.Effect.Parser.Excerpt
 ( Excerpt(..)
 , Excerpted(..)
-, unExcerpted
+, getExcerpted
 , excerpted
 ) where
 
@@ -24,8 +24,8 @@ instance Semigroup Excerpt where
 data Excerpted a = a :~ Excerpt
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-unExcerpted :: Excerpted a -> a
-unExcerpted (a :~ _) = a
+getExcerpted :: Excerpted a -> a
+getExcerpted (a :~ _) = a
 
 excerpted :: (Has Parser sig m, Has (Reader Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpted a)
 excerpted m = do
