@@ -81,6 +81,7 @@ runParser
 runParser leaf nil fail input (ParserC run) = run leaf nil fail input
 {-# INLINE runParser #-}
 
+
 data Input = Input
   { pos :: {-# UNPACK #-} !Pos
   , str :: !String
@@ -111,6 +112,7 @@ errToNotice path inputLines Err{ input = Input pos _, reason, expected } = Notic
   , context = []
   }
 {-# INLINE errToNotice #-}
+
 
 newtype ParserC m a = ParserC
   (forall r
