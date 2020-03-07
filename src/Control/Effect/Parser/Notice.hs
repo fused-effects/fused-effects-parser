@@ -14,7 +14,6 @@ module Control.Effect.Parser.Notice
 import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
 import           Data.List (isSuffixOf)
-import           Data.Maybe (fromMaybe)
 import           Data.Text.Prettyprint.Doc
 import           Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle, Color(..), color)
 import qualified Data.Text.Prettyprint.Doc.Render.Terminal as ANSI
@@ -34,7 +33,7 @@ prettyLevel = \case
 data Notice = Notice
   { level    :: !(Maybe Level)
   , excerpt  :: {-# UNPACK #-} !Excerpt
-  , reason   :: !(Maybe (Doc AnsiStyle))
+  , reason   :: !(Doc AnsiStyle)
   , context  :: ![Doc AnsiStyle]
   }
   deriving (Show)
@@ -45,7 +44,7 @@ level_ = lens level $ \ n level -> n{ level }
 excerpt_ :: Lens' Notice Excerpt
 excerpt_ = lens excerpt $ \ n excerpt -> n{ excerpt }
 
-reason_ :: Lens' Notice (Maybe (Doc AnsiStyle))
+reason_ :: Lens' Notice (Doc AnsiStyle)
 reason_ = lens reason $ \ n reason -> n{ reason }
 
 context_ :: Lens' Notice [Doc AnsiStyle]
@@ -55,7 +54,7 @@ prettyNotice :: Notice -> Doc AnsiStyle
 prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
   ( nest 2 (group (fillSep
     [ bold (pretty path) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . prettyLevel) level
-    , fromMaybe (fillSep (map pretty (words "unknown error"))) reason
+    , reason
     ]))
   : blue (pretty (succ (Span.line (Span.start span)))) <+> align (vcat
     [ blue (pretty '|') <+> pretty line <> if "\n" `isSuffixOf` line then mempty else blue (pretty "<end of input>")

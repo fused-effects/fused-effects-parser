@@ -95,7 +95,7 @@ errToNotice :: Path -> Lines -> Err -> Notice.Notice
 errToNotice path inputLines Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
   , excerpt = Excerpt path (inputLines ! pos) (Span pos pos)
-  , reason  = Just (fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected))))
+  , reason  = fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
   , context = []
   }
 {-# INLINE errToNotice #-}
