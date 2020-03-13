@@ -6,7 +6,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Parser.Church
@@ -158,7 +157,7 @@ instance Algebra sig m => CharParsing (ParserC m) where
 instance Algebra sig m => TokenParsing (ParserC m)
 
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
-  alg (hdl :: forall x . ctx (n x) -> ParserC m (ctx x)) sig ctx = case sig of
+  alg hdl sig ctx = case sig of
     L parser -> case parser of
       Accept p     ->
         ParserC $ \ leaf nil _ input -> case str input of
@@ -194,7 +193,7 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
       thread (fmap Compose . uncurry dst . getCompose) hdl other (Compose (input, pure ctx))
       >>= runIdentity . uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) . getCompose
     where
-    dst :: Input -> ParserC Identity (ParserC m a) -> m (Input, ParserC Identity a)
+    dst :: Applicative m => Input -> ParserC Identity (ParserC m a) -> m (Input, ParserC Identity a)
     dst = fmap runIdentity
         . runParser
           (\ i -> pure . distParser i)
