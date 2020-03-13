@@ -157,39 +157,35 @@ instance Algebra sig m => CharParsing (ParserC m) where
 instance Algebra sig m => TokenParsing (ParserC m)
 
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
-  alg hdl sig ctx = case sig of
+  alg hdl sig ctx = ParserC $ \ leaf nil fail input -> case sig of
     L parser -> case parser of
-      Accept p     ->
-        ParserC $ \ leaf nil _ input -> case str input of
-          c:_ | Just a <- p c -> leaf (advance input) (a <$ ctx)
-              | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
-          _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
+      Accept p     -> case str input of
+        c:_ | Just a <- p c -> leaf (advance input) (a <$ ctx)
+            | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
+        _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
 
-      Label m s    ->
-        ParserC (\ leaf nil fail input -> runParser
-          leaf
-          (\ err -> nil  err{ expected = singleton s })
-          (\ err -> fail err{ expected = singleton s })
-          input
-          (hdl (m <$ ctx)))
+      Label m s    -> runParser
+        leaf
+        (\ err -> nil  err{ expected = singleton s })
+        (\ err -> fail err{ expected = singleton s })
+        input
+        (hdl (m <$ ctx))
 
-      Unexpected s -> ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
+      Unexpected s -> nil (Err input (Just (pretty s)) mempty)
 
-      Position     ->
-        ParserC (\ leaf _ _ input -> leaf input (pos input <$ ctx))
+      Position     -> leaf input (pos input <$ ctx)
 
     R (L cut) -> case cut of
-      Cutfail  -> cutfailWith Nothing mempty
+      Cutfail  -> fail (Err input Nothing mempty)
 
-      Call m   ->
-        ParserC (\ leaf nil _ input -> runParser leaf nil nil input (hdl (m <$ ctx)))
+      Call m   -> runParser leaf nil nil input (hdl (m <$ ctx))
 
     R (R (L nondet)) -> case nondet of
-      L Empty  -> empty
+      L Empty  -> nil (Err input Nothing mempty)
 
-      R Choose -> pure (True <$ ctx) <|> pure (False <$ ctx)
+      R Choose -> runParser leaf nil fail input (pure (True <$ ctx) <|> pure (False <$ ctx))
 
-    R (R (R other)) -> ParserC $ \ leaf nil fail input ->
+    R (R (R other)) ->
       thread (fmap Compose . uncurry dst . getCompose) hdl other (Compose (input, pure ctx))
       >>= runIdentity . uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) . getCompose
     where
