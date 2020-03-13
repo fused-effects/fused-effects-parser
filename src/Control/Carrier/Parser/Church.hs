@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -157,7 +158,7 @@ instance Algebra sig m => CharParsing (ParserC m) where
 instance Algebra sig m => TokenParsing (ParserC m)
 
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
-  alg ctx (hdl :: forall x . ctx (n x) -> ParserC m (ctx x)) = \case
+  alg (hdl :: forall x . ctx (n x) -> ParserC m (ctx x)) sig ctx = case sig of
     L parser -> case parser of
       Accept p k   ->
         ParserC (\ leaf nil _ input -> case str input of
@@ -184,23 +185,22 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
     R (L cut) -> case cut of
       Cutfail  -> cutfailWith Nothing mempty
 
-      Call m k ->
+      Call m   ->
         ParserC (\ leaf nil _ input -> runParser leaf nil nil input (hdl (m <$ ctx)))
-        >>= hdl . fmap k
 
     R (R (L nondet)) -> case nondet of
-      L Empty      -> empty
+      L Empty  -> empty
 
-      R (Choose k) -> hdl (k True <$ ctx) <|> hdl (k False <$ ctx)
+      R Choose -> pure (True <$ ctx) <|> pure (False <$ ctx)
 
     R (R (R other)) -> ParserC $ \ leaf nil fail input ->
-      thread (Compose (input, pure ctx)) (fmap Compose . uncurry dst . getCompose) other
+      thread (fmap Compose . uncurry dst . getCompose) hdl other (Compose (input, pure ctx))
       >>= runIdentity . uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) . getCompose
     where
-    dst :: Input -> ParserC Identity (ctx (n a)) -> m (Input, ParserC Identity (ctx a))
+    dst :: Input -> ParserC Identity (ParserC m a) -> m (Input, ParserC Identity a)
     dst = fmap runIdentity
         . runParser
-          (\ i -> pure . distParser i . hdl)
+          (\ i -> pure . distParser i)
           (pure . emptyk)
           (pure . cutfailk)
   {-# INLINE alg #-}
