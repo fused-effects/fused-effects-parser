@@ -145,7 +145,7 @@ instance Algebra sig m => Parsing (ParserC m) where
   unexpected s = send (Unexpected s)
   {-# INLINE unexpected #-}
 
-  m <?> s = send (Label m s pure)
+  m <?> s = send (Label m s)
   {-# INLINE (<?>) #-}
 
   notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . ("unexpected " <>) . show))
@@ -160,27 +160,24 @@ instance Algebra sig m => TokenParsing (ParserC m)
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg (hdl :: forall x . ctx (n x) -> ParserC m (ctx x)) sig ctx = case sig of
     L parser -> case parser of
-      Accept p k   ->
-        ParserC (\ leaf nil _ input -> case str input of
-          c:_ | Just a <- p c -> leaf (advance input) a
+      Accept p     ->
+        ParserC $ \ leaf nil _ input -> case str input of
+          c:_ | Just a <- p c -> leaf (advance input) (a <$ ctx)
               | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
-          _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty))
-        >>= hdl . (<$ ctx) . k
+          _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
 
-      Label m s k  ->
+      Label m s    ->
         ParserC (\ leaf nil fail input -> runParser
           leaf
           (\ err -> nil  err{ expected = singleton s })
           (\ err -> fail err{ expected = singleton s })
           input
           (hdl (m <$ ctx)))
-        >>= hdl . fmap k
 
       Unexpected s -> ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
 
-      Position k   ->
-        ParserC (\ leaf _ _ input -> leaf input (pos input))
-        >>= hdl . (<$ ctx) . k
+      Position     ->
+        ParserC (\ leaf _ _ input -> leaf input (pos input <$ ctx))
 
     R (L cut) -> case cut of
       Cutfail  -> cutfailWith Nothing mempty
