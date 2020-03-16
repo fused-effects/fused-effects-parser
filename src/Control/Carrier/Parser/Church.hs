@@ -135,7 +135,7 @@ instance MonadTrans ParserC where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Parsing (ParserC m) where
-  try = call
+  try m = ParserC $ \ leaf nil _ input -> runParser leaf nil nil input m
   {-# INLINE try #-}
 
   eof = notFollowedBy anyChar <?> "end of input"
