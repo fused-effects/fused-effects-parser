@@ -159,7 +159,10 @@ instance Algebra sig m => Parsing (ParserC m) where
   {-# INLINE notFollowedBy #-}
 
 instance Algebra sig m => CharParsing (ParserC m) where
-  satisfy p = accept (\ c -> if p c then Just c else Nothing)
+  satisfy p = ParserC $ \ leaf nil _ input -> case str input of
+    c:_ | p c       -> leaf (advance input) c
+        | otherwise -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
+    _               -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
   {-# INLINE satisfy #-}
 
 instance Algebra sig m => TokenParsing (ParserC m)
