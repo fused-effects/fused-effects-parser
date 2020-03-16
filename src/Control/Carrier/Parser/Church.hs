@@ -182,10 +182,10 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
 
       Position     -> ParserC $ \ leaf _ _ input -> leaf input (pos input <$ ctx)
 
-    R (L cut) -> ParserC $ \ leaf nil fail input -> case cut of
-      Cutfail  -> fail (Err input Nothing mempty)
+    R (L cut) -> case cut of
+      Cutfail  -> ParserC $ \ _ _ fail input -> fail (Err input Nothing mempty)
 
-      Call m   -> runParser leaf nil nil input (hdl (m <$ ctx))
+      Call m   -> ParserC $ \ leaf nil _ input -> runParser leaf nil nil input (hdl (m <$ ctx))
 
     R (R (L nondet)) -> ParserC $ \ leaf nil fail input -> case nondet of
       L Empty  -> nil (Err input Nothing mempty)
