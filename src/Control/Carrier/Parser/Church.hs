@@ -149,8 +149,8 @@ instance Algebra sig m => Parsing (ParserC m) where
 
   m <?> s = ParserC $ \ leaf nil fail input -> runParser
     leaf
-    (\ err -> nil  err{ expected = singleton s })
-    (\ err -> fail err{ expected = singleton s })
+    (nil  . (expected_ .~ singleton s))
+    (fail . (expected_ .~ singleton s))
     input
     m
   {-# INLINE (<?>) #-}
