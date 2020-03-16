@@ -187,10 +187,10 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
 
       Call m   -> try (hdl (m <$ ctx))
 
-    R (R (L nondet)) -> ParserC $ \ leaf nil fail input -> case nondet of
-      L Empty  -> nil (Err input Nothing mempty)
+    R (R (L nondet)) -> case nondet of
+      L Empty  -> empty
 
-      R Choose -> runParser leaf nil fail input (pure (True <$ ctx) <|> pure (False <$ ctx))
+      R Choose -> pure (True <$ ctx) <|> pure (False <$ ctx)
 
     R (R (R other)) -> ParserC $ \ leaf nil fail input ->
       thread (fmap Compose . uncurry dst . getCompose ~<~ hdl) other (Compose (input, pure ctx))
