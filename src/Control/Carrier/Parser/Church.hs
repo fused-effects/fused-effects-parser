@@ -159,10 +159,7 @@ instance Parsing (ParserC m) where
   {-# INLINE notFollowedBy #-}
 
 instance CharParsing (ParserC m) where
-  satisfy p = ParserC $ \ leaf nil _ input -> case str input of
-    c:_ | p c       -> leaf (advance input) c
-        | otherwise -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
-    _               -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
+  satisfy p = acceptC (\ c -> if p c then Just c else Nothing)
   {-# INLINE satisfy #-}
 
 instance TokenParsing (ParserC m)
@@ -177,10 +174,7 @@ acceptC p = ParserC $ \ leaf nil _ input -> case str input of
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg hdl sig ctx = ParserC $ \ leaf nil fail input -> case sig of
     L parser -> case parser of
-      Accept p     -> case str input of
-        c:_ | Just a <- p c -> leaf (advance input) (a <$ ctx)
-            | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
-        _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
+      Accept p     -> runParser (\ i -> leaf i . (<$ ctx)) nil fail input (acceptC p)
 
       Label m s    -> runParser
         leaf
