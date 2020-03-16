@@ -174,7 +174,7 @@ acceptC p = ParserC $ \ leaf nil _ input -> case str input of
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg hdl sig ctx = case sig of
     L parser -> case parser of
-      Accept p     -> ParserC $ \ leaf nil fail input -> runParser (\ i -> leaf i . (<$ ctx)) nil fail input (acceptC p)
+      Accept p     -> (<$ ctx) <$> acceptC p
 
       Label m s    -> ParserC $ \ leaf nil fail input -> runParser
         leaf
