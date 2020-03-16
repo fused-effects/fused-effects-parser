@@ -173,26 +173,23 @@ acceptC p = ParserC $ \ leaf nil _ input -> case str input of
 
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg hdl sig ctx = case sig of
-    L parser -> case parser of
-      Accept p     -> (<$ ctx) <$> acceptC p
+    L (Accept p)         -> (<$ ctx) <$> acceptC p
 
-      Label m s    -> hdl (m <$ ctx) <?> s
+    L (Label m s)        -> hdl (m <$ ctx) <?> s
 
-      Unexpected s -> unexpected s
+    L (Unexpected s)     -> unexpected s
 
-      Position     -> ParserC $ \ leaf _ _ input -> leaf input (pos input <$ ctx)
+    L Position           -> ParserC $ \ leaf _ _ input -> leaf input (pos input <$ ctx)
 
-    R (L cut) -> case cut of
-      Cutfail  -> ParserC $ \ _ _ fail input -> fail (Err input Nothing mempty)
+    R (L Cutfail)        -> ParserC $ \ _ _ fail input -> fail (Err input Nothing mempty)
 
-      Call m   -> try (hdl (m <$ ctx))
+    R (L (Call m))       -> try (hdl (m <$ ctx))
 
-    R (R (L nondet)) -> case nondet of
-      L Empty  -> empty
+    R (R (L (L Empty)))  -> empty
 
-      R Choose -> pure (True <$ ctx) <|> pure (False <$ ctx)
+    R (R (L (R Choose))) -> pure (True <$ ctx) <|> pure (False <$ ctx)
 
-    R (R (R other)) -> ParserC $ \ leaf nil fail input ->
+    R (R (R other))      -> ParserC $ \ leaf nil fail input ->
       thread (fmap Compose . uncurry dst . getCompose ~<~ hdl) other (Compose (input, pure ctx))
       >>= runIdentity . uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) . getCompose
     where
