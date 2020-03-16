@@ -186,7 +186,7 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
       R Choose -> runParser leaf nil fail input (pure (True <$ ctx) <|> pure (False <$ ctx))
 
     R (R (R other)) ->
-      thread (fmap Compose . uncurry dst . getCompose) hdl other (Compose (input, pure ctx))
+      thread (fmap Compose . uncurry dst . getCompose ~<~ hdl) other (Compose (input, pure ctx))
       >>= runIdentity . uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) . getCompose
     where
     dst :: Applicative m => Input -> ParserC Identity (ParserC m a) -> m (Input, ParserC Identity a)
