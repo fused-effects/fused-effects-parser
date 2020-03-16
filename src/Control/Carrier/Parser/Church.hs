@@ -141,7 +141,7 @@ instance Algebra sig m => Parsing (ParserC m) where
   eof = notFollowedBy anyChar <?> "end of input"
   {-# INLINE eof #-}
 
-  unexpected s = send (Unexpected s)
+  unexpected s = ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
   {-# INLINE unexpected #-}
 
   m <?> s = send (Label m s)
