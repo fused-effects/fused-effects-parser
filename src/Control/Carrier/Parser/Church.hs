@@ -176,12 +176,7 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
     L parser -> case parser of
       Accept p     -> (<$ ctx) <$> acceptC p
 
-      Label m s    -> ParserC $ \ leaf nil fail input -> runParser
-        leaf
-        (\ err -> nil  err{ expected = singleton s })
-        (\ err -> fail err{ expected = singleton s })
-        input
-        (hdl (m <$ ctx))
+      Label m s    -> hdl (m <$ ctx) <?> s
 
       Unexpected s -> ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
 
