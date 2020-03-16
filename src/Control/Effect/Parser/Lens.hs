@@ -3,9 +3,11 @@ module Control.Effect.Parser.Lens
 ( Lens'
 , lens
 , (.~)
+, (&)
 ) where
 
 import Data.Coerce (coerce)
+import Data.Function
 import Data.Functor.Identity
 
 type Lens' s a = forall f . Functor f => (a -> f a) -> (s -> f s)
