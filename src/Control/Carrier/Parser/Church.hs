@@ -178,7 +178,7 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
 
       Label m s    -> hdl (m <$ ctx) <?> s
 
-      Unexpected s -> ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
+      Unexpected s -> unexpected s
 
       Position     -> ParserC $ \ leaf _ _ input -> leaf input (pos input <$ ctx)
 
