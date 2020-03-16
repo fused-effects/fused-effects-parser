@@ -14,7 +14,7 @@ module Control.Carrier.Parser.Church
 , runParserWithFile
 , runParserWith
 , runParser
-, ParserC(..)
+, ParserC(ParserC)
 , emptyWith
 , cutfailWith
 , Input(..)
@@ -86,12 +86,14 @@ runParser leaf nil fail input (ParserC run) = run leaf nil fail input
 
 
 newtype ParserC m a = ParserC
-  (forall r
-  .  (Input -> a -> m r) -- success
-  -> (Err -> m r)        -- empty
-  -> (Err -> m r)        -- cut
-  -> Input
-  -> m r)
+  { runParserC
+    :: forall r
+    .  (Input -> a -> m r) -- success
+    -> (Err -> m r)        -- empty
+    -> (Err -> m r)        -- cut
+    -> Input
+    -> m r
+  }
   deriving (Functor)
 
 instance Applicative (ParserC m) where
