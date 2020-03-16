@@ -167,6 +167,13 @@ instance CharParsing (ParserC m) where
 
 instance TokenParsing (ParserC m)
 
+acceptC :: (Char -> Maybe a) -> ParserC m a
+acceptC p = ParserC $ \ leaf nil _ input -> case str input of
+  c:_ | Just a <- p c -> leaf (advance input) a
+      | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
+  _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
+{-# INLINE acceptC #-}
+
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg hdl sig ctx = ParserC $ \ leaf nil fail input -> case sig of
     L parser -> case parser of
