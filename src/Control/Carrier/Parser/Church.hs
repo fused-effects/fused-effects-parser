@@ -149,12 +149,10 @@ instance Algebra sig m => Parsing (ParserC m) where
   unexpected s = ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
   {-# INLINE unexpected #-}
 
-  m <?> s = ParserC $ \ leaf nil fail input -> runParser
+  m <?> s = ParserC $ \ leaf nil fail -> runParserC m
     leaf
     (nil  . (expected_ .~ singleton s))
     (fail . (expected_ .~ singleton s))
-    input
-    m
   {-# INLINE (<?>) #-}
 
   notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . ("unexpected " <>) . show))
