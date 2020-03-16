@@ -139,7 +139,7 @@ instance MonadTrans ParserC where
   lift m = ParserC $ \ leaf _ _ input -> m >>= leaf input
   {-# INLINE lift #-}
 
-instance Algebra sig m => Parsing (ParserC m) where
+instance Parsing (ParserC m) where
   try m = ParserC $ \ leaf nil _ input -> runParser leaf nil nil input m
   {-# INLINE try #-}
 
@@ -158,14 +158,14 @@ instance Algebra sig m => Parsing (ParserC m) where
   notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . ("unexpected " <>) . show))
   {-# INLINE notFollowedBy #-}
 
-instance Algebra sig m => CharParsing (ParserC m) where
+instance CharParsing (ParserC m) where
   satisfy p = ParserC $ \ leaf nil _ input -> case str input of
     c:_ | p c       -> leaf (advance input) c
         | otherwise -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
     _               -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
   {-# INLINE satisfy #-}
 
-instance Algebra sig m => TokenParsing (ParserC m)
+instance TokenParsing (ParserC m)
 
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg hdl sig ctx = ParserC $ \ leaf nil fail input -> case sig of
