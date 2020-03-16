@@ -173,19 +173,19 @@ acceptC p = ParserC $ \ leaf nil _ input -> case str input of
 
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
   alg hdl sig ctx = case sig of
-    L parser -> ParserC $ \ leaf nil fail input -> case parser of
-      Accept p     -> runParser (\ i -> leaf i . (<$ ctx)) nil fail input (acceptC p)
+    L parser -> case parser of
+      Accept p     -> ParserC $ \ leaf nil fail input -> runParser (\ i -> leaf i . (<$ ctx)) nil fail input (acceptC p)
 
-      Label m s    -> runParser
+      Label m s    -> ParserC $ \ leaf nil fail input -> runParser
         leaf
         (\ err -> nil  err{ expected = singleton s })
         (\ err -> fail err{ expected = singleton s })
         input
         (hdl (m <$ ctx))
 
-      Unexpected s -> nil (Err input (Just (pretty s)) mempty)
+      Unexpected s -> ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
 
-      Position     -> leaf input (pos input <$ ctx)
+      Position     -> ParserC $ \ leaf _ _ input -> leaf input (pos input <$ ctx)
 
     R (L cut) -> ParserC $ \ leaf nil fail input -> case cut of
       Cutfail  -> fail (Err input Nothing mempty)
