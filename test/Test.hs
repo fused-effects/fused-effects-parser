@@ -20,6 +20,12 @@ import Text.Parser.Combinators
 main :: IO ()
 main = defaultMain $ testGroup "unit tests"
   [ parserTests
+  , testGroup "Lines"
+    [ testGroup "linesFromString"
+      [ testCase "returns the empty string for the empty string" $
+        linesFromString "" @?= Lines [""]
+      ]
+    ]
   ]
 
 parserTests :: TestTree
