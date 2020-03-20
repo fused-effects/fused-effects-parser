@@ -32,9 +32,9 @@ main = defaultMain $ testGroup "unit tests"
         linesFromString "\n" @?= Lines ["\n", ""]
       , testProperty "returns one more string than there are newlines" . property $ do
         s <- forAll (Gen.string (Range.linear 1 100)
-          (Gen.frequency [ (5, Gen.unicode), (1, Gen.element "\t\n ") ]))
+          (Gen.frequency [ (5, Gen.unicode), (1, Gen.element "\t\r\n ") ]))
         length (getLines (linesFromString s))
-          === length (Prelude.filter (== '\n') s) + 1
+          === length (Prelude.filter (`elem` "\r\n") s) + 1
       ]
     ]
   ]
