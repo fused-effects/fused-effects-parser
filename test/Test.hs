@@ -1,4 +1,5 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module Main
 ( main
@@ -10,6 +11,7 @@ import Control.Carrier.Reader
 import Control.Effect.Parser.Lines
 import Control.Effect.Parser.Notice as Notice
 import Control.Effect.Parser.Path
+import Data.List
 import Data.Set
 import Hedgehog
 import qualified Hedgehog.Gen as Gen
@@ -34,10 +36,18 @@ main = defaultMain $ testGroup "unit tests"
         s <- forAll (Gen.string (Range.linear 1 100)
           (Gen.frequency [ (5, Gen.unicode), (1, Gen.element "\t\r\n ") ]))
         length (getLines (linesFromString s))
-          === length (Prelude.filter (`elem` "\r\n") s) + 1
+          === length (Prelude.filter (`elem` "\r\n") (replace "\r\n" "\n" s)) + 1
       ]
     ]
   ]
+  where
+  replace a b = go
+    where
+    go = \case
+      ""                        -> ""
+      c:cs
+        | a `isPrefixOf` (c:cs) -> b <> go (Prelude.drop (length a) (c:cs))
+        | otherwise             -> c : go cs
 
 parserTests :: TestTree
 parserTests = testGroup "ParserC (Church)"
