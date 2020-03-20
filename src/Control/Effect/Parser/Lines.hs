@@ -18,14 +18,14 @@ linesFromString = Lines . go
   where
   go = \case
     "" -> [""]
-    s  -> let (line, rest) = takeLine s in line : go rest
+    s  -> let (line, rest) = takeLine s in line : either (const []) go rest
 {-# INLINE linesFromString #-}
 
-takeLine :: String -> (String, String)
+takeLine :: String -> (String, Either String String)
 takeLine = go id where
   go line = \case
-    ""        -> (line "", "")
-    '\n':rest -> (line "\n", rest)
+    ""        -> (line "", Left "")
+    '\n':rest -> (line "\n", Right rest)
     c   :rest -> go (line . (c:)) rest
 {-# INLINE takeLine #-}
 
