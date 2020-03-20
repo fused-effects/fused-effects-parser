@@ -25,7 +25,9 @@ takeLine :: String -> (String, Either String String)
 takeLine = go id where
   go line = \case
     ""        -> (line "", Left "")
-    '\r':rest -> (line "\r", Right rest)
+    '\r':rest -> case rest of
+      '\n':rest -> (line "\r\n", Right rest)
+      _         -> (line "\r", Right rest)
     '\n':rest -> (line "\n", Right rest)
     c   :rest -> go (line . (c:)) rest
 {-# INLINE takeLine #-}
