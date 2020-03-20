@@ -65,8 +65,10 @@ test-suite test
     , containers
     , fused-effects
     , fused-effects-parser
+    , hedgehog ^>= 1
     , parsers
     , prettyprinter
     , semantic-source
     , tasty ^>= 1.2
+    , tasty-hedgehog ^>= 1
     , tasty-hunit ^>= 0.10
