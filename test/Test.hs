@@ -25,7 +25,7 @@ main = defaultMain $ testGroup "unit tests"
       [ testCase "returns the empty string for the empty string" $
         linesFromString "" @?= Lines [""]
       , testCase "returns two empty strings for a newline" $
-        linesFromString "\n" @?= Lines ["", ""]
+        linesFromString "\n" @?= Lines ["\n", ""]
       ]
     ]
   ]
