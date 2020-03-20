@@ -11,8 +11,12 @@ import Control.Effect.Parser.Lines
 import Control.Effect.Parser.Notice as Notice
 import Control.Effect.Parser.Path
 import Data.Set
+import Hedgehog
+import qualified Hedgehog.Gen as Gen
+import qualified Hedgehog.Range as Range
 import Source.Span (Pos(..))
 import Test.Tasty
+import Test.Tasty.Hedgehog
 import Test.Tasty.HUnit
 import Text.Parser.Char
 import Text.Parser.Combinators
@@ -26,6 +30,11 @@ main = defaultMain $ testGroup "unit tests"
         linesFromString "" @?= Lines [""]
       , testCase "returns two empty strings for a newline" $
         linesFromString "\n" @?= Lines ["\n", ""]
+      , testProperty "returns one more string than there are newlines" . property $ do
+        s <- forAll (Gen.string (Range.linear 1 100)
+          (Gen.frequency [ (5, Gen.unicode), (1, Gen.element "\t\n ") ]))
+        length (getLines (linesFromString s))
+          === length (Prelude.filter (== '\n') s) + 1
       ]
     ]
   ]
