@@ -1,11 +1,11 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Parser.Church
@@ -14,7 +14,7 @@ module Control.Carrier.Parser.Church
 , runParserWithFile
 , runParserWith
 , runParser
-, ParserC(..)
+, ParserC(ParserC)
 , emptyWith
 , cutfailWith
 , Input(..)
@@ -86,12 +86,14 @@ runParser leaf nil fail input (ParserC run) = run leaf nil fail input
 
 
 newtype ParserC m a = ParserC
-  (forall r
-  .  (Input -> a -> m r) -- success
-  -> (Err -> m r)        -- empty
-  -> (Err -> m r)        -- cut
-  -> Input
-  -> m r)
+  { runParserC
+    :: forall r
+    .  (Input -> a -> m r) -- success
+    -> (Err -> m r)        -- empty
+    -> (Err -> m r)        -- cut
+    -> Input
+    -> m r
+  }
   deriving (Functor)
 
 instance Applicative (ParserC m) where
@@ -105,14 +107,17 @@ instance Alternative (ParserC m) where
   empty = emptyWith Nothing mempty
   {-# INLINE empty #-}
 
-  ParserC l <|> ParserC r = ParserC (\ leaf nil fail input -> l leaf (\ Err{ reason = a, expected = e } -> r leaf (\ err@Err{ reason = a', expected = e' } -> nil err{ reason = a <|> a', expected = e' <> e }) fail input) fail input)
+  ParserC l <|> ParserC r = ParserC $ \ leaf nil fail input ->
+    l leaf (\ Err{ reason = a, expected = e } ->
+      r leaf (\ err@Err{ reason = a', expected = e' } ->
+        nil err{ reason = a <|> a', expected = e' <> e }) fail input) fail input
   {-# INLINE (<|>) #-}
 
 instance Monad (ParserC m) where
   ParserC m >>= f = ParserC (\ leaf nil fail -> m (\ input -> runParser leaf nil fail input . f) nil fail)
   {-# INLINE (>>=) #-}
 
-instance (Algebra sig m, Effect sig) => Fail.MonadFail (ParserC m) where
+instance Algebra sig m => Fail.MonadFail (ParserC m) where
   fail = unexpected
   {-# INLINE fail #-}
 
@@ -134,73 +139,64 @@ instance MonadTrans ParserC where
   lift m = ParserC $ \ leaf _ _ input -> m >>= leaf input
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect sig) => Parsing (ParserC m) where
-  try = call
+instance Parsing (ParserC m) where
+  try m = ParserC $ \ leaf nil _ input -> runParser leaf nil nil input m
   {-# INLINE try #-}
 
   eof = notFollowedBy anyChar <?> "end of input"
   {-# INLINE eof #-}
 
-  unexpected s = send (Unexpected s)
+  unexpected s = ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
   {-# INLINE unexpected #-}
 
-  m <?> s = send (Label m s pure)
+  m <?> s = ParserC $ \ leaf nil fail -> runParserC m
+    leaf
+    (nil  . (expected_ .~ singleton s))
+    (fail . (expected_ .~ singleton s))
   {-# INLINE (<?>) #-}
 
   notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . ("unexpected " <>) . show))
   {-# INLINE notFollowedBy #-}
 
-instance (Algebra sig m, Effect sig) => CharParsing (ParserC m) where
-  satisfy p = accept (\ c -> if p c then Just c else Nothing)
+instance CharParsing (ParserC m) where
+  satisfy p = acceptC (\ c -> if p c then Just c else Nothing)
   {-# INLINE satisfy #-}
 
-instance (Algebra sig m, Effect sig) => TokenParsing (ParserC m)
+instance TokenParsing (ParserC m)
 
-instance (Algebra sig m, Effect sig) => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
-  alg = \case
-    L parser -> case parser of
-      Accept p k   ->
-        ParserC (\ leaf nil _ input -> case str input of
-          c:_ | Just a <- p c -> leaf (advance input) a
-              | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
-          _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty))
-        >>= k
+acceptC :: (Char -> Maybe a) -> ParserC m a
+acceptC p = ParserC $ \ leaf nil _ input -> case str input of
+  c:_ | Just a <- p c -> leaf (advance input) a
+      | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
+  _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
+{-# INLINE acceptC #-}
 
-      Label m s k  ->
-        ParserC (\ leaf nil fail input -> runParser
-          leaf
-          (\ err -> nil  err{ expected = singleton s })
-          (\ err -> fail err{ expected = singleton s })
-          input
-          m)
-        >>= k
+instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
+  alg hdl sig ctx = case sig of
+    L (Accept p)         -> (<$ ctx) <$> acceptC p
 
-      Unexpected s -> ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
+    L (Label m s)        -> hdl (m <$ ctx) <?> s
 
-      Position k   ->
-        ParserC (\ leaf _ _ input -> leaf input (pos input))
-        >>= k
+    L (Unexpected s)     -> unexpected s
 
-    R (L cut) -> case cut of
-      Cutfail  -> cutfailWith Nothing mempty
+    L Position           -> ParserC $ \ leaf _ _ input -> leaf input (pos input <$ ctx)
 
-      Call m k ->
-        ParserC (\ leaf nil _ input -> runParser leaf nil nil input m)
-        >>= k
+    R (L Cutfail)        -> ParserC $ \ _ _ fail input -> fail (Err input Nothing mempty)
 
-    R (R (L nondet)) -> case nondet of
-      L Empty      -> empty
+    R (L (Call m))       -> try (hdl (m <$ ctx))
 
-      R (Choose k) -> k True <|> k False
+    R (R (L (L Empty)))  -> empty
 
-    R (R (R other)) -> ParserC $ \ leaf nil fail input ->
-      alg (thread (Compose (input, pure ())) (fmap Compose . uncurry dst . getCompose) other)
+    R (R (L (R Choose))) -> pure (True <$ ctx) <|> pure (False <$ ctx)
+
+    R (R (R other))      -> ParserC $ \ leaf nil fail input ->
+      thread (fmap Compose . uncurry dst . getCompose ~<~ hdl) other (Compose (input, pure ctx))
       >>= runIdentity . uncurry (runParser (coerce leaf) (coerce nil) (coerce fail)) . getCompose
     where
-    dst :: Input -> ParserC Identity (ParserC m a) -> m (Input, ParserC Identity a)
+    dst :: Applicative m => Input -> ParserC Identity (ParserC m a) -> m (Input, ParserC Identity a)
     dst = fmap runIdentity
         . runParser
-          (fmap pure . distParser)
+          (\ i -> pure . distParser i)
           (pure . emptyk)
           (pure . cutfailk)
   {-# INLINE alg #-}

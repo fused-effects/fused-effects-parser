@@ -1,7 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE GADTs #-}
 module Control.Effect.Parser
 ( -- * Parser effect
   Parser(..)
@@ -16,33 +13,17 @@ module Control.Effect.Parser
 import           Control.Algebra
 import qualified Source.Span as Span
 
-data Parser m k
-  = forall a . Accept (Char -> Maybe a) (a -> m k)
-  | forall a . Label (m a) String (a -> m k)
-  | Unexpected String
-  | Position (Span.Pos -> m k)
-
-deriving instance Functor m => Functor (Parser m)
-
-instance HFunctor Parser where
-  hmap f = \case
-    Accept p   k -> Accept p      (f . k)
-    Label m s  k -> Label (f m) s (f . k)
-    Unexpected s -> Unexpected s
-    Position   k -> Position      (f . k)
-
-instance Effect Parser where
-  thread ctx hdl = \case
-    Accept p   k -> Accept p (hdl . (<$ ctx) . k)
-    Label m s  k -> Label (hdl (m <$ ctx)) s (hdl . fmap k)
-    Unexpected s -> Unexpected s
-    Position   k -> Position (hdl . (<$ ctx) . k)
+data Parser m k where
+  Accept     :: (Char -> Maybe a) -> Parser m a
+  Label      :: m a -> String ->     Parser m a
+  Unexpected :: String ->            Parser m a
+  Position   ::                      Parser m Span.Pos
 
 
 accept :: Has Parser sig m => (Char -> Maybe a) -> m a
-accept p = send (Accept p pure)
+accept p = send (Accept p)
 {-# INLINE accept #-}
 
 position :: Has Parser sig m => m Span.Pos
-position = send (Position pure)
+position = send Position
 {-# INLINE position #-}

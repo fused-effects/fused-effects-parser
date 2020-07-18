@@ -1,4 +1,5 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module Main
 ( main
@@ -10,9 +11,14 @@ import Control.Carrier.Reader
 import Control.Effect.Parser.Lines
 import Control.Effect.Parser.Notice as Notice
 import Control.Effect.Parser.Path
+import Data.List
 import Data.Set
+import Hedgehog
+import qualified Hedgehog.Gen as Gen
+import qualified Hedgehog.Range as Range
 import Source.Span (Pos(..))
 import Test.Tasty
+import Test.Tasty.Hedgehog
 import Test.Tasty.HUnit
 import Text.Parser.Char
 import Text.Parser.Combinators
@@ -20,7 +26,28 @@ import Text.Parser.Combinators
 main :: IO ()
 main = defaultMain $ testGroup "unit tests"
   [ parserTests
+  , testGroup "Lines"
+    [ testGroup "linesFromString"
+      [ testCase "returns the empty string for the empty string" $
+        linesFromString "" @?= Lines [""]
+      , testCase "returns two empty strings for a newline" $
+        linesFromString "\n" @?= Lines ["\n", ""]
+      , testProperty "returns one more string than there are newlines" . property $ do
+        s <- forAll (Gen.string (Range.linear 1 100)
+          (Gen.frequency [ (5, Gen.unicode), (1, Gen.element "\t\r\n ") ]))
+        length (getLines (linesFromString s))
+          === length (Prelude.filter (`elem` "\r\n") (replace "\r\n" "\n" s)) + 1
+      ]
+    ]
   ]
+  where
+  replace a b = go
+    where
+    go = \case
+      ""                        -> ""
+      c:cs
+        | a `isPrefixOf` (c:cs) -> b <> go (Prelude.drop (length a) (c:cs))
+        | otherwise             -> c : go cs
 
 parserTests :: TestTree
 parserTests = testGroup "ParserC (Church)"
