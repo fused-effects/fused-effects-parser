@@ -71,7 +71,6 @@ test-suite test
     , fused-effects-parser
     , hedgehog ^>= 1
     , parsers
-    , prettyprinter
     , semantic-source
     , tasty ^>= 1.2
     , tasty-hedgehog ^>= 1
