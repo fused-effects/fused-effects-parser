@@ -11,7 +11,7 @@ module Control.Effect.Parser
 ) where
 
 import           Control.Algebra
-import qualified Source.Span as Span
+import qualified Control.Effect.Parser.Span as Span
 
 data Parser m k where
   Accept     :: (Char -> Maybe a) -> Parser m a

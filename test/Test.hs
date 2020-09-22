@@ -10,13 +10,13 @@ import           Control.Carrier.Parser.Church
 import           Control.Carrier.Reader
 import           Control.Effect.Parser.Notice as Notice
 import           Control.Effect.Parser.Source
+import           Control.Effect.Parser.Span (Pos(..))
 import           Data.List (isPrefixOf)
 import           Data.Set
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 import           Prelude hiding (lines)
-import           Source.Span (Pos(..))
 import           Test.Tasty
 import           Test.Tasty.Hedgehog
 import           Test.Tasty.HUnit

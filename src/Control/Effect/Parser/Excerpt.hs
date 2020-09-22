@@ -10,9 +10,9 @@ module Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser as Parser
 import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Source as Source
+import qualified Control.Effect.Parser.Span as Span
 import           Control.Effect.Reader
 import           Prelude hiding (span)
-import qualified Source.Span as Span
 
 data Excerpt = Excerpt
   { path :: !(Maybe FilePath)

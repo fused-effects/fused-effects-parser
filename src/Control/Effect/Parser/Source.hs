@@ -10,9 +10,9 @@ module Control.Effect.Parser.Source
 ) where
 
 import           Control.Effect.Parser
+import qualified Control.Effect.Parser.Span as Span
 import           Control.Effect.Reader
 import qualified Prettyprinter as P
-import qualified Source.Span as Span
 
 data Source = Source
   { path  :: Maybe FilePath

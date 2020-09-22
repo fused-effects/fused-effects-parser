@@ -38,6 +38,7 @@ import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Notice as Notice
 import           Control.Effect.Parser.Source as Source
+import           Control.Effect.Parser.Span as Span
 import           Control.Effect.Throw
 import           Control.Monad (ap)
 import           Control.Monad.Fail as Fail
@@ -51,7 +52,6 @@ import           Data.Maybe (fromMaybe)
 import           Data.Set (Set, singleton, toList)
 import           Prettyprinter
 import           Prettyprinter.Render.Terminal (AnsiStyle)
-import           Source.Span as Span
 import           Text.Parser.Char (CharParsing(..))
 import           Text.Parser.Combinators
 import           Text.Parser.Token (TokenParsing)
