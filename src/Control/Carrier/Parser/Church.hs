@@ -113,7 +113,11 @@ instance Alternative (ParserC m) where
       (\ el -> r
         leaf
         (nil  . extend el)
-        (fail . extend el)
+        (\ er ->
+          if pos (input er) == pos i then
+            nil  (extend el er)
+          else
+            fail (extend el er))
         i)
       (\ el ->
         if pos (input el) == pos i then
