@@ -14,9 +14,9 @@ module Control.Effect.Parser.Notice
 import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
 import           Data.List (isSuffixOf)
-import           Data.Text.Prettyprint.Doc
-import           Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle, Color(..), color)
-import qualified Data.Text.Prettyprint.Doc.Render.Terminal as ANSI
+import           Prettyprinter
+import           Prettyprinter.Render.Terminal (AnsiStyle, Color(..), color)
+import qualified Prettyprinter.Render.Terminal as ANSI
 import           Source.Span as Span
 
 data Level

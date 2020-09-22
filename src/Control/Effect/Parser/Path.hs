@@ -5,7 +5,7 @@ module Control.Effect.Parser.Path
 ) where
 
 import Control.Effect.Reader
-import Data.Text.Prettyprint.Doc
+import Prettyprinter
 
 newtype Path = Path { getPath :: FilePath }
   deriving (Eq, Ord, Pretty, Show)

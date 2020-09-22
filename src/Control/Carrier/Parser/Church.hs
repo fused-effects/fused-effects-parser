@@ -50,8 +50,8 @@ import           Data.Functor.Compose
 import           Data.Functor.Identity
 import           Data.Maybe (fromMaybe)
 import           Data.Set (Set, singleton, toList)
-import           Data.Text.Prettyprint.Doc
-import           Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle)
+import           Prettyprinter
+import           Prettyprinter.Render.Terminal (AnsiStyle)
 import           Source.Span as Span
 import           Text.Parser.Char (CharParsing(..))
 import           Text.Parser.Combinators
