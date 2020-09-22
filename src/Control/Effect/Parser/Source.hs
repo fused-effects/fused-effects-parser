@@ -5,8 +5,8 @@ module Control.Effect.Parser.Source
 , Line(..)
 , LineEnding(..)
 , linesFromString
-, line
 , (!)
+, line
 , source
 ) where
 
