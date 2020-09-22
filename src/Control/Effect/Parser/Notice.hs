@@ -76,6 +76,7 @@ prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
 prettyLine :: String -> Doc AnsiStyle
 prettyLine line
   | "\r\n" `isSuffixOf` line = pretty (init (init line)) <> blue (pretty "\\r\\n")
+  | "\r"   `isSuffixOf` line = pretty (init line) <> blue (pretty "\\r")
   | "\n"   `isSuffixOf` line = pretty (init line) <> blue (pretty "\\n")
   | otherwise                = pretty line <> blue (pretty "<end of input>")
 
