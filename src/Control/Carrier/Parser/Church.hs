@@ -257,6 +257,7 @@ advance = \case
 
 advancePos :: Char -> Pos -> Pos
 advancePos c p = case c of
+  -- FIXME: this should handle CR & maybe CRLF
   '\n' -> Pos (succ (Span.line p)) 0
   _    -> p { Span.column = succ (Span.column p) }
 {-# INLINE advancePos #-}
