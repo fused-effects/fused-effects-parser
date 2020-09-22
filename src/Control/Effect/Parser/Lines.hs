@@ -10,6 +10,7 @@ module Control.Effect.Parser.Lines
 
 import           Control.Effect.Parser
 import           Control.Effect.Reader
+import qualified Prettyprinter as P
 import qualified Source.Span as Span
 
 newtype Lines = Lines { getLines :: [Line] }
@@ -24,6 +25,14 @@ data LineEnding
   | LF
   | CRLF
   deriving (Bounded, Enum, Eq, Ord, Show)
+
+instance P.Pretty LineEnding where
+  pretty = \case
+    EOF  -> P.pretty "<end of input>"
+    CRLF -> P.pretty "\\r\\n"
+    CR   -> P.pretty "\\r"
+    LF   -> P.pretty "\\n"
+
 
 linesFromString :: String -> Lines
 linesFromString = Lines . go
