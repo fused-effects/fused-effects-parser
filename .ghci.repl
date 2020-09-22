@@ -32,3 +32,9 @@
 -- We have this one on in the project but not in the REPL to reduce noise
 :seti -Wno-type-defaults
 :set -Wno-unused-packages
+
+:load Control.Carrier.Parser.Church test/Test.hs
+
+import Control.Carrier.Parser.Church
+import Control.Effect.Parser.Notice
+import Main
