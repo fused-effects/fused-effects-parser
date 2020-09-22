@@ -26,7 +26,7 @@ module Control.Carrier.Parser.Church
 , expected_
 , errToNotice
   -- * Parser effect
-, module P
+, module Control.Effect.Parser
   -- * Cut effect
 , module Control.Effect.Cut
 ) where
@@ -34,7 +34,7 @@ module Control.Carrier.Parser.Church
 import           Control.Algebra
 import           Control.Effect.Cut
 import           Control.Effect.NonDet
-import           Control.Effect.Parser as P
+import           Control.Effect.Parser
 import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Notice as Notice
