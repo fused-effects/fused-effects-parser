@@ -38,7 +38,7 @@ import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Notice as Notice
 import           Control.Effect.Parser.Path
-import           Control.Effect.Parser.Source
+import           Control.Effect.Parser.Source as Source
 import           Control.Effect.Throw
 import           Control.Monad (ap)
 import           Control.Monad.Fail as Fail
@@ -57,21 +57,21 @@ import           Text.Parser.Char (CharParsing(..))
 import           Text.Parser.Combinators
 import           Text.Parser.Token (TokenParsing)
 
-runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
+runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Source m)) a -> m a
 runParserWithString pos input = runParserWith (Path "(interactive)") (Input pos input)
 {-# INLINE runParserWithString #-}
 
-runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => Path -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
+runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => Path -> ParserC (ReaderC Path (ReaderC Source m)) a -> m a
 runParserWithFile path p = do
   input <- liftIO (readFile (getPath path))
   runParserWith path (Input (Pos 0 0) input) p
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Has (Throw Notice.Notice) sig m => Path -> Input -> ParserC (ReaderC Path (ReaderC Lines m)) a -> m a
-runParserWith path input = runReader inputLines . runReader path . runParser (const pure) failure failure input
+runParserWith :: Has (Throw Notice.Notice) sig m => Path -> Input -> ParserC (ReaderC Path (ReaderC Source m)) a -> m a
+runParserWith path input = runReader source . runReader path . runParser (const pure) failure failure input
   where
-  failure = throwError . errToNotice path inputLines
-  inputLines = linesFromString (str input)
+  source = sourceFromString (Just (getPath path)) (str input)
+  failure = throwError . errToNotice source
 {-# INLINE runParserWith #-}
 
 runParser
@@ -283,10 +283,10 @@ expected_ :: Lens' Err (Set String)
 expected_ = lens expected $ \ i expected -> i{ expected }
 {-# INLINE expected_ #-}
 
-errToNotice :: Path -> Lines -> Err -> Notice.Notice
-errToNotice path inputLines Err{ input = Input pos _, reason, expected } = Notice.Notice
+errToNotice :: Source -> Err -> Notice.Notice
+errToNotice source Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
-  , excerpt = Excerpt path (inputLines ! pos) (Span pos pos)
+  , excerpt = Excerpt (maybe (Path "") Path (Source.path source)) (source ! pos) (Span pos pos)
   , reason  = fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
   , context = []
   }

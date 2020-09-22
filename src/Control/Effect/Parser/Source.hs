@@ -67,14 +67,14 @@ takeLine = go id where
     mk = Line (line "")
 {-# INLINE takeLine #-}
 
-(!) :: Lines -> Span.Pos -> Line
-Lines lines ! pos = lines !! Span.line pos
+(!) :: Source -> Span.Pos -> Line
+Source _ lines ! pos = lines !! Span.line pos
 {-# INLINE (!) #-}
 
 infixl 9 !
 
 
-line :: (Has Parser sig m, Has (Reader Lines) sig m) => m Line
+line :: (Has Parser sig m, Has (Reader Source) sig m) => m Line
 line = do
   pos <- position
   asks (! pos)

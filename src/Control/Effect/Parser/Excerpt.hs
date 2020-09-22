@@ -48,7 +48,7 @@ spanned m = do
   pure (Span.Span start end, a)
 {-# INLINE spanned #-}
 
-excerpted :: (Has Parser sig m, Has (Reader Source.Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpt, a)
+excerpted :: (Has Parser sig m, Has (Reader Source.Source) sig m, Has (Reader Path) sig m) => m a -> m (Excerpt, a)
 excerpted m = do
   path <- Parser.path
   line <- Source.line
