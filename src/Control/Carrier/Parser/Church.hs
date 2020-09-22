@@ -68,9 +68,9 @@ runParserWithFile path p = do
 runParserWith :: Has (Throw Notice.Notice) sig m => Maybe FilePath -> Pos -> String -> ParserC m a -> m a
 runParserWith path pos str = runParser (const pure) failure failure input
   where
-  input = Input{ src, pos, str }
+  input = Input{ pos, str }
   src = sourceFromString path str
-  failure = throwError . errToNotice
+  failure = throwError . errToNotice src
 {-# INLINE runParserWith #-}
 
 runParser
@@ -237,8 +237,7 @@ cutfailWith a e = ParserC (\ _ _   fail i -> fail (Err i a e))
 
 
 data Input = Input
-  { src :: !Source
-  , pos :: {-# UNPACK #-} !Pos
+  { pos :: {-# UNPACK #-} !Pos
   , str :: !String
   }
   deriving (Eq, Ord, Show)
@@ -253,8 +252,8 @@ str_ = lens str $ \ i str -> i{ str }
 
 advance :: Input -> Input
 advance = \case
-  Input src pos (c:cs) -> Input src (advancePos c pos) cs
-  i                    -> i
+  Input pos (c:cs) -> Input (advancePos c pos) cs
+  i                -> i
 {-# INLINE advance #-}
 
 advancePos :: Char -> Pos -> Pos
@@ -283,8 +282,8 @@ expected_ :: Lens' Err (Set String)
 expected_ = lens expected $ \ i expected -> i{ expected }
 {-# INLINE expected_ #-}
 
-errToNotice :: Err -> Notice.Notice
-errToNotice Err{ input = Input source pos _, reason, expected } = Notice.Notice
+errToNotice :: Source -> Err -> Notice.Notice
+errToNotice source Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
   , excerpt = Excerpt (Source.path source) (source ! pos) (Span pos pos)
   , reason  = fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))

@@ -79,7 +79,7 @@ parsesInto p s expected = case runParserWithString (Pos 0 0) s p of
   Right actual -> actual @?= expected
 
 failsWith :: Show a => ParserC IO a -> String -> (Err -> Assertion) -> Assertion
-failsWith p s f = runParser (const (assertFailure . show)) f f (Input (sourceFromString Nothing s) (Pos 0 0) s) p
+failsWith p s f = runParser (const (assertFailure . show)) f f (Input (Pos 0 0) s) p
 
 hasExpectation :: Set String -> Err -> Assertion
 hasExpectation expected' Err{ expected } = expected @?= expected'
