@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 module Control.Effect.Parser.Lines
 ( Lines(..)
+, Line(..)
 , linesFromString
 , line
 , (!)
@@ -11,6 +12,9 @@ import           Control.Effect.Reader
 import qualified Source.Span as Span
 
 newtype Lines = Lines { getLines :: [String] }
+  deriving (Eq, Ord, Show)
+
+newtype Line = Line { getLine :: String }
   deriving (Eq, Ord, Show)
 
 linesFromString :: String -> Lines
