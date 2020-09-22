@@ -3,6 +3,7 @@ module Control.Effect.Parser.Lens
 ( Lens'
 , lens
 , (.~)
+, (%~)
 , (&)
 ) where
 
@@ -21,3 +22,9 @@ l .~ b = coerce . l (const (Identity b))
 {-# INLINE (.~) #-}
 
 infixr 4 .~
+
+(%~) :: Lens' s a -> (a -> a) -> s -> s
+l %~ f = runIdentity . l (Identity . f)
+{-# INLINE (%~) #-}
+
+infixr 4 %~
