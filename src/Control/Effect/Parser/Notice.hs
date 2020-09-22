@@ -76,9 +76,9 @@ prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
 prettyLine :: Line -> Doc AnsiStyle
 prettyLine (Line line end) = case end of
   EOF  -> pretty line <> blue (pretty "<end of input>")
-  CRLF -> pretty (init (init line)) <> blue (pretty "\\r\\n")
-  CR   -> pretty (init line) <> blue (pretty "\\r")
-  LF   -> pretty (init line) <> blue (pretty "\\n")
+  CRLF -> pretty line <> blue (pretty "\\r\\n")
+  CR   -> pretty line <> blue (pretty "\\r")
+  LF   -> pretty line <> blue (pretty "\\n")
 
 
 red, green, blue, magenta :: Doc AnsiStyle -> Doc AnsiStyle
