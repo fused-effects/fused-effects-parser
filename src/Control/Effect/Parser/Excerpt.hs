@@ -9,15 +9,13 @@ module Control.Effect.Parser.Excerpt
 
 import           Control.Effect.Parser as Parser
 import           Control.Effect.Parser.Lens
-import           Control.Effect.Parser.Path (Path)
-import qualified Control.Effect.Parser.Path as Parser
 import qualified Control.Effect.Parser.Source as Source
 import           Control.Effect.Reader
 import           Prelude hiding (span)
 import qualified Source.Span as Span
 
 data Excerpt = Excerpt
-  { path :: !Path
+  { path :: !(Maybe FilePath)
   , line :: !Source.Line
   , span :: {-# UNPACK #-} !Span.Span
   }
@@ -31,7 +29,7 @@ instance Semigroup Excerpt where
   Excerpt _ l s1 <> Excerpt p _ s2 = Excerpt p l (s1 <> s2)
   {-# INLINE (<>) #-}
 
-path_ :: Lens' Excerpt Path
+path_ :: Lens' Excerpt (Maybe FilePath)
 path_ = lens path $ \ e path -> e{ path }
 {-# INLINE path_ #-}
 
@@ -48,10 +46,9 @@ spanned m = do
   pure (Span.Span start end, a)
 {-# INLINE spanned #-}
 
-excerpted :: (Has Parser sig m, Has (Reader Source.Source) sig m, Has (Reader Path) sig m) => m a -> m (Excerpt, a)
+excerpted :: (Has Parser sig m, Has (Reader Source.Source) sig m) => m a -> m (Excerpt, a)
 excerpted m = do
-  path <- Parser.path
-  line <- Source.line
+  Source.Source path lines <- Source.source
   (span, a) <- spanned m
-  pure (Excerpt path line span, a)
+  pure (Excerpt path (lines !! Span.line (Span.start span)) span, a)
 {-# INLINE excerpted #-}
