@@ -1,2 +1,5 @@
 module Control.Effect.Parser.Span
-() where
+( module Source.Span
+) where
+
+import Source.Span
