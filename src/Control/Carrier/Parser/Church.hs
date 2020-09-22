@@ -37,7 +37,6 @@ import           Control.Effect.Parser
 import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Notice as Notice
-import           Control.Effect.Parser.Path
 import           Control.Effect.Parser.Source as Source
 import           Control.Effect.Throw
 import           Control.Monad (ap)
@@ -58,19 +57,19 @@ import           Text.Parser.Combinators
 import           Text.Parser.Token (TokenParsing)
 
 runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC (ReaderC Source m) a -> m a
-runParserWithString pos input = runParserWith (Path "(interactive)") (Input pos input)
+runParserWithString pos input = runParserWith Nothing (Input pos input)
 {-# INLINE runParserWithString #-}
 
-runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => Path -> ParserC (ReaderC Source m) a -> m a
+runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Source m) a -> m a
 runParserWithFile path p = do
-  input <- liftIO (readFile (getPath path))
-  runParserWith path (Input (Pos 0 0) input) p
+  input <- liftIO (readFile path)
+  runParserWith (Just path) (Input (Pos 0 0) input) p
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Has (Throw Notice.Notice) sig m => Path -> Input -> ParserC (ReaderC Source m) a -> m a
+runParserWith :: Has (Throw Notice.Notice) sig m => Maybe FilePath -> Input -> ParserC (ReaderC Source m) a -> m a
 runParserWith path input = runReader source . runParser (const pure) failure failure input
   where
-  source = sourceFromString (Just (getPath path)) (str input)
+  source = sourceFromString path (str input)
   failure = throwError . errToNotice source
 {-# INLINE runParserWith #-}
 
