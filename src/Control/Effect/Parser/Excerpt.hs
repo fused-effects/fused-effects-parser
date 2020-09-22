@@ -50,7 +50,7 @@ spanned m = do
 
 excerpted :: Has Parser.Parser sig m => m a -> m (Excerpt, a)
 excerpted m = do
-  Source.Source path lines <- Parser.source
+  src <- Parser.source
   (span, a) <- spanned m
-  pure (Excerpt path (lines !! Span.line (Span.start span)) span, a)
+  pure (fromSourceAndSpan src span, a)
 {-# INLINE excerpted #-}
