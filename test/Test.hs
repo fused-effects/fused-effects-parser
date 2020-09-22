@@ -5,23 +5,23 @@ module Main
 ( main
 ) where
 
-import Control.Applicative (Alternative(..))
-import Control.Carrier.Parser.Church
-import Control.Carrier.Reader
-import Control.Effect.Parser.Lines
-import Control.Effect.Parser.Notice as Notice
-import Control.Effect.Parser.Path
-import Data.List
-import Data.Set
-import Hedgehog
+import           Control.Applicative (Alternative(..))
+import           Control.Carrier.Parser.Church
+import           Control.Carrier.Reader
+import           Control.Effect.Parser.Lines
+import           Control.Effect.Parser.Notice as Notice
+import           Control.Effect.Parser.Path
+import           Data.List
+import           Data.Set
+import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import Source.Span (Pos(..))
-import Test.Tasty
-import Test.Tasty.Hedgehog
-import Test.Tasty.HUnit
-import Text.Parser.Char
-import Text.Parser.Combinators
+import           Source.Span (Pos(..))
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
+import           Test.Tasty.HUnit
+import           Text.Parser.Char
+import           Text.Parser.Combinators
 
 main :: IO ()
 main = defaultMain $ testGroup "unit tests"
