@@ -110,11 +110,10 @@ instance Alternative (ParserC m) where
   ParserC l <|> ParserC r = ParserC $ \ leaf nil fail input ->
     l
       leaf
-      (\ Err{ reason = a, expected = e } ->
+      (\ el ->
         r
           leaf
-          (\ err@Err{ reason = a', expected = e' } ->
-            nil err{ reason = a <|> a', expected = e' <> e })
+          (\ er -> nil (Err input (reason el <|> reason er) (expected el <> expected er)))
           fail
           input)
       fail
