@@ -28,12 +28,11 @@ linesFromString = Lines . go
 takeLine :: String -> (Line, Either String String)
 takeLine = go Line where
   go line = \case
-    ""        -> (line "", Left "")
-    '\r':rest -> case rest of
-      '\n':rest -> (line "\r\n", Right rest)
-      _         -> (line "\r", Right rest)
-    '\n':rest -> (line "\n", Right rest)
-    c   :rest -> go (line . (c:)) rest
+    ""             -> (line "", Left "")
+    '\r':'\n':rest -> (line "\r\n", Right rest)
+    '\r':rest      -> (line "\r", Right rest)
+    '\n':rest      -> (line "\n", Right rest)
+    c   :rest      -> go (line . (c:)) rest
 {-# INLINE takeLine #-}
 
 (!) :: Lines -> Span.Pos -> Line
