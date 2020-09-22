@@ -54,7 +54,6 @@ library
     , parsers ^>= 0.12
     , prettyprinter ^>= 1.7
     , prettyprinter-ansi-terminal ^>= 1.1
-    , semantic-source ^>= 0.1
     , transformers >= 0.4 && < 0.6
 
 test-suite test
@@ -69,7 +68,6 @@ test-suite test
     , fused-effects-parser
     , hedgehog ^>= 1
     , parsers
-    , semantic-source
     , tasty ^>= 1.2
     , tasty-hedgehog ^>= 1
     , tasty-hunit ^>= 0.10
