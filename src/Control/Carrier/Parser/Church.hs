@@ -107,7 +107,7 @@ instance Alternative (ParserC m) where
   empty = emptyWith Nothing mempty
   {-# INLINE empty #-}
 
-  ParserC l <|> ParserC r = ParserC $ \ leaf nil fail input ->
+  ParserC l <|> ParserC r = ParserC $ \ leaf nil fail i ->
     l
       leaf
       (\ el ->
@@ -115,9 +115,9 @@ instance Alternative (ParserC m) where
           leaf
           (\ er -> nil  (er & reason_ %~ (<|> reason el) & if null (expected er) then expected_ .~ expected el else id))
           (\ er -> fail (er & reason_ %~ (<|> reason el) & if null (expected er) then expected_ .~ expected el else id))
-          input)
+          i)
       fail
-      input
+      i
   {-# INLINE (<|>) #-}
 
 instance Monad (ParserC m) where
