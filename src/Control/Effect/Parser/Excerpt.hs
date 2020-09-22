@@ -1,6 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Control.Effect.Parser.Excerpt
 ( Excerpt(..)
+, fromSourceAndSpan
 , path_
 , line_
 , spanned
@@ -24,6 +25,11 @@ data Excerpt = Excerpt
 instance Semigroup Excerpt where
   Excerpt _ l s1 <> Excerpt p _ s2 = Excerpt p l (s1 <> s2)
   {-# INLINE (<>) #-}
+
+fromSourceAndSpan :: Source.Source -> Span.Span -> Excerpt
+fromSourceAndSpan src span = Excerpt{ path = Source.path src, line = src Source.! Span.start span, span }
+{-# INLINABLE fromSourceAndSpan #-}
+
 
 path_ :: Lens' Excerpt (Maybe FilePath)
 path_ = lens path $ \ e path -> e{ path }
