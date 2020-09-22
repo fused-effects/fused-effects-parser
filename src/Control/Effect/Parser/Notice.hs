@@ -74,7 +74,9 @@ prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
   bold = annotate ANSI.bold
 
 prettyLine :: String -> Doc AnsiStyle
-prettyLine line = if "\n" `isSuffixOf` line then pretty (init line) <> blue (pretty "\\n") else pretty line <> blue (pretty "<end of input>")
+prettyLine line
+  | "\n" `isSuffixOf` line = pretty (init line) <> blue (pretty "\\n")
+  | otherwise              = pretty line <> blue (pretty "<end of input>")
 
 
 red, green, blue, magenta :: Doc AnsiStyle -> Doc AnsiStyle
