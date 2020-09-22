@@ -57,7 +57,7 @@ prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
     , reason
     ]))
   : blue (pretty (succ (Span.line (Span.start span)))) <+> align (vcat
-    [ blue (pretty '|') <+> if "\n" `isSuffixOf` line then pretty (init line) <> blue (pretty "\\n") else pretty line <> blue (pretty "<end of input>")
+    [ blue (pretty '|') <+> prettyLine line
     , blue (pretty '|') <+> padding span <> caret span
     ])
   : context)
@@ -72,6 +72,9 @@ prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
     | otherwise    = green (pretty "^…")
 
   bold = annotate ANSI.bold
+
+prettyLine :: String -> Doc AnsiStyle
+prettyLine line = if "\n" `isSuffixOf` line then pretty (init line) <> blue (pretty "\\n") else pretty line <> blue (pretty "<end of input>")
 
 
 red, green, blue, magenta :: Doc AnsiStyle -> Doc AnsiStyle
