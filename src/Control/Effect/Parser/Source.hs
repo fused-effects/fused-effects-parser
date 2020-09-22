@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 module Control.Effect.Parser.Source
-( Lines(..)
+( Source(..)
+, Lines(..)
 , Line(..)
 , LineEnding(..)
 , linesFromString
@@ -12,6 +13,12 @@ import           Control.Effect.Parser
 import           Control.Effect.Reader
 import qualified Prettyprinter as P
 import qualified Source.Span as Span
+
+data Source = Source
+  { path  :: Maybe FilePath
+  , lines :: [String]
+  }
+  deriving (Eq, Ord, Show)
 
 newtype Lines = Lines { getLines :: [Line] }
   deriving (Eq, Ord, Show)
