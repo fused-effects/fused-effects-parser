@@ -16,7 +16,7 @@ import qualified Source.Span as Span
 
 data Source = Source
   { path  :: Maybe FilePath
-  , lines :: [String]
+  , lines :: [Line]
   }
   deriving (Eq, Ord, Show)
 
