@@ -27,11 +27,11 @@ data LineEnding
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 instance P.Pretty LineEnding where
-  pretty = \case
-    EOF  -> P.pretty "<end of input>"
-    CRLF -> P.pretty "\\r\\n"
-    CR   -> P.pretty "\\r"
-    LF   -> P.pretty "\\n"
+  pretty = P.pretty . \case
+    EOF  -> "<end of input>"
+    CRLF -> "\\r\\n"
+    CR   -> "\\r"
+    LF   -> "\\n"
 
 
 linesFromString :: String -> Lines
