@@ -1,5 +1,40 @@
 module Control.Effect.Parser.Span
-( module Source.Span
+( -- * Positions
+  Pos(..)
+, line_
+, column_
+  -- * Spans
+, Span(..)
+, start_
+, end_
 ) where
 
-import Source.Span
+import Control.Effect.Parser.Lens
+
+-- Positions
+
+data Pos = Pos
+  { line   :: {-# UNPACK #-} !Int
+  , column :: {-# UNPACK #-} !Int
+  }
+  deriving (Eq, Ord, Show)
+
+line_, column_ :: Lens' Pos Int
+line_   = lens line   (\p l -> p { line   = l })
+column_ = lens column (\p l -> p { column = l })
+
+
+-- Spans
+
+data Span = Span
+  { start :: {-# UNPACK #-} !Pos
+  , end   :: {-# UNPACK #-} !Pos
+  }
+  deriving (Eq, Ord, Show)
+
+instance Semigroup Span where
+  Span s1 e1 <> Span s2 e2 = Span (min s1 s2) (max e1 e2)
+
+start_, end_ :: Lens' Span Pos
+start_ = lens start (\p s -> p { start = s })
+end_   = lens end   (\p e -> p { end   = e })

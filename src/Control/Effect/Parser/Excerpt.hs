@@ -21,10 +21,6 @@ data Excerpt = Excerpt
   }
   deriving (Eq, Ord, Show)
 
-instance Span.HasSpan Excerpt where
-  span_ = lens span $ \ e span -> e{ span }
-  {-# INLINE span_ #-}
-
 instance Semigroup Excerpt where
   Excerpt _ l s1 <> Excerpt p _ s2 = Excerpt p l (s1 <> s2)
   {-# INLINE (<>) #-}
