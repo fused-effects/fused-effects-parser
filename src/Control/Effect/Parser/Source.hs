@@ -47,13 +47,11 @@ sourceFromString path = Source path . go
 takeLine :: String -> (Line, Either String String)
 takeLine = go id where
   go line = \case
-    ""             -> (mk EOF, Left "")
-    '\r':'\n':rest -> (mk CRLF, Right rest)
-    '\r':rest      -> (mk CR, Right rest)
-    '\n':rest      -> (mk LF, Right rest)
+    ""             -> (Line (line "") EOF, Left "")
+    '\r':'\n':rest -> (Line (line "") CRLF, Right rest)
+    '\r':rest      -> (Line (line "") CR, Right rest)
+    '\n':rest      -> (Line (line "") LF, Right rest)
     c   :rest      -> go (line . (c:)) rest
-    where
-    mk = Line (line "")
 {-# INLINE takeLine #-}
 
 (!) :: Source -> Span.Pos -> Line
