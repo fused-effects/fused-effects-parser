@@ -11,14 +11,14 @@ import           Control.Effect.Parser as Parser
 import           Control.Effect.Parser.Lens
 import           Control.Effect.Parser.Path (Path)
 import qualified Control.Effect.Parser.Path as Parser
-import qualified Control.Effect.Parser.Source as Parser
+import qualified Control.Effect.Parser.Source as Source
 import           Control.Effect.Reader
 import           Prelude hiding (span)
 import qualified Source.Span as Span
 
 data Excerpt = Excerpt
   { path :: !Path
-  , line :: !Parser.Line
+  , line :: !Source.Line
   , span :: {-# UNPACK #-} !Span.Span
   }
   deriving (Eq, Ord, Show)
@@ -35,7 +35,7 @@ path_ :: Lens' Excerpt Path
 path_ = lens path $ \ e path -> e{ path }
 {-# INLINE path_ #-}
 
-line_ :: Lens' Excerpt Parser.Line
+line_ :: Lens' Excerpt Source.Line
 line_ = lens line $ \ e line -> e{ line }
 {-# INLINE line_ #-}
 
@@ -48,10 +48,10 @@ spanned m = do
   pure (Span.Span start end, a)
 {-# INLINE spanned #-}
 
-excerpted :: (Has Parser sig m, Has (Reader Parser.Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpt, a)
+excerpted :: (Has Parser sig m, Has (Reader Source.Lines) sig m, Has (Reader Path) sig m) => m a -> m (Excerpt, a)
 excerpted m = do
   path <- Parser.path
-  line <- Parser.line
+  line <- Source.line
   (span, a) <- spanned m
   pure (Excerpt path line span, a)
 {-# INLINE excerpted #-}
