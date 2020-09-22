@@ -180,8 +180,6 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
 
     L Position           -> ParserC $ \ leaf _ _ input -> leaf input (pos input <$ ctx)
 
-    L P.Source           -> ParserC $ \ leaf _ _ input -> leaf input (src input <$ ctx)
-
     R (L Cutfail)        -> ParserC $ \ _ _ fail input -> fail (Err input Nothing mempty)
 
     R (L (Call m))       -> try (hdl (m <$ ctx))

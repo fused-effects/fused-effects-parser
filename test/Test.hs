@@ -6,7 +6,7 @@ module Main
 ) where
 
 import           Control.Applicative (Alternative(..))
-import           Control.Carrier.Parser.Church hiding (Source)
+import           Control.Carrier.Parser.Church
 import           Control.Effect.Parser.Notice as Notice
 import           Control.Effect.Parser.Source
 import           Control.Effect.Parser.Span (Pos(..))
