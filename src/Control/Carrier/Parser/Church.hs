@@ -26,14 +26,14 @@ module Control.Carrier.Parser.Church
 , expected_
 , errToNotice
   -- * Parser effect
-, module Control.Effect.Parser
+, module P
 ) where
 
 import           Control.Algebra
 import           Control.Carrier.Reader
 import           Control.Effect.Cut
 import           Control.Effect.NonDet
-import           Control.Effect.Parser
+import           Control.Effect.Parser as P
 import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Notice as Notice
@@ -57,20 +57,21 @@ import           Text.Parser.Combinators
 import           Text.Parser.Token (TokenParsing)
 
 runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC (ReaderC Source m) a -> m a
-runParserWithString pos input = runParserWith Nothing (Input pos input)
+runParserWithString = runParserWith Nothing
 {-# INLINE runParserWithString #-}
 
 runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Source m) a -> m a
 runParserWithFile path p = do
   input <- liftIO (readFile path)
-  runParserWith (Just path) (Input (Pos 0 0) input) p
+  runParserWith (Just path) (Pos 0 0) input p
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Has (Throw Notice.Notice) sig m => Maybe FilePath -> Input -> ParserC (ReaderC Source m) a -> m a
-runParserWith path input = runReader source . runParser (const pure) failure failure input
+runParserWith :: Has (Throw Notice.Notice) sig m => Maybe FilePath -> Pos -> String -> ParserC (ReaderC Source m) a -> m a
+runParserWith path pos str = runReader src . runParser (const pure) failure failure input
   where
-  source = sourceFromString path (str input)
-  failure = throwError . errToNotice source
+  input = Input{ src, pos, str }
+  src = sourceFromString path str
+  failure = throwError . errToNotice src
 {-# INLINE runParserWith #-}
 
 runParser
@@ -180,6 +181,8 @@ instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m
 
     L Position           -> ParserC $ \ leaf _ _ input -> leaf input (pos input <$ ctx)
 
+    L P.Source           -> ParserC $ \ leaf _ _ input -> leaf input (src input <$ ctx)
+
     R (L Cutfail)        -> ParserC $ \ _ _ fail input -> fail (Err input Nothing mempty)
 
     R (L (Call m))       -> try (hdl (m <$ ctx))
@@ -237,7 +240,8 @@ cutfailWith a e = ParserC (\ _ _   fail i -> fail (Err i a e))
 
 
 data Input = Input
-  { pos :: {-# UNPACK #-} !Pos
+  { src :: !Source
+  , pos :: {-# UNPACK #-} !Pos
   , str :: !String
   }
   deriving (Eq, Ord, Show)
@@ -252,8 +256,8 @@ str_ = lens str $ \ i str -> i{ str }
 
 advance :: Input -> Input
 advance = \case
-  Input pos (c:cs) -> Input (advancePos c pos) cs
-  i                -> i
+  Input src pos (c:cs) -> Input src (advancePos c pos) cs
+  i                    -> i
 {-# INLINE advance #-}
 
 advancePos :: Char -> Pos -> Pos
@@ -283,7 +287,7 @@ expected_ = lens expected $ \ i expected -> i{ expected }
 {-# INLINE expected_ #-}
 
 errToNotice :: Source -> Err -> Notice.Notice
-errToNotice source Err{ input = Input pos _, reason, expected } = Notice.Notice
+errToNotice source Err{ input = Input _ pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
   , excerpt = Excerpt (Source.path source) (source ! pos) (Span pos pos)
   , reason  = fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))

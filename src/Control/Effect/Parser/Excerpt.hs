@@ -7,7 +7,7 @@ module Control.Effect.Parser.Excerpt
 , excerpted
 ) where
 
-import           Control.Effect.Parser as Parser
+import qualified Control.Effect.Parser as Parser
 import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Source as Source
 import qualified Control.Effect.Parser.Span as Span
@@ -34,17 +34,17 @@ line_ = lens line $ \ e line -> e{ line }
 {-# INLINE line_ #-}
 
 
-spanned :: Has Parser sig m => m a -> m (Span.Span, a)
+spanned :: Has Parser.Parser sig m => m a -> m (Span.Span, a)
 spanned m = do
-  start <- position
+  start <- Parser.position
   a <- m
-  end <- position
+  end <- Parser.position
   pure (Span.Span start end, a)
 {-# INLINE spanned #-}
 
-excerpted :: (Has Parser sig m, Has (Reader Source.Source) sig m) => m a -> m (Excerpt, a)
+excerpted :: Has Parser.Parser sig m => m a -> m (Excerpt, a)
 excerpted m = do
-  Source.Source path lines <- Source.source
+  Source.Source path lines <- Parser.source
   (span, a) <- spanned m
   pure (Excerpt path (lines !! Span.line (Span.start span)) span, a)
 {-# INLINE excerpted #-}

@@ -5,13 +5,9 @@ module Control.Effect.Parser.Source
 , LineEnding(..)
 , sourceFromString
 , (!)
-, line
-, source
 ) where
 
-import           Control.Effect.Parser
 import qualified Control.Effect.Parser.Span as Span
-import           Control.Effect.Reader
 import qualified Prettyprinter as P
 
 data Source = Source
@@ -59,14 +55,3 @@ Source _ lines ! pos = lines !! Span.line pos
 {-# INLINE (!) #-}
 
 infixl 9 !
-
-
-line :: (Has Parser sig m, Has (Reader Source) sig m) => m Line
-line = do
-  pos <- position
-  asks (! pos)
-{-# INLINE line #-}
-
-source :: Has (Reader Source) sig m => m Source
-source = ask
-{-# INLINE source #-}
