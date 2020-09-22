@@ -30,7 +30,6 @@ module Control.Carrier.Parser.Church
 ) where
 
 import           Control.Algebra
-import           Control.Carrier.Reader
 import           Control.Effect.Cut
 import           Control.Effect.NonDet
 import           Control.Effect.Parser as P
@@ -56,18 +55,18 @@ import           Text.Parser.Char (CharParsing(..))
 import           Text.Parser.Combinators
 import           Text.Parser.Token (TokenParsing)
 
-runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC (ReaderC Source m) a -> m a
+runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC m a -> m a
 runParserWithString = runParserWith Nothing
 {-# INLINE runParserWithString #-}
 
-runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => FilePath -> ParserC (ReaderC Source m) a -> m a
+runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => FilePath -> ParserC m a -> m a
 runParserWithFile path p = do
   input <- liftIO (readFile path)
   runParserWith (Just path) (Pos 0 0) input p
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Has (Throw Notice.Notice) sig m => Maybe FilePath -> Pos -> String -> ParserC (ReaderC Source m) a -> m a
-runParserWith path pos str = runReader src . runParser (const pure) failure failure input
+runParserWith :: Has (Throw Notice.Notice) sig m => Maybe FilePath -> Pos -> String -> ParserC m a -> m a
+runParserWith path pos str = runParser (const pure) failure failure input
   where
   input = Input{ src, pos, str }
   src = sourceFromString path str

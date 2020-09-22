@@ -64,7 +64,6 @@ test-suite test
   build-depends:
     , base
     , containers
-    , fused-effects
     , fused-effects-parser
     , hedgehog ^>= 1
     , parsers
