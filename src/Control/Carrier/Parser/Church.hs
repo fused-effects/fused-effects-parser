@@ -70,7 +70,7 @@ runParserWith path pos str = runParser (const pure) failure failure input
   where
   input = Input{ src, pos, str }
   src = sourceFromString path str
-  failure = throwError . errToNotice src
+  failure = throwError . errToNotice
 {-# INLINE runParserWith #-}
 
 runParser
@@ -285,8 +285,8 @@ expected_ :: Lens' Err (Set String)
 expected_ = lens expected $ \ i expected -> i{ expected }
 {-# INLINE expected_ #-}
 
-errToNotice :: Source -> Err -> Notice.Notice
-errToNotice source Err{ input = Input _ pos _, reason, expected } = Notice.Notice
+errToNotice :: Err -> Notice.Notice
+errToNotice Err{ input = Input source pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
   , excerpt = Excerpt (Source.path source) (source ! pos) (Span pos pos)
   , reason  = fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
