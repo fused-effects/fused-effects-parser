@@ -14,7 +14,6 @@ module Control.Effect.Parser.Notice
 import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
 import           Control.Effect.Parser.Lines
-import           Data.List (isSuffixOf)
 import           Prettyprinter
 import           Prettyprinter.Render.Terminal (AnsiStyle, Color(..), color)
 import qualified Prettyprinter.Render.Terminal as ANSI
@@ -75,11 +74,11 @@ prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
   bold = annotate ANSI.bold
 
 prettyLine :: Line -> Doc AnsiStyle
-prettyLine (Line line)
-  | "\r\n" `isSuffixOf` line = pretty (init (init line)) <> blue (pretty "\\r\\n")
-  | "\r"   `isSuffixOf` line = pretty (init line) <> blue (pretty "\\r")
-  | "\n"   `isSuffixOf` line = pretty (init line) <> blue (pretty "\\n")
-  | otherwise                = pretty line <> blue (pretty "<end of input>")
+prettyLine (Line line end) = case end of
+  EOF  -> pretty line <> blue (pretty "<end of input>")
+  CRLF -> pretty (init (init line)) <> blue (pretty "\\r\\n")
+  CR   -> pretty (init line) <> blue (pretty "\\r")
+  LF   -> pretty (init line) <> blue (pretty "\\n")
 
 
 red, green, blue, magenta :: Doc AnsiStyle -> Doc AnsiStyle

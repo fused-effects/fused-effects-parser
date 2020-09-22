@@ -15,7 +15,7 @@ import qualified Source.Span as Span
 newtype Lines = Lines { getLines :: [Line] }
   deriving (Eq, Ord, Show)
 
-newtype Line = Line { getLine :: String }
+data Line = Line String LineEnding
   deriving (Eq, Ord, Show)
 
 data LineEnding
@@ -29,18 +29,20 @@ linesFromString :: String -> Lines
 linesFromString = Lines . go
   where
   go = \case
-    "" -> [Line ""]
+    "" -> [Line "" EOF]
     s  -> let (line, rest) = takeLine s in line : either (const []) go rest
 {-# INLINE linesFromString #-}
 
 takeLine :: String -> (Line, Either String String)
-takeLine = go Line where
+takeLine = go id where
   go line = \case
-    ""             -> (line "", Left "")
-    '\r':'\n':rest -> (line "\r\n", Right rest)
-    '\r':rest      -> (line "\r", Right rest)
-    '\n':rest      -> (line "\n", Right rest)
+    ""             -> (mk EOF, Left "")
+    '\r':'\n':rest -> (mk CRLF, Right rest)
+    '\r':rest      -> (mk CR, Right rest)
+    '\n':rest      -> (mk LF, Right rest)
     c   :rest      -> go (line . (c:)) rest
+    where
+    mk = Line (line "")
 {-# INLINE takeLine #-}
 
 (!) :: Lines -> Span.Pos -> Line
