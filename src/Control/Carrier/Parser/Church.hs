@@ -113,8 +113,8 @@ instance Alternative (ParserC m) where
       (\ el ->
         r
           leaf
-          (\ er -> nil  er{ reason = reason el <|> reason er, expected = expected el <> expected er })
-          (\ er -> fail er{ reason = reason el <|> reason er, expected = expected el <> expected er })
+          (\ er -> nil  (er & reason_ %~ (reason el <|>) & expected_ %~ (expected el <>)))
+          (\ er -> fail (er & reason_ %~ (reason el <|>) & expected_ %~ (expected el <>)))
           input)
       fail
       input
