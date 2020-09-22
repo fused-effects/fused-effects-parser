@@ -15,6 +15,7 @@ import           Data.Set
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
+import           Prelude hiding (lines)
 import           Source.Span (Pos(..))
 import           Test.Tasty
 import           Test.Tasty.Hedgehog
@@ -25,16 +26,16 @@ import           Text.Parser.Combinators
 main :: IO ()
 main = defaultMain $ testGroup "unit tests"
   [ parserTests
-  , testGroup "Lines"
-    [ testGroup "linesFromString"
+  , testGroup "Source"
+    [ testGroup "sourceFromString"
       [ testCase "returns the empty string for the empty string" $
-        linesFromString "" @?= Lines [Line "" EOF]
+        sourceFromString Nothing "" @?= Source Nothing [Line "" EOF]
       , testCase "returns two empty strings for a newline" $
-        linesFromString "\n" @?= Lines [Line "" LF, Line "" EOF]
+        sourceFromString Nothing "\n" @?= Source Nothing [Line "" LF, Line "" EOF]
       , testProperty "returns one more string than there are newlines" . property $ do
         s <- forAll (Gen.string (Range.linear 1 100)
           (Gen.frequency [ (5, Gen.unicode), (1, Gen.element "\t\r\n ") ]))
-        length (getLines (linesFromString s))
+        length (lines (sourceFromString Nothing s))
           === length (Prelude.filter (`elem` "\r\n") (replace "\r\n" "\n" s)) + 1
       ]
     ]

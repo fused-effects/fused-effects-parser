@@ -1,11 +1,9 @@
 {-# LANGUAGE LambdaCase #-}
 module Control.Effect.Parser.Source
 ( Source(..)
-, Lines(..)
 , Line(..)
 , LineEnding(..)
 , sourceFromString
-, linesFromString
 , (!)
 , line
 , source
@@ -20,9 +18,6 @@ data Source = Source
   { path  :: Maybe FilePath
   , lines :: [Line]
   }
-  deriving (Eq, Ord, Show)
-
-newtype Lines = Lines { getLines :: [Line] }
   deriving (Eq, Ord, Show)
 
 data Line = Line String LineEnding
@@ -44,16 +39,12 @@ instance P.Pretty LineEnding where
 
 
 sourceFromString :: Maybe FilePath -> String -> Source
-sourceFromString path = Source path . getLines . linesFromString
-
-
-linesFromString :: String -> Lines
-linesFromString = Lines . go
+sourceFromString path = Source path . go
   where
   go = \case
     "" -> [Line "" EOF]
     s  -> let (line, rest) = takeLine s in line : either (const []) go rest
-{-# INLINE linesFromString #-}
+{-# INLINE sourceFromString #-}
 
 takeLine :: String -> (Line, Either String String)
 takeLine = go id where
