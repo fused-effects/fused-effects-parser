@@ -11,7 +11,7 @@ import           Control.Carrier.Reader
 import           Control.Effect.Parser.Lines
 import           Control.Effect.Parser.Notice as Notice
 import           Control.Effect.Parser.Path
-import           Data.List
+import           Data.List (isPrefixOf)
 import           Data.Set
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
