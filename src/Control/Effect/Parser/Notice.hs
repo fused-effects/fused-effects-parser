@@ -74,11 +74,7 @@ prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
   bold = annotate ANSI.bold
 
 prettyLine :: Line -> Doc AnsiStyle
-prettyLine (Line line end) = mappend (pretty line) . blue $ case end of
-  EOF  -> pretty "<end of input>"
-  CRLF -> pretty "\\r\\n"
-  CR   -> pretty "\\r"
-  LF   -> pretty "\\n"
+prettyLine (Line line end) = pretty line <> blue (pretty end)
 
 
 red, green, blue, magenta :: Doc AnsiStyle -> Doc AnsiStyle
