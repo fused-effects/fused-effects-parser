@@ -9,7 +9,6 @@ import           Control.Applicative (Alternative(..))
 import           Control.Carrier.Parser.Church
 import           Control.Carrier.Reader
 import           Control.Effect.Parser.Notice as Notice
-import           Control.Effect.Parser.Path
 import           Control.Effect.Parser.Source
 import           Data.List (isPrefixOf)
 import           Data.Set
@@ -74,7 +73,7 @@ parserTests = testGroup "ParserC (Church)"
   ]
 
 
-parsesInto :: (Eq a, Show a) => ParserC (ReaderC Path (ReaderC Source (Either Notice))) a -> String -> a -> Assertion
+parsesInto :: (Eq a, Show a) => ParserC (ReaderC Source (Either Notice)) a -> String -> a -> Assertion
 parsesInto p s expected = case runParserWithString (Pos 0 0) s p of
   Left  err    -> assertFailure (show err)
   Right actual -> actual @?= expected

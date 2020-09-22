@@ -57,18 +57,18 @@ import           Text.Parser.Char (CharParsing(..))
 import           Text.Parser.Combinators
 import           Text.Parser.Token (TokenParsing)
 
-runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC (ReaderC Path (ReaderC Source m)) a -> m a
+runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC (ReaderC Source m) a -> m a
 runParserWithString pos input = runParserWith (Path "(interactive)") (Input pos input)
 {-# INLINE runParserWithString #-}
 
-runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => Path -> ParserC (ReaderC Path (ReaderC Source m)) a -> m a
+runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => Path -> ParserC (ReaderC Source m) a -> m a
 runParserWithFile path p = do
   input <- liftIO (readFile (getPath path))
   runParserWith path (Input (Pos 0 0) input) p
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Has (Throw Notice.Notice) sig m => Path -> Input -> ParserC (ReaderC Path (ReaderC Source m)) a -> m a
-runParserWith path input = runReader source . runReader path . runParser (const pure) failure failure input
+runParserWith :: Has (Throw Notice.Notice) sig m => Path -> Input -> ParserC (ReaderC Source m) a -> m a
+runParserWith path input = runReader source . runParser (const pure) failure failure input
   where
   source = sourceFromString (Just (getPath path)) (str input)
   failure = throwError . errToNotice source
