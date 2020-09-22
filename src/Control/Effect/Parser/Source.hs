@@ -4,6 +4,7 @@ module Control.Effect.Parser.Source
 , Lines(..)
 , Line(..)
 , LineEnding(..)
+, sourceFromString
 , linesFromString
 , (!)
 , line
@@ -40,6 +41,10 @@ instance P.Pretty LineEnding where
     CRLF -> "\\r\\n"
     CR   -> "\\r"
     LF   -> "\\n"
+
+
+sourceFromString :: Maybe FilePath -> String -> Source
+sourceFromString path = Source path . getLines . linesFromString
 
 
 linesFromString :: String -> Lines
