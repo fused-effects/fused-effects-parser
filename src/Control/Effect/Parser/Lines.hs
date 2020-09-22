@@ -19,7 +19,8 @@ newtype Line = Line { getLine :: String }
   deriving (Eq, Ord, Show)
 
 data LineEnding
-  = CR
+  = EOF
+  | CR
   | LF
   | CRLF
   deriving (Bounded, Enum, Eq, Ord, Show)
