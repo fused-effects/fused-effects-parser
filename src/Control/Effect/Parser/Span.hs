@@ -10,6 +10,7 @@ module Control.Effect.Parser.Span
 ) where
 
 import Control.Effect.Parser.Lens
+import Data.Functor.Classes (showsBinaryWith)
 
 -- Positions
 
@@ -17,7 +18,10 @@ data Pos = Pos
   { line   :: {-# UNPACK #-} !Int
   , column :: {-# UNPACK #-} !Int
   }
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
+
+instance Show Pos where
+  showsPrec p (Pos l c) = showsBinaryWith showsPrec showsPrec "Pos" p l c
 
 line_, column_ :: Lens' Pos Int
 line_   = lens line   (\p l -> p { line   = l })
