@@ -44,6 +44,7 @@ library
     Control.Effect.Parser.Excerpt
     Control.Effect.Parser.Notice
     Control.Effect.Parser.Source
+    Control.Effect.Parser.Span
   other-modules:
     Control.Effect.Parser.Lens
   build-depends:
