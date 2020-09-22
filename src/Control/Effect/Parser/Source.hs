@@ -7,6 +7,7 @@ module Control.Effect.Parser.Source
 , linesFromString
 , line
 , (!)
+, source
 ) where
 
 import           Control.Effect.Parser
@@ -73,3 +74,7 @@ line = do
   pos <- position
   asks (! pos)
 {-# INLINE line #-}
+
+source :: Has (Reader Source) sig m => m Source
+source = ask
+{-# INLINE source #-}
