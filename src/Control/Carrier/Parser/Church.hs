@@ -56,20 +56,19 @@ import           Text.Parser.Combinators
 import           Text.Parser.Token (TokenParsing)
 
 runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC m a -> m a
-runParserWithString = runParserWith Nothing
+runParserWithString pos str = runParserWith Nothing (Input pos str)
 {-# INLINE runParserWithString #-}
 
 runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => FilePath -> ParserC m a -> m a
 runParserWithFile path p = do
   input <- liftIO (readFile path)
-  runParserWith (Just path) (Pos 0 0) input p
+  runParserWith (Just path) (Input (Pos 0 0) input) p
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Has (Throw Notice.Notice) sig m => Maybe FilePath -> Pos -> String -> ParserC m a -> m a
-runParserWith path pos str = runParser (const pure) failure failure input
+runParserWith :: Has (Throw Notice.Notice) sig m => Maybe FilePath -> Input -> ParserC m a -> m a
+runParserWith path input = runParser (const pure) failure failure input
   where
-  input = Input{ pos, str }
-  src = sourceFromString path str
+  src = sourceFromString path (str input)
   failure = throwError . errToNotice src
 {-# INLINE runParserWith #-}
 
