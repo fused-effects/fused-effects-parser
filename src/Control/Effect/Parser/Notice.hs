@@ -14,6 +14,7 @@ module Control.Effect.Parser.Notice
 import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
 import           Control.Effect.Parser.Source
+import           Data.Maybe (fromMaybe)
 import           Prettyprinter
 import           Prettyprinter.Render.Terminal (AnsiStyle, Color(..), color)
 import qualified Prettyprinter.Render.Terminal as ANSI
@@ -53,7 +54,7 @@ context_ = lens context $ \ n context -> n{ context }
 prettyNotice :: Notice -> Doc AnsiStyle
 prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
   ( nest 2 (group (fillSep
-    [ bold (pretty path) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . prettyLevel) level
+    [ bold (pretty (fromMaybe "(interactive)" path)) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . prettyLevel) level
     , reason
     ]))
   : blue (pretty (succ (Span.line (Span.start span)))) <+> align (vcat
