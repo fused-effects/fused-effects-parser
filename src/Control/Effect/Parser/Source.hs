@@ -41,9 +41,7 @@ instance P.Pretty LineEnding where
 sourceFromString :: Maybe FilePath -> String -> Source
 sourceFromString path = Source path . go
   where
-  go = \case
-    "" -> [Line "" EOF]
-    s  -> let (line, rest) = takeLine s in line : either (const []) go rest
+  go s = let (line, rest) = takeLine s in line : either (const []) go rest
 {-# INLINE sourceFromString #-}
 
 takeLine :: String -> (Line, Either String String)
