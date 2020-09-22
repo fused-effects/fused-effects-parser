@@ -4,6 +4,7 @@ module Control.Effect.Parser
   Parser(..)
 , accept
 , position
+, spanned
 , source
 , line
   -- * Re-exports
@@ -31,6 +32,14 @@ accept p = send (Accept p)
 position :: Has Parser sig m => m Span.Pos
 position = send Position
 {-# INLINE position #-}
+
+spanned :: Has Parser sig m => m a -> m (Span.Span, a)
+spanned m = do
+  start <- position
+  a <- m
+  end <- position
+  pure (Span.Span start end, a)
+{-# INLINE spanned #-}
 
 source :: Has Parser sig m => m Source.Source
 source = send Source
