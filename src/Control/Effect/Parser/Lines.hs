@@ -2,6 +2,7 @@
 module Control.Effect.Parser.Lines
 ( Lines(..)
 , Line(..)
+, LineEnding(..)
 , linesFromString
 , line
 , (!)
@@ -16,6 +17,12 @@ newtype Lines = Lines { getLines :: [Line] }
 
 newtype Line = Line { getLine :: String }
   deriving (Eq, Ord, Show)
+
+data LineEnding
+  = CR
+  | LF
+  | CRLF
+  deriving (Bounded, Enum, Eq, Ord, Show)
 
 linesFromString :: String -> Lines
 linesFromString = Lines . go
