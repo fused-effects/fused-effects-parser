@@ -18,7 +18,7 @@ import qualified Source.Span as Span
 
 data Excerpt = Excerpt
   { path :: !Path
-  , line :: !String
+  , line :: !Parser.Line
   , span :: {-# UNPACK #-} !Span.Span
   }
   deriving (Eq, Ord, Show)
@@ -35,7 +35,7 @@ path_ :: Lens' Excerpt Path
 path_ = lens path $ \ e path -> e{ path }
 {-# INLINE path_ #-}
 
-line_ :: Lens' Excerpt String
+line_ :: Lens' Excerpt Parser.Line
 line_ = lens line $ \ e line -> e{ line }
 {-# INLINE line_ #-}
 

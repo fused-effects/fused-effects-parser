@@ -11,7 +11,7 @@ import           Control.Effect.Parser
 import           Control.Effect.Reader
 import qualified Source.Span as Span
 
-newtype Lines = Lines { getLines :: [String] }
+newtype Lines = Lines { getLines :: [Line] }
   deriving (Eq, Ord, Show)
 
 newtype Line = Line { getLine :: String }
@@ -21,12 +21,12 @@ linesFromString :: String -> Lines
 linesFromString = Lines . go
   where
   go = \case
-    "" -> [""]
+    "" -> [Line ""]
     s  -> let (line, rest) = takeLine s in line : either (const []) go rest
 {-# INLINE linesFromString #-}
 
-takeLine :: String -> (String, Either String String)
-takeLine = go id where
+takeLine :: String -> (Line, Either String String)
+takeLine = go Line where
   go line = \case
     ""        -> (line "", Left "")
     '\r':rest -> case rest of
@@ -36,14 +36,14 @@ takeLine = go id where
     c   :rest -> go (line . (c:)) rest
 {-# INLINE takeLine #-}
 
-(!) :: Lines -> Span.Pos -> String
+(!) :: Lines -> Span.Pos -> Line
 Lines lines ! pos = lines !! Span.line pos
 {-# INLINE (!) #-}
 
 infixl 9 !
 
 
-line :: (Has Parser sig m, Has (Reader Lines) sig m) => m String
+line :: (Has Parser sig m, Has (Reader Lines) sig m) => m Line
 line = do
   pos <- position
   asks (! pos)
