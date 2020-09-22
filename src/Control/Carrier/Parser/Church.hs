@@ -114,13 +114,15 @@ instance Alternative (ParserC m) where
         if pos (input el) == pos i then
           r
             leaf
-            (\ er -> nil  (er & reason_ %~ (<|> reason el) & if null (expected er) then expected_ .~ expected el else id))
-            (\ er -> fail (er & reason_ %~ (<|> reason el) & if null (expected er) then expected_ .~ expected el else id))
+            (nil  . extend el)
+            (fail . extend el)
             i
           else
             fail el)
       fail
       i
+    where
+    extend el er = er & reason_ %~ (<|> reason el) & if null (expected er) then expected_ .~ expected el else id
   {-# INLINE (<|>) #-}
 
 instance Monad (ParserC m) where
