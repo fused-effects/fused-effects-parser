@@ -34,10 +34,13 @@ data Span = Span
   { start :: {-# UNPACK #-} !Pos
   , end   :: {-# UNPACK #-} !Pos
   }
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
 
 instance Semigroup Span where
   Span s1 e1 <> Span s2 e2 = Span (min s1 s2) (max e1 e2)
+
+instance Show Span where
+  showsPrec p (Span s e) = showsBinaryWith showsPrec showsPrec "Span" p s e
 
 start_, end_ :: Lens' Span Pos
 start_ = lens start (\p s -> p { start = s })
