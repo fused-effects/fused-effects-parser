@@ -110,12 +110,12 @@ instance Alternative (ParserC m) where
   ParserC l <|> ParserC r = ParserC $ \ leaf nil fail i ->
     l
       leaf
+      (\ el -> r leaf (nil  . extend el) (fail . extend el) i)
       (\ el ->
         if pos (input el) == pos i then
-          r leaf (nil  . extend el) (fail . extend el) i
+          nil el
         else
           fail el)
-      fail
       i
     where
     extend el er = er & reason_ %~ (<|> reason el) & if null (expected er) then expected_ .~ expected el else id
@@ -177,10 +177,10 @@ instance CharParsing (ParserC m) where
 instance TokenParsing (ParserC m)
 
 acceptC :: (Char -> Maybe a) -> ParserC m a
-acceptC p = ParserC $ \ leaf nil _ input -> case str input of
+acceptC p = ParserC $ \ leaf _ fail input -> case str input of
   c:_ | Just a <- p c -> leaf (advance input) a
-      | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
-  _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
+      | otherwise     -> fail (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
+  _                   -> fail (Err input (Just (pretty "unexpected end of input")) mempty)
 {-# INLINE acceptC #-}
 
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
