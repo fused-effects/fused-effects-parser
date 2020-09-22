@@ -27,6 +27,8 @@ module Control.Carrier.Parser.Church
 , errToNotice
   -- * Parser effect
 , module P
+  -- * Cut effect
+, module Control.Effect.Cut
 ) where
 
 import           Control.Algebra
