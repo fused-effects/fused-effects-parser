@@ -153,7 +153,11 @@ instance Parsing (ParserC m) where
     (fail . (expected_ .~ singleton s))
   {-# INLINE (<?>) #-}
 
-  notFollowedBy p = try (optional p >>= maybe (pure ()) (unexpected . ("unexpected " <>) . show))
+  notFollowedBy p = ParserC $ \ leaf nil _ input -> runParserC p
+    (\ _ a -> nil (Err input (Just (pretty (show a))) mempty))
+    (\ _ -> leaf input ())
+    (\ _ -> leaf input ())
+    input
   {-# INLINE notFollowedBy #-}
 
 instance CharParsing (ParserC m) where
