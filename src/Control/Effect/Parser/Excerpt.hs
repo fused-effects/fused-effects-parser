@@ -9,9 +9,9 @@ module Control.Effect.Parser.Excerpt
 
 import           Control.Effect.Parser as Parser
 import           Control.Effect.Parser.Lens
-import qualified Control.Effect.Parser.Lines as Parser
 import           Control.Effect.Parser.Path (Path)
 import qualified Control.Effect.Parser.Path as Parser
+import qualified Control.Effect.Parser.Source as Parser
 import           Control.Effect.Reader
 import           Prelude hiding (span)
 import qualified Source.Span as Span

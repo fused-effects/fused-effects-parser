@@ -36,9 +36,9 @@ import           Control.Effect.NonDet
 import           Control.Effect.Parser
 import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
-import           Control.Effect.Parser.Lines
 import qualified Control.Effect.Parser.Notice as Notice
 import           Control.Effect.Parser.Path
+import           Control.Effect.Parser.Source
 import           Control.Effect.Throw
 import           Control.Monad (ap)
 import           Control.Monad.Fail as Fail

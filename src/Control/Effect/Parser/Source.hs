@@ -1,5 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
-module Control.Effect.Parser.Lines
+module Control.Effect.Parser.Source
 ( Lines(..)
 , Line(..)
 , LineEnding(..)

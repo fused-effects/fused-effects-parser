@@ -13,7 +13,7 @@ module Control.Effect.Parser.Notice
 
 import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
-import           Control.Effect.Parser.Lines
+import           Control.Effect.Parser.Source
 import           Prettyprinter
 import           Prettyprinter.Render.Terminal (AnsiStyle, Color(..), color)
 import qualified Prettyprinter.Render.Terminal as ANSI

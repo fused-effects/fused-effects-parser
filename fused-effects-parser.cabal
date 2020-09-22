@@ -42,9 +42,9 @@ library
     Control.Carrier.Parser.Church
     Control.Effect.Parser
     Control.Effect.Parser.Excerpt
-    Control.Effect.Parser.Lines
     Control.Effect.Parser.Notice
     Control.Effect.Parser.Path
+    Control.Effect.Parser.Source
   other-modules:
     Control.Effect.Parser.Lens
   build-depends:
