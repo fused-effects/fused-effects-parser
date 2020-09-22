@@ -4,14 +4,11 @@ module Control.Effect.Parser.Excerpt
 , fromSourceAndSpan
 , path_
 , line_
-, excerpted
 ) where
 
-import qualified Control.Effect.Parser as Parser
 import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Source as Source
 import qualified Control.Effect.Parser.Span as Span
-import           Control.Effect.Reader
 import           Prelude hiding (span)
 
 data Excerpt = Excerpt
@@ -37,11 +34,3 @@ path_ = lens path $ \ e path -> e{ path }
 line_ :: Lens' Excerpt Source.Line
 line_ = lens line $ \ e line -> e{ line }
 {-# INLINE line_ #-}
-
-
-excerpted :: Has Parser.Parser sig m => m a -> m (Excerpt, a)
-excerpted m = do
-  src <- Parser.source
-  (span, a) <- Parser.spanned m
-  pure (fromSourceAndSpan src span, a)
-{-# INLINE excerpted #-}
