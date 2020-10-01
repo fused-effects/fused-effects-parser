@@ -46,6 +46,7 @@ library
     Control.Effect.Parser.Source
     Control.Effect.Parser.Span
   other-modules:
+    Control.Effect.Parser.GHCI
     Control.Effect.Parser.Lens
   build-depends:
     , base >= 4.12 && < 5
