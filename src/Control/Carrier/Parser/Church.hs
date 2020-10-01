@@ -163,7 +163,7 @@ instance Parsing (ParserC m) where
   m <?> s = ParserC $ \ leaf nil fail -> runParserC m
     leaf
     (nil  . (expected_ .~ singleton s))
-    (fail . (expected_ .~ singleton s))
+    fail
   {-# INLINE (<?>) #-}
 
   notFollowedBy p = ParserC $ \ leaf nil _ input -> runParserC p
