@@ -127,7 +127,10 @@ instance Alternative (ParserC m) where
   {-# INLINE (<|>) #-}
 
 instance Monad (ParserC m) where
-  ParserC m >>= f = ParserC (\ leaf nil fail -> m (\ input -> runParser leaf nil fail input . f) nil fail)
+  ParserC m >>= f = ParserC $ \ leaf nil fail i -> m (\ i' -> if pos i == pos i' then
+    runParser leaf nil fail i' . f
+  else
+    runParser leaf fail fail i' . f) nil fail i
   {-# INLINE (>>=) #-}
 
 instance Algebra sig m => Fail.MonadFail (ParserC m) where
