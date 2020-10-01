@@ -37,4 +37,8 @@
 
 import Control.Carrier.Parser.Church
 import Control.Effect.Parser.Notice
+import Control.Effect.Parser.Span
 import Main
+import Text.Parser.Char
+import Text.Parser.Combinators
+import Text.Parser.Token
