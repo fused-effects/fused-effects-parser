@@ -33,9 +33,10 @@
 :seti -Wno-type-defaults
 :set -Wno-unused-packages
 
-:load Control.Carrier.Parser.Church test/Test.hs
+:load Control.Carrier.Parser.Church Control.Effect.Parser.GHCI test/Test.hs
 
 import Control.Carrier.Parser.Church
+import Control.Effect.Parser.GHCI
 import Control.Effect.Parser.Notice
 import Control.Effect.Parser.Span
 import Main
