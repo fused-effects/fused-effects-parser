@@ -46,6 +46,7 @@ import           Control.Monad.Fail as Fail
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
+import           Control.Selective
 import           Data.Coerce (coerce)
 import           Data.Functor.Compose
 import           Data.Functor.Identity
@@ -120,6 +121,10 @@ instance Alternative (ParserC m) where
     where
     extend el er = er & reason_ %~ (<|> reason el) & if null (expected er) then expected_ .~ expected el else id
   {-# INLINE (<|>) #-}
+
+instance Selective (ParserC m) where
+  select = selectM
+  {-# INLINE select #-}
 
 instance Monad (ParserC m) where
   ParserC m >>= f = ParserC $ \ leaf nil fail i -> m (\ i' -> if pos i == pos i' then
