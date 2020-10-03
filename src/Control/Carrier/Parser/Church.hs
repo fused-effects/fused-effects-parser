@@ -113,7 +113,7 @@ instance Alternative (ParserC m) where
       leaf
       (\ el -> r
         leaf
-        (nil . extend el)
+        (nil  . extend el)
         (fail . extend el)
         i)
       fail
