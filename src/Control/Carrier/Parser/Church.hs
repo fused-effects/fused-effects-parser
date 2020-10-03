@@ -128,10 +128,7 @@ instance Selective (ParserC m) where
 
 instance Monad (ParserC m) where
   ParserC m >>= f = ParserC $ \ leaf nil fail i -> m
-    (\ i' -> if pos i == pos i' then
-      runParser leaf nil  fail i' . f
-    else
-      runParser leaf fail fail i' . f)
+    (\ i' -> runParser leaf (if pos i == pos i' then nil else fail) fail i' . f)
     nil
     fail
     i
