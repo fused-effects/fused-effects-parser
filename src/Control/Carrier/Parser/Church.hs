@@ -119,7 +119,7 @@ instance Alternative (ParserC m) where
       fail
       i
     where
-    extend el er = er & reason_ %~ (<|> reason el) & if null (expected er) then expected_ .~ expected el else id
+    extend el er = er & reason_ %~ (<|> reason el) & expected_ %~ (expected el <>)
   {-# INLINE (<|>) #-}
 
 instance Selective (ParserC m) where
