@@ -55,6 +55,7 @@ library
     , parsers ^>= 0.12
     , prettyprinter ^>= 1.7
     , prettyprinter-ansi-terminal ^>= 1.1
+    , selective ^>= 0.4
     , transformers >= 0.4 && < 0.6
 
 test-suite test
