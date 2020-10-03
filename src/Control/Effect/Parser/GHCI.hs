@@ -51,22 +51,3 @@ _Type = token (symbol "Type") <?> "Type"
 
 var :: TokenParsing m => String -> m String
 var v = token (symbol v) <?> v
-
-{-
-
-m
-  eo
-  (\e ->
-    n
-      (\a e' -> eo a (e <> e'))
-      (\e' -> ee (e <> e'))
-      co
-      ce
-      d
-      bs)
-  co
-  ce
-  d
-  bs
-
--}
