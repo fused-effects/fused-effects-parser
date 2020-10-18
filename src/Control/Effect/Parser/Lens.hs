@@ -1,6 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
 module Control.Effect.Parser.Lens
-( Lens'
+( Lens
+, Lens'
 , lens
 , (.~)
 , (%~)
@@ -11,6 +12,7 @@ import Data.Coerce (coerce)
 import Data.Function
 import Data.Functor.Identity
 
+type Lens s t a b = forall f . Functor f => (a -> f b) -> (s -> f t)
 type Lens' s a = forall f . Functor f => (a -> f a) -> (s -> f s)
 
 lens :: (s -> a) -> (s -> a -> s) -> Lens' s a
