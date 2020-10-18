@@ -52,7 +52,6 @@ import           Data.Functor.Compose
 import           Data.Functor.Identity
 import           Data.Maybe (fromMaybe)
 import           Data.Set (Set, singleton, toList)
-import           Data.Void
 import           Prettyprinter
 import           Text.Parser.Char (CharParsing(..))
 import           Text.Parser.Combinators
@@ -302,7 +301,7 @@ expected_ :: Lens' Err (Set String)
 expected_ = lens expected $ \ i expected -> i{ expected }
 {-# INLINE expected_ #-}
 
-errToNotice :: Source -> Err -> Notice.Notice Void
+errToNotice :: Source -> Err -> Notice.Notice a
 errToNotice source Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
   , excerpt = fromSourceAndSpan source (Span pos pos)
