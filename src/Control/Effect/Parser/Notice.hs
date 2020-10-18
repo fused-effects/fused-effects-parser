@@ -58,48 +58,48 @@ reAnnotateNotice f Notice{ level, excerpt, reason, context} = Notice{ level, exc
 
 
 data Style a = Style
-  { pathStyle   :: a
-  , levelStyle  :: Level -> a
-  , posStyle    :: a
-  , gutterStyle :: a
-  , eofStyle    :: a
-  , caretStyle  :: a
+  { pathStyle   :: Doc a -> Doc a
+  , levelStyle  :: Level -> Doc a -> Doc a
+  , posStyle    :: Doc a -> Doc a
+  , gutterStyle :: Doc a -> Doc a
+  , eofStyle    :: Doc a -> Doc a
+  , caretStyle  :: Doc a -> Doc a
   }
 
 ansiStyle :: Style AnsiStyle
 ansiStyle = Style
-  { pathStyle   = bold
+  { pathStyle   = annotate bold
   , levelStyle  = \case
-    Warn  -> color Magenta
-    Error -> color Red
-  , posStyle    = bold
-  , gutterStyle = color Blue
-  , eofStyle    = color Blue
-  , caretStyle  = color Green
+    Warn  -> annotate (color Magenta)
+    Error -> annotate (color Red)
+  , posStyle    = annotate bold
+  , gutterStyle = annotate (color Blue)
+  , eofStyle    = annotate (color Blue)
+  , caretStyle  = annotate (color Green)
   }
 
 prettyNoticeWith :: Style a -> Notice a -> Doc a
 prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, caretStyle } (Notice level (Excerpt path line span) reason context) = vsep
   ( nest 2 (group (fillSep
-    [ annotate pathStyle (pretty (fromMaybe "(interactive)" path)) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . (annotate . levelStyle <*> pretty)) level
+    [ pathStyle (pretty (fromMaybe "(interactive)" path)) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . (levelStyle <*> pretty)) level
     , reason
     ]))
-  : annotate gutterStyle (pretty (succ (Span.line (Span.start span)))) <+> align (vcat
-    [ annotate gutterStyle (pretty '|') <+> prettyLine line
-    , annotate gutterStyle (pretty '|') <+> padding span <> caret span
+  : gutterStyle (pretty (succ (Span.line (Span.start span)))) <+> align (vcat
+    [ gutterStyle (pretty '|') <+> prettyLine line
+    , gutterStyle (pretty '|') <+> padding span <> caret span
     ])
   : context)
   where
-  pos (Pos l c) = annotate posStyle (pretty (succ l)) <> colon <> annotate posStyle (pretty (succ c))
+  pos (Pos l c) = posStyle (pretty (succ l)) <> colon <> posStyle (pretty (succ c))
 
   padding (Span (Pos _ c) _) = pretty (replicate c ' ')
 
   caret (Span start@(Pos sl sc) end@(Pos el ec))
-    | start == end = annotate caretStyle (pretty '^')
-    | sl    == el  = annotate caretStyle (pretty (replicate (ec - sc) '~'))
-    | otherwise    = annotate caretStyle (pretty "^…")
+    | start == end = caretStyle (pretty '^')
+    | sl    == el  = caretStyle (pretty (replicate (ec - sc) '~'))
+    | otherwise    = caretStyle (pretty "^…")
 
-  prettyLine (Line line end) = pretty line <> annotate eofStyle (pretty end)
+  prettyLine (Line line end) = pretty line <> eofStyle (pretty end)
 
 
 prettyNotice :: Notice AnsiStyle -> Doc AnsiStyle
