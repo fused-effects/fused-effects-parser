@@ -5,6 +5,7 @@ module Control.Effect.Parser.Source
 , LineEnding(..)
 , sourceFromString
 , (!)
+, (!..)
 ) where
 
 import qualified Control.Effect.Parser.Span as Span
@@ -56,3 +57,15 @@ Source _ lines ! pos = lines NE.!! Span.line pos
 {-# INLINE (!) #-}
 
 infixl 9 !
+
+(!..) :: Source -> Span.Span -> NE.NonEmpty Line
+Source _ lines !.. span
+  = NE.fromList
+  $ take (endLine - startLine + 1)
+  $ NE.drop startLine lines
+  where
+  startLine = Span.line (Span.start span)
+  endLine   = Span.line (Span.end   span)
+{-# INLINE (!..) #-}
+
+infixl 9 !..
