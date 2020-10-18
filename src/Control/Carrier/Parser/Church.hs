@@ -287,7 +287,7 @@ data Err = Err
   , reason   :: !(Maybe String)
   , expected :: !(Set String)
   }
-  deriving (Show)
+  deriving (Eq, Ord, Show)
 
 
 input_ :: Lens' Err Input
