@@ -39,16 +39,16 @@ data Notice a = Notice
   }
   deriving (Show)
 
-level_ :: Lens' (Notice AnsiStyle) (Maybe Level)
+level_ :: Lens' (Notice a) (Maybe Level)
 level_ = lens level $ \ n level -> n{ level }
 
-excerpt_ :: Lens' (Notice AnsiStyle) Excerpt
+excerpt_ :: Lens' (Notice a) Excerpt
 excerpt_ = lens excerpt $ \ n excerpt -> n{ excerpt }
 
-reason_ :: Lens' (Notice AnsiStyle) (Doc AnsiStyle)
+reason_ :: Lens' (Notice a) (Doc a)
 reason_ = lens reason $ \ n reason -> n{ reason }
 
-context_ :: Lens' (Notice AnsiStyle) [Doc AnsiStyle]
+context_ :: Lens' (Notice a) [Doc a]
 context_ = lens context $ \ n context -> n{ context }
 
 prettyNotice :: Notice AnsiStyle -> Doc AnsiStyle
