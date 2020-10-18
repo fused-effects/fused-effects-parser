@@ -113,5 +113,5 @@ prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, 
   prettyLine (Line line end) = pretty line <> eofStyle (pretty end)
 
 
-prettyNotice :: Notice AnsiStyle -> Doc AnsiStyle
-prettyNotice = prettyNoticeWith ansiStyle
+prettyNotice :: Notice a -> Doc a
+prettyNotice = prettyNoticeWith identityStyle
