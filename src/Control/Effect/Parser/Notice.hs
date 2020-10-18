@@ -9,6 +9,7 @@ module Control.Effect.Parser.Notice
 , reason_
 , context_
 , Style(..)
+, ansiStyle
 , prettyNotice
 ) where
 
@@ -18,7 +19,7 @@ import           Control.Effect.Parser.Source
 import           Control.Effect.Parser.Span as Span
 import           Data.Maybe (fromMaybe)
 import           Prettyprinter
-import           Prettyprinter.Render.Terminal (AnsiStyle, Color(..), color)
+import           Prettyprinter.Render.Terminal (AnsiStyle, Color(..), bold, color)
 import qualified Prettyprinter.Render.Terminal as ANSI
 
 data Level
@@ -65,6 +66,18 @@ data Style a = Style
   , gutterStyle :: a
   , eofStyle    :: a
   , caretStyle  :: a
+  }
+
+ansiStyle :: Style AnsiStyle
+ansiStyle = Style
+  { pathStyle   = bold
+  , levelStyle  = \case
+    Warn  -> color Magenta
+    Error -> color Red
+  , posStyle    = bold
+  , gutterStyle = color Blue
+  , eofStyle    = color Blue
+  , caretStyle  = color Green
   }
 
 prettyNotice :: Notice AnsiStyle -> Doc AnsiStyle
