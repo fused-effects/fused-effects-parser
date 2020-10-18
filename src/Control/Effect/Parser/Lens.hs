@@ -19,7 +19,7 @@ lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens get put afa s = fmap (put s) (afa (get s))
 {-# INLINE lens #-}
 
-(.~) :: Lens' s a -> a -> s -> s
+(.~) :: Lens s t a b -> b -> s -> t
 l .~ b = coerce . l (const (Identity b))
 {-# INLINE (.~) #-}
 
