@@ -14,7 +14,7 @@ import Text.Parser.Char
 import Text.Parser.Combinators
 import Text.Parser.Token
 
-parse :: Show a => ParserC (Either Notice) a -> String -> IO ()
+parse :: Show a => ParserC (Either (Notice AnsiStyle)) a -> String -> IO ()
 parse p s = do
   let v = runParserWithString (Pos 0 0) s p
   either (putDoc . (<> line) . prettyNotice) print v

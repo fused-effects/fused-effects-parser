@@ -16,6 +16,7 @@ import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 import           Prelude hiding (lines)
+import           Prettyprinter.Render.Terminal (AnsiStyle)
 import           Test.Tasty
 import           Test.Tasty.Hedgehog
 import           Test.Tasty.HUnit
@@ -73,7 +74,7 @@ parserTests = testGroup "ParserC (Church)"
   ]
 
 
-parsesInto :: (Eq a, Show a) => ParserC (Either Notice) a -> String -> a -> Assertion
+parsesInto :: (Eq a, Show a) => ParserC (Either (Notice AnsiStyle)) a -> String -> a -> Assertion
 parsesInto p s expected = case runParserWithString (Pos 0 0) s p of
   Left  err    -> assertFailure (show err)
   Right actual -> actual @?= expected

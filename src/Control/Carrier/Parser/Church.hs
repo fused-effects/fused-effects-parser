@@ -58,17 +58,17 @@ import           Text.Parser.Char (CharParsing(..))
 import           Text.Parser.Combinators
 import           Text.Parser.Token (TokenParsing)
 
-runParserWithString :: Has (Throw Notice.Notice) sig m => Pos -> String -> ParserC m a -> m a
+runParserWithString :: Has (Throw (Notice.Notice AnsiStyle)) sig m => Pos -> String -> ParserC m a -> m a
 runParserWithString pos str = runParserWith Nothing (Input pos str)
 {-# INLINE runParserWithString #-}
 
-runParserWithFile :: (Has (Throw Notice.Notice) sig m, MonadIO m) => FilePath -> ParserC m a -> m a
+runParserWithFile :: (Has (Throw (Notice.Notice AnsiStyle)) sig m, MonadIO m) => FilePath -> ParserC m a -> m a
 runParserWithFile path p = do
   input <- liftIO (readFile path)
   runParserWith (Just path) (Input (Pos 0 0) input) p
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Has (Throw Notice.Notice) sig m => Maybe FilePath -> Input -> ParserC m a -> m a
+runParserWith :: Has (Throw (Notice.Notice AnsiStyle)) sig m => Maybe FilePath -> Input -> ParserC m a -> m a
 runParserWith path input = runParser (const pure) failure failure input
   where
   src = sourceFromString path (str input)
@@ -305,7 +305,7 @@ expected_ :: Lens' Err (Set String)
 expected_ = lens expected $ \ i expected -> i{ expected }
 {-# INLINE expected_ #-}
 
-errToNotice :: Source -> Err -> Notice.Notice
+errToNotice :: Source -> Err -> Notice.Notice AnsiStyle
 errToNotice source Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
   , excerpt = Excerpt (Source.path source) (source ! pos) (Span pos pos)

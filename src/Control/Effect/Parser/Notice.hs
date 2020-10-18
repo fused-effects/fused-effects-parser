@@ -31,27 +31,27 @@ prettyLevel = \case
   Error -> red     (pretty "error")
 
 
-data Notice = Notice
+data Notice a = Notice
   { level   :: !(Maybe Level)
   , excerpt :: {-# UNPACK #-} !Excerpt
-  , reason  :: !(Doc AnsiStyle)
-  , context :: ![Doc AnsiStyle]
+  , reason  :: !(Doc a)
+  , context :: ![Doc a]
   }
   deriving (Show)
 
-level_ :: Lens' Notice (Maybe Level)
+level_ :: Lens' (Notice AnsiStyle) (Maybe Level)
 level_ = lens level $ \ n level -> n{ level }
 
-excerpt_ :: Lens' Notice Excerpt
+excerpt_ :: Lens' (Notice AnsiStyle) Excerpt
 excerpt_ = lens excerpt $ \ n excerpt -> n{ excerpt }
 
-reason_ :: Lens' Notice (Doc AnsiStyle)
+reason_ :: Lens' (Notice AnsiStyle) (Doc AnsiStyle)
 reason_ = lens reason $ \ n reason -> n{ reason }
 
-context_ :: Lens' Notice [Doc AnsiStyle]
+context_ :: Lens' (Notice AnsiStyle) [Doc AnsiStyle]
 context_ = lens context $ \ n context -> n{ context }
 
-prettyNotice :: Notice -> Doc AnsiStyle
+prettyNotice :: Notice AnsiStyle -> Doc AnsiStyle
 prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
   ( nest 2 (group (fillSep
     [ bold (pretty (fromMaybe "(interactive)" path)) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . prettyLevel) level
