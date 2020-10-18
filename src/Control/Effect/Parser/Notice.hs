@@ -2,7 +2,6 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Control.Effect.Parser.Notice
 ( Level(..)
-, prettyLevel
 , Notice(..)
 , level_
 , excerpt_
