@@ -45,9 +45,9 @@ takeLine = go id where
   go line = \case
     ""             -> (Line (line "") EOF,  Left "")
     '\r':'\n':rest -> (Line (line "") CRLF, Right rest)
-    '\r':rest      -> (Line (line "") CR,   Right rest)
-    '\n':rest      -> (Line (line "") LF,   Right rest)
-    c   :rest      -> go (line . (c:)) rest
+    '\r':     rest -> (Line (line "") CR,   Right rest)
+    '\n':     rest -> (Line (line "") LF,   Right rest)
+    c   :     rest -> go (line . (c:)) rest
 {-# INLINE takeLine #-}
 
 (!) :: Source -> Span.Pos -> Line
