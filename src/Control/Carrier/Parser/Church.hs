@@ -297,6 +297,9 @@ data Err = Err
 
 newtype AnyDoc = AnyDoc { getAnyDoc :: forall x . Doc x }
 
+instance Show AnyDoc where
+  showsPrec p (AnyDoc d) = showsPrec p d
+
 
 input_ :: Lens' Err Input
 input_ = lens input $ \ i input -> i{ input }
