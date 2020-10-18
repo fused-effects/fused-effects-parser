@@ -4,6 +4,7 @@ module Control.Effect.Parser.Excerpt
 , fromSourceAndSpan
 , path_
 , line_
+, span_
 ) where
 
 import           Control.Effect.Parser.Lens
@@ -34,3 +35,7 @@ path_ = lens path $ \ e path -> e{ path }
 line_ :: Lens' Excerpt Source.Line
 line_ = lens line $ \ e line -> e{ line }
 {-# INLINE line_ #-}
+
+span_ :: Lens' Excerpt Span.Span
+span_ = lens span $ \ e span -> e{ span }
+{-# INLINE span_ #-}
