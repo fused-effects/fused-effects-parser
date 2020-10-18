@@ -159,7 +159,7 @@ instance Parsing (ParserC m) where
   eof = notFollowedBy anyChar <?> "end of input"
   {-# INLINE eof #-}
 
-  unexpected s = ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
+  unexpected s = ParserC $ \ _ nil _ input -> nil (Err input (Just s) mempty)
   {-# INLINE unexpected #-}
 
   m <?> s = ParserC $ \ leaf nil fail -> runParserC m
@@ -169,7 +169,7 @@ instance Parsing (ParserC m) where
   {-# INLINE (<?>) #-}
 
   notFollowedBy p = ParserC $ \ leaf nil _ input -> runParserC p
-    (\ _ a -> nil (Err input (Just (pretty (show a))) mempty))
+    (\ _ a -> nil (Err input (Just (show a)) mempty))
     (\ _ -> leaf input ())
     (\ _ -> leaf input ())
     input
@@ -184,8 +184,8 @@ instance TokenParsing (ParserC m)
 acceptC :: (Char -> Maybe a) -> ParserC m a
 acceptC p = ParserC $ \ leaf nil _ input -> case str input of
   c:_ | Just a <- p c -> leaf (advance input) a
-      | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
-  _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
+      | otherwise     -> nil (Err input (Just ("unexpected " <> show c)) mempty)
+  _                   -> nil (Err input (Just "unexpected end of input") mempty)
 {-# INLINE acceptC #-}
 
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
@@ -240,7 +240,7 @@ cutfailk Err{ input, reason, expected } = pure (input, cutfailWith reason expect
 -- @
 -- 'emptyWith' 'Nothing' 'mempty' = 'empty'
 -- @
-emptyWith :: Maybe (Doc Void) -> Set String -> ParserC m a
+emptyWith :: Maybe String -> Set String -> ParserC m a
 emptyWith   a e = ParserC (\ _ nil _    i -> nil  (Err i a e))
 {-# INLINE emptyWith #-}
 
@@ -249,7 +249,7 @@ emptyWith   a e = ParserC (\ _ nil _    i -> nil  (Err i a e))
 -- @
 -- 'cutfailWith' 'Nothing' 'mempty' = 'cutfail'
 -- @
-cutfailWith :: Maybe (Doc Void) -> Set String -> ParserC m a
+cutfailWith :: Maybe String -> Set String -> ParserC m a
 cutfailWith a e = ParserC (\ _ _   fail i -> fail (Err i a e))
 {-# INLINE cutfailWith #-}
 
@@ -284,7 +284,7 @@ advancePos c p = case c of
 
 data Err = Err
   { input    :: {-# UNPACK #-} !Input
-  , reason   :: !(Maybe (Doc Void))
+  , reason   :: !(Maybe String)
   , expected :: !(Set String)
   }
   deriving (Show)
@@ -294,7 +294,7 @@ input_ :: Lens' Err Input
 input_ = lens input $ \ i input -> i{ input }
 {-# INLINE input_ #-}
 
-reason_ :: Lens' Err (Maybe (Doc Void))
+reason_ :: Lens' Err (Maybe String)
 reason_ = lens reason $ \ i reason -> i{ reason }
 {-# INLINE reason_ #-}
 
@@ -306,7 +306,7 @@ errToNotice :: Source -> Err -> Notice.Notice Void
 errToNotice source Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
   , excerpt = Excerpt (Source.path source) (source ! pos) (Span pos pos)
-  , reason  = fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
+  , reason  = fillSep (map pretty (words (fromMaybe "unknown error" reason))) <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
   , context = []
   }
 {-# INLINE errToNotice #-}
