@@ -9,6 +9,7 @@ module Control.Effect.Parser.Notice
 , context_
 , reAnnotateNotice
 , Style(..)
+, identityStyle
 , ansiStyle
 , prettyNoticeWith
 , prettyNotice
@@ -64,6 +65,16 @@ data Style a = Style
   , gutterStyle :: Doc a -> Doc a
   , eofStyle    :: Doc a -> Doc a
   , caretStyle  :: Doc a -> Doc a
+  }
+
+identityStyle :: Style a
+identityStyle = Style
+  { pathStyle   = id
+  , levelStyle  = const id
+  , posStyle    = id
+  , gutterStyle = id
+  , eofStyle    = id
+  , caretStyle  = id
   }
 
 ansiStyle :: Style AnsiStyle
