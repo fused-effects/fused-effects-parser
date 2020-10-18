@@ -294,7 +294,9 @@ data Err = Err
   }
   deriving (Show)
 
+
 newtype AnyDoc = AnyDoc { getAnyDoc :: forall x . Doc x }
+
 
 input_ :: Lens' Err Input
 input_ = lens input $ \ i input -> i{ input }
