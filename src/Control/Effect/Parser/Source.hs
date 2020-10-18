@@ -38,7 +38,7 @@ instance P.Pretty LineEnding where
 sourceFromString :: Maybe FilePath -> String -> Source
 sourceFromString path = Source path . go
   where
-  go s = let (line, rest) = takeLine s in maybe (line NE.:| []) ((line NE.<|) . go) rest
+  go s = let (line, rest) = takeLine s in maybe (NE.fromList [ line ]) (NE.cons line . go) rest
 {-# INLINE sourceFromString #-}
 
 takeLine :: String -> (Line, Maybe String)
