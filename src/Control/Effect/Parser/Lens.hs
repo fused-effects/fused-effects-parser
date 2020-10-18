@@ -25,7 +25,7 @@ l .~ b = coerce . l (const (Identity b))
 
 infixr 4 .~
 
-(%~) :: Lens' s a -> (a -> a) -> s -> s
+(%~) :: Lens s t a b -> (a -> b) -> s -> t
 l %~ f = runIdentity . l (Identity . f)
 {-# INLINE (%~) #-}
 
