@@ -25,6 +25,11 @@ data Level
   | Error
   deriving (Eq, Ord, Show)
 
+instance Pretty Level where
+  pretty = \case
+    Warn  -> pretty "warning"
+    Error -> pretty "error"
+
 prettyLevel :: Level -> Doc AnsiStyle
 prettyLevel = \case
   Warn  -> magenta (pretty "warning")
