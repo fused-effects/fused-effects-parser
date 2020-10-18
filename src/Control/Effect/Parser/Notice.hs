@@ -13,14 +13,13 @@ module Control.Effect.Parser.Notice
 , prettyNotice
 ) where
 
-import           Control.Effect.Parser.Excerpt
-import           Control.Effect.Parser.Lens
-import           Control.Effect.Parser.Source
-import           Control.Effect.Parser.Span as Span
-import           Data.Maybe (fromMaybe)
-import           Prettyprinter
-import           Prettyprinter.Render.Terminal (AnsiStyle, Color(..), bold, color)
-import qualified Prettyprinter.Render.Terminal as ANSI
+import Control.Effect.Parser.Excerpt
+import Control.Effect.Parser.Lens
+import Control.Effect.Parser.Source
+import Control.Effect.Parser.Span as Span
+import Data.Maybe (fromMaybe)
+import Prettyprinter
+import Prettyprinter.Render.Terminal (AnsiStyle, Color(..), bold, color)
 
 data Level
   = Warn
@@ -100,35 +99,4 @@ prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, 
 
 
 prettyNotice :: Notice AnsiStyle -> Doc AnsiStyle
-prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
-  ( nest 2 (group (fillSep
-    [ bold (pretty (fromMaybe "(interactive)" path)) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . prettyLevel) level
-    , reason
-    ]))
-  : blue (pretty (succ (Span.line (Span.start span)))) <+> align (vcat
-    [ blue (pretty '|') <+> prettyLine line
-    , blue (pretty '|') <+> padding span <> caret span
-    ])
-  : context)
-  where
-  pos (Pos l c) = bold (pretty (succ l)) <> colon <> bold (pretty (succ c))
-
-  padding (Span (Pos _ c) _) = pretty (replicate c ' ')
-
-  caret (Span start@(Pos sl sc) end@(Pos el ec))
-    | start == end = green (pretty '^')
-    | sl    == el  = green (pretty (replicate (ec - sc) '~'))
-    | otherwise    = green (pretty "^…")
-
-  bold = annotate ANSI.bold
-
-  prettyLevel = \case
-    Warn  -> magenta (pretty "warning")
-    Error -> red     (pretty "error")
-
-  prettyLine (Line line end) = pretty line <> blue (pretty end)
-
-  red     = annotate $ color Red
-  green   = annotate $ color Green
-  blue    = annotate $ color Blue
-  magenta = annotate $ color Magenta
+prettyNotice = prettyNoticeWith ansiStyle
