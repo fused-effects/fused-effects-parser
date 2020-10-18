@@ -7,13 +7,11 @@ module Main
 
 import           Control.Applicative (Alternative(..))
 import           Control.Carrier.Parser.Church
-import           Control.Effect.Parser.Notice as Notice
 import           Control.Effect.Parser.Source
 import           Control.Effect.Parser.Span (Pos(..))
 import           Data.List (isPrefixOf)
 import qualified Data.List.NonEmpty as NE
 import           Data.Set
-import           Data.Void
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
@@ -75,9 +73,9 @@ parserTests = testGroup "ParserC (Church)"
   ]
 
 
-parsesInto :: (Eq a, Show a) => ParserC (Either (Notice Void)) a -> String -> a -> Assertion
+parsesInto :: (Eq a, Show a) => ParserC (Either (Source, Err)) a -> String -> a -> Assertion
 parsesInto p s expected = case runParserWithString (Pos 0 0) s p of
-  Left  err    -> assertFailure (show err)
+  Left  (s, e) -> assertFailure (show (errToNotice s e))
   Right actual -> actual @?= expected
 
 failsWith :: Show a => ParserC IO a -> String -> (Err -> Assertion) -> Assertion
