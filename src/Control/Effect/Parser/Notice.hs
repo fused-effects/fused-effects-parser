@@ -18,6 +18,7 @@ import Control.Effect.Parser.Excerpt
 import Control.Effect.Parser.Lens
 import Control.Effect.Parser.Source
 import Control.Effect.Parser.Span as Span
+import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe (fromMaybe)
 import Prettyprinter
 
@@ -76,7 +77,7 @@ identityStyle = Style
   }
 
 prettyNoticeWith :: Style a -> Notice a -> Doc a
-prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, caretStyle } (Notice level (Excerpt path line span) reason context) = vsep
+prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, caretStyle } (Notice level (Excerpt path (line:|_) span) reason context) = vsep
   ( nest 2 (group (fillSep
     [ pathStyle (pretty (fromMaybe "(interactive)" path)) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . (levelStyle <*> pretty)) level
     , reason
