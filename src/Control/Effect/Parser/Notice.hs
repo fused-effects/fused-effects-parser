@@ -31,11 +31,6 @@ instance Pretty Level where
     Warn  -> pretty "warning"
     Error -> pretty "error"
 
-prettyLevel :: Level -> Doc AnsiStyle
-prettyLevel = \case
-  Warn  -> magenta (pretty "warning")
-  Error -> red     (pretty "error")
-
 
 data Notice a = Notice
   { level   :: !(Maybe Level)
@@ -101,6 +96,10 @@ prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
     | otherwise    = green (pretty "^…")
 
   bold = annotate ANSI.bold
+
+  prettyLevel = \case
+    Warn  -> magenta (pretty "warning")
+    Error -> red     (pretty "error")
 
   prettyLine (Line line end) = pretty line <> blue (pretty end)
 
