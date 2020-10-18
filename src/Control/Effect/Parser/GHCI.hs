@@ -4,15 +4,15 @@ module Control.Effect.Parser.GHCI
 ) where
 
 import Control.Applicative
+import Control.Carrier.Parser.Church
 import Control.Effect.Parser.Notice
 import Control.Effect.Parser.Span hiding (line)
-import Control.Carrier.Parser.Church
+import Debug.Trace
+import Prettyprinter (line)
+import Prettyprinter.Render.Terminal
 import Text.Parser.Char
 import Text.Parser.Combinators
 import Text.Parser.Token
-import Prettyprinter (line)
-import Prettyprinter.Render.Terminal
-import Debug.Trace
 
 parse :: Show a => ParserC (Either Notice) a -> String -> IO ()
 parse p s = do
