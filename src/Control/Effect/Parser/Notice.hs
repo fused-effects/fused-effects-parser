@@ -7,6 +7,7 @@ module Control.Effect.Parser.Notice
 , excerpt_
 , reason_
 , context_
+, reAnnotateNotice
 , Style(..)
 , ansiStyle
 , prettyNoticeWith
@@ -51,6 +52,9 @@ reason_ = lens reason $ \ n reason -> n{ reason }
 
 context_ :: Lens' (Notice a) [Doc a]
 context_ = lens context $ \ n context -> n{ context }
+
+reAnnotateNotice :: (a -> b) -> (Notice a -> Notice b)
+reAnnotateNotice f Notice{ level, excerpt, reason, context} = Notice{ level, excerpt, reason = reAnnotate f reason, context = map (reAnnotate f) context }
 
 
 data Style a = Style
