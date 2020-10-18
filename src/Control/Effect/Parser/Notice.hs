@@ -77,7 +77,7 @@ identityStyle = Style
   }
 
 prettyNoticeWith :: Style a -> Notice a -> Doc a
-prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, caretStyle } (Notice level (Excerpt path (line:|_) span) reason context) = vsep
+prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, caretStyle } (Notice level (Excerpt path (line:|_) span) reason context) = concatWith (surround hardline)
   ( nest 2 (group (fillSep
     [ pathStyle (pretty (fromMaybe "(interactive)" path)) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . (levelStyle <*> pretty)) level
     , reason
