@@ -6,6 +6,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Parser.Church
@@ -72,7 +73,7 @@ runParserWith :: Has (Throw (Notice.Notice AnsiStyle)) sig m => Maybe FilePath -
 runParserWith path input = runParser (const pure) failure failure input
   where
   src = sourceFromString path (str input)
-  failure = throwError . errToNotice src
+  failure = throwError @(Notice.Notice AnsiStyle) . errToNotice src
 {-# INLINE runParserWith #-}
 
 runParser
@@ -312,7 +313,7 @@ expected_ :: Lens' Err (Set String)
 expected_ = lens expected $ \ i expected -> i{ expected }
 {-# INLINE expected_ #-}
 
-errToNotice :: Source -> Err -> Notice.Notice AnsiStyle
+errToNotice :: Source -> Err -> Notice.Notice a
 errToNotice source Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
   , excerpt = Excerpt (Source.path source) (source ! pos) (Span pos pos)
