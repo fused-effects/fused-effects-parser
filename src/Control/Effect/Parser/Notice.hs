@@ -103,9 +103,7 @@ prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
 
   prettyLine (Line line end) = pretty line <> blue (pretty end)
 
-
-red, green, blue, magenta :: Doc AnsiStyle -> Doc AnsiStyle
-red     = annotate $ color Red
-green   = annotate $ color Green
-blue    = annotate $ color Blue
-magenta = annotate $ color Magenta
+  red     = annotate $ color Red
+  green   = annotate $ color Green
+  blue    = annotate $ color Blue
+  magenta = annotate $ color Magenta
