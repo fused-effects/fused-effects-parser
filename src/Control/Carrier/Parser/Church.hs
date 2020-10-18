@@ -305,7 +305,7 @@ expected_ = lens expected $ \ i expected -> i{ expected }
 errToNotice :: Source -> Err -> Notice.Notice Void
 errToNotice source Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
-  , excerpt = Excerpt (Source.path source) (source ! pos) (Span pos pos)
+  , excerpt = fromSourceAndSpan source (Span pos pos)
   , reason  = fillSep (map pretty (words (fromMaybe "unknown error" reason))) <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
   , context = []
   }
