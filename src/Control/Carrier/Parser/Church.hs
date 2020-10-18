@@ -53,27 +53,27 @@ import           Data.Coerce (coerce)
 import           Data.Functor.Compose
 import           Data.Functor.Identity
 import           Data.Set (Set, singleton, toList)
+import           Data.Void
 import           Prettyprinter
-import           Prettyprinter.Render.Terminal (AnsiStyle)
 import           Text.Parser.Char (CharParsing(..))
 import           Text.Parser.Combinators
 import           Text.Parser.Token (TokenParsing)
 
-runParserWithString :: Has (Throw (Notice.Notice AnsiStyle)) sig m => Pos -> String -> ParserC m a -> m a
+runParserWithString :: Has (Throw (Notice.Notice Void)) sig m => Pos -> String -> ParserC m a -> m a
 runParserWithString pos str = runParserWith Nothing (Input pos str)
 {-# INLINE runParserWithString #-}
 
-runParserWithFile :: (Has (Throw (Notice.Notice AnsiStyle)) sig m, MonadIO m) => FilePath -> ParserC m a -> m a
+runParserWithFile :: (Has (Throw (Notice.Notice Void)) sig m, MonadIO m) => FilePath -> ParserC m a -> m a
 runParserWithFile path p = do
   input <- liftIO (readFile path)
   runParserWith (Just path) (Input (Pos 0 0) input) p
 {-# INLINE runParserWithFile #-}
 
-runParserWith :: Has (Throw (Notice.Notice AnsiStyle)) sig m => Maybe FilePath -> Input -> ParserC m a -> m a
+runParserWith :: Has (Throw (Notice.Notice Void)) sig m => Maybe FilePath -> Input -> ParserC m a -> m a
 runParserWith path input = runParser (const pure) failure failure input
   where
   src = sourceFromString path (str input)
-  failure = throwError @(Notice.Notice AnsiStyle) . errToNotice src
+  failure = throwError @(Notice.Notice Void) . errToNotice src
 {-# INLINE runParserWith #-}
 
 runParser

@@ -7,6 +7,7 @@ import Control.Applicative
 import Control.Carrier.Parser.Church
 import Control.Effect.Parser.Notice
 import Control.Effect.Parser.Span hiding (line)
+import Data.Void
 import Debug.Trace
 import Prettyprinter (line)
 import Prettyprinter.Render.Terminal
@@ -14,10 +15,10 @@ import Text.Parser.Char
 import Text.Parser.Combinators
 import Text.Parser.Token
 
-parse :: Show a => ParserC (Either (Notice AnsiStyle)) a -> String -> IO ()
+parse :: Show a => ParserC (Either (Notice Void)) a -> String -> IO ()
 parse p s = do
   let v = runParserWithString (Pos 0 0) s p
-  either (putDoc . (<> line) . prettyNotice) print v
+  either (putDoc . (<> line) . prettyNotice . reAnnotateNotice absurd) print v
 
 sig :: (TokenParsing m, Monad m) => m String
 sig = sig' _Type _Type
