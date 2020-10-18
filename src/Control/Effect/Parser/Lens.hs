@@ -3,6 +3,7 @@ module Control.Effect.Parser.Lens
 ( Lens
 , Lens'
 , Traversal
+, ASetter
 , lens
 , (.~)
 , (%~)
@@ -17,6 +18,8 @@ type Lens s t a b = forall f . Functor f => (a -> f b) -> (s -> f t)
 type Lens' s a = Lens s s a a
 
 type Traversal s t a b = forall f . Applicative f => (a -> f b) -> s -> f t
+
+type ASetter s t a b = (a -> Identity b) -> s -> Identity t
 
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens get put afa s = fmap (put s) (afa (get s))
