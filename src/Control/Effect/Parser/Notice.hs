@@ -9,6 +9,7 @@ module Control.Effect.Parser.Notice
 , context_
 , Style(..)
 , ansiStyle
+, prettyNoticeWith
 , prettyNotice
 ) where
 
@@ -73,6 +74,30 @@ ansiStyle = Style
   , eofStyle    = color Blue
   , caretStyle  = color Green
   }
+
+prettyNoticeWith :: Style a -> Notice a -> Doc a
+prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, caretStyle } (Notice level (Excerpt path line span) reason context) = vsep
+  ( nest 2 (group (fillSep
+    [ annotate pathStyle (pretty (fromMaybe "(interactive)" path)) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . (annotate . levelStyle <*> pretty)) level
+    , reason
+    ]))
+  : annotate gutterStyle (pretty (succ (Span.line (Span.start span)))) <+> align (vcat
+    [ annotate gutterStyle (pretty '|') <+> prettyLineWith line
+    , annotate gutterStyle (pretty '|') <+> padding span <> caret span
+    ])
+  : context)
+  where
+  pos (Pos l c) = annotate posStyle (pretty (succ l)) <> colon <> annotate posStyle (pretty (succ c))
+
+  padding (Span (Pos _ c) _) = pretty (replicate c ' ')
+
+  caret (Span start@(Pos sl sc) end@(Pos el ec))
+    | start == end = annotate caretStyle (pretty '^')
+    | sl    == el  = annotate caretStyle (pretty (replicate (ec - sc) '~'))
+    | otherwise    = annotate caretStyle (pretty "^…")
+
+  prettyLineWith (Line line end) = pretty line <> annotate eofStyle (pretty end)
+
 
 prettyNotice :: Notice AnsiStyle -> Doc AnsiStyle
 prettyNotice (Notice level (Excerpt path line span) reason context) = vsep
