@@ -13,7 +13,7 @@ import Data.Function
 import Data.Functor.Identity
 
 type Lens s t a b = forall f . Functor f => (a -> f b) -> (s -> f t)
-type Lens' s a = forall f . Functor f => (a -> f a) -> (s -> f s)
+type Lens' s a = Lens s s a a
 
 lens :: (s -> a) -> (s -> a -> s) -> Lens' s a
 lens get put afa s = fmap (put s) (afa (get s))
