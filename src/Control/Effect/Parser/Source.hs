@@ -38,16 +38,16 @@ instance P.Pretty LineEnding where
 sourceFromString :: Maybe FilePath -> String -> Source
 sourceFromString path = Source path . go
   where
-  go s = let (line, rest) = takeLine s in either (const (line NE.:| [])) ((line NE.<|) . go) rest
+  go s = let (line, rest) = takeLine s in maybe (line NE.:| []) ((line NE.<|) . go) rest
 {-# INLINE sourceFromString #-}
 
-takeLine :: String -> (Line, Either String String)
+takeLine :: String -> (Line, Maybe String)
 takeLine = go id where
   go line = \case
-    ""             -> (Line (line "") EOF,  Left "")
-    '\r':'\n':rest -> (Line (line "") CRLF, Right rest)
-    '\r':     rest -> (Line (line "") CR,   Right rest)
-    '\n':     rest -> (Line (line "") LF,   Right rest)
+    ""             -> (Line (line "") EOF,  Nothing)
+    '\r':'\n':rest -> (Line (line "") CRLF, Just rest)
+    '\r':     rest -> (Line (line "") CR,   Just rest)
+    '\n':     rest -> (Line (line "") LF,   Just rest)
     c   :     rest -> go (line . (c:)) rest
 {-# INLINE takeLine #-}
 
