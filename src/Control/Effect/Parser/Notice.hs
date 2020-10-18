@@ -10,7 +10,6 @@ module Control.Effect.Parser.Notice
 , reAnnotateNotice
 , Style(..)
 , identityStyle
-, ansiStyle
 , prettyNoticeWith
 , prettyNotice
 ) where
@@ -21,7 +20,6 @@ import Control.Effect.Parser.Source
 import Control.Effect.Parser.Span as Span
 import Data.Maybe (fromMaybe)
 import Prettyprinter
-import Prettyprinter.Render.Terminal (AnsiStyle, Color(..), bold, color)
 
 data Level
   = Warn
@@ -75,18 +73,6 @@ identityStyle = Style
   , gutterStyle = id
   , eofStyle    = id
   , caretStyle  = id
-  }
-
-ansiStyle :: Style AnsiStyle
-ansiStyle = Style
-  { pathStyle   = annotate bold
-  , levelStyle  = \case
-    Warn  -> annotate (color Magenta)
-    Error -> annotate (color Red)
-  , posStyle    = annotate bold
-  , gutterStyle = annotate (color Blue)
-  , eofStyle    = annotate (color Blue)
-  , caretStyle  = annotate (color Green)
   }
 
 prettyNoticeWith :: Style a -> Notice a -> Doc a
