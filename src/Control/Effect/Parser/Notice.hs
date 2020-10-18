@@ -85,7 +85,7 @@ prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, 
     , reason
     ]))
   : annotate gutterStyle (pretty (succ (Span.line (Span.start span)))) <+> align (vcat
-    [ annotate gutterStyle (pretty '|') <+> prettyLineWith line
+    [ annotate gutterStyle (pretty '|') <+> prettyLine line
     , annotate gutterStyle (pretty '|') <+> padding span <> caret span
     ])
   : context)
@@ -99,7 +99,7 @@ prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, 
     | sl    == el  = annotate caretStyle (pretty (replicate (ec - sc) '~'))
     | otherwise    = annotate caretStyle (pretty "^…")
 
-  prettyLineWith (Line line end) = pretty line <> annotate eofStyle (pretty end)
+  prettyLine (Line line end) = pretty line <> annotate eofStyle (pretty end)
 
 
 prettyNotice :: Notice AnsiStyle -> Doc AnsiStyle
