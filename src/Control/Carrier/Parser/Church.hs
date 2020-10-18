@@ -22,7 +22,6 @@ module Control.Carrier.Parser.Church
 , pos_
 , str_
 , Err(..)
-, AnyDoc(..)
 , input_
 , reason_
 , expected_
@@ -52,6 +51,7 @@ import           Control.Selective
 import           Data.Coerce (coerce)
 import           Data.Functor.Compose
 import           Data.Functor.Identity
+import           Data.Maybe (fromMaybe)
 import           Data.Set (Set, singleton, toList)
 import           Data.Void
 import           Prettyprinter
@@ -164,7 +164,7 @@ instance Parsing (ParserC m) where
   eof = notFollowedBy anyChar <?> "end of input"
   {-# INLINE eof #-}
 
-  unexpected s = ParserC $ \ _ nil _ input -> nil (Err input (Just (AnyDoc (pretty s))) mempty)
+  unexpected s = ParserC $ \ _ nil _ input -> nil (Err input (Just (pretty s)) mempty)
   {-# INLINE unexpected #-}
 
   m <?> s = ParserC $ \ leaf nil fail -> runParserC m
@@ -174,7 +174,7 @@ instance Parsing (ParserC m) where
   {-# INLINE (<?>) #-}
 
   notFollowedBy p = ParserC $ \ leaf nil _ input -> runParserC p
-    (\ _ a -> nil (Err input (Just (AnyDoc (pretty (show a)))) mempty))
+    (\ _ a -> nil (Err input (Just (pretty (show a))) mempty))
     (\ _ -> leaf input ())
     (\ _ -> leaf input ())
     input
@@ -189,8 +189,8 @@ instance TokenParsing (ParserC m)
 acceptC :: (Char -> Maybe a) -> ParserC m a
 acceptC p = ParserC $ \ leaf nil _ input -> case str input of
   c:_ | Just a <- p c -> leaf (advance input) a
-      | otherwise     -> nil (Err input (Just (AnyDoc (pretty "unexpected " <> pretty (show c)))) mempty)
-  _                   -> nil (Err input (Just (AnyDoc (pretty "unexpected end of input"))) mempty)
+      | otherwise     -> nil (Err input (Just (pretty "unexpected " <> pretty (show c))) mempty)
+  _                   -> nil (Err input (Just (pretty "unexpected end of input")) mempty)
 {-# INLINE acceptC #-}
 
 instance Algebra sig m => Algebra (Parser :+: Cut :+: NonDet :+: sig) (ParserC m) where
@@ -245,7 +245,7 @@ cutfailk Err{ input, reason, expected } = pure (input, cutfailWith reason expect
 -- @
 -- 'emptyWith' 'Nothing' 'mempty' = 'empty'
 -- @
-emptyWith :: Maybe AnyDoc -> Set String -> ParserC m a
+emptyWith :: Maybe (Doc Void) -> Set String -> ParserC m a
 emptyWith   a e = ParserC (\ _ nil _    i -> nil  (Err i a e))
 {-# INLINE emptyWith #-}
 
@@ -254,7 +254,7 @@ emptyWith   a e = ParserC (\ _ nil _    i -> nil  (Err i a e))
 -- @
 -- 'cutfailWith' 'Nothing' 'mempty' = 'cutfail'
 -- @
-cutfailWith :: Maybe AnyDoc -> Set String -> ParserC m a
+cutfailWith :: Maybe (Doc Void) -> Set String -> ParserC m a
 cutfailWith a e = ParserC (\ _ _   fail i -> fail (Err i a e))
 {-# INLINE cutfailWith #-}
 
@@ -289,23 +289,17 @@ advancePos c p = case c of
 
 data Err = Err
   { input    :: {-# UNPACK #-} !Input
-  , reason   :: !(Maybe AnyDoc)
+  , reason   :: !(Maybe (Doc Void))
   , expected :: !(Set String)
   }
   deriving (Show)
-
-
-newtype AnyDoc = AnyDoc { getAnyDoc :: forall x . Doc x }
-
-instance Show AnyDoc where
-  showsPrec p (AnyDoc d) = showsPrec p d
 
 
 input_ :: Lens' Err Input
 input_ = lens input $ \ i input -> i{ input }
 {-# INLINE input_ #-}
 
-reason_ :: Lens' Err (Maybe AnyDoc)
+reason_ :: Lens' Err (Maybe (Doc Void))
 reason_ = lens reason $ \ i reason -> i{ reason }
 {-# INLINE reason_ #-}
 
@@ -313,11 +307,11 @@ expected_ :: Lens' Err (Set String)
 expected_ = lens expected $ \ i expected -> i{ expected }
 {-# INLINE expected_ #-}
 
-errToNotice :: Source -> Err -> Notice.Notice a
+errToNotice :: Source -> Err -> Notice.Notice Void
 errToNotice source Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
   , excerpt = Excerpt (Source.path source) (source ! pos) (Span pos pos)
-  , reason  = maybe (fillSep (map pretty (words "unknown error"))) getAnyDoc reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
+  , reason  = fromMaybe (fillSep (map pretty (words "unknown error"))) reason <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
   , context = []
   }
 {-# INLINE errToNotice #-}
