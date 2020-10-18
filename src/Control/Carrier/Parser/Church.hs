@@ -21,6 +21,7 @@ module Control.Carrier.Parser.Church
 , pos_
 , str_
 , Err(..)
+, AnyDoc(..)
 , input_
 , reason_
 , expected_
@@ -292,6 +293,8 @@ data Err = Err
   , expected :: !(Set String)
   }
   deriving (Show)
+
+newtype AnyDoc = AnyDoc { getAnyDoc :: forall x . Doc x }
 
 input_ :: Lens' Err Input
 input_ = lens input $ \ i input -> i{ input }
