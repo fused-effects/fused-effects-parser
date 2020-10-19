@@ -27,7 +27,7 @@ data Source = Source
   }
   deriving (Eq, Ord, Show)
 
--- | Inject and project the 'Span.Span' from a 'Source'.
+-- | A lens over the 'Span.Span' from a 'Source'.
 --
 -- Note that it is the caller’s responsibility to ensure that this span and the 'lines' are in agreement as to line numbers.
 span_ :: Lens' Source Span.Span
