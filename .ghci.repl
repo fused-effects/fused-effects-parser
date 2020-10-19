@@ -38,6 +38,7 @@
 import Control.Carrier.Parser.Church
 import Control.Effect.Parser.GHCI
 import Control.Effect.Parser.Notice
+import Control.Effect.Parser.Source as Src
 import Control.Effect.Parser.Span
 import Main
 import Text.Parser.Char
