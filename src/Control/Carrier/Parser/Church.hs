@@ -59,8 +59,8 @@ import           Text.Parser.Char (CharParsing(..))
 import           Text.Parser.Combinators
 import           Text.Parser.Token (TokenParsing)
 
-runParserWithString :: Has (Throw (Source, Err)) sig m => Pos -> String -> ParserC m a -> m a
-runParserWithString pos str = runParserWith Nothing (Input pos str)
+runParserWithString :: Has (Throw (Source, Err)) sig m => Int -> String -> ParserC m a -> m a
+runParserWithString line str = runParserWith Nothing (Input (Pos line 0) str)
 {-# INLINE runParserWithString #-}
 
 runParserWithFile :: (Has (Throw (Source, Err)) sig m, MonadIO m) => FilePath -> ParserC m a -> m a

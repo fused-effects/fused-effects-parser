@@ -7,7 +7,6 @@ import Control.Applicative
 import Control.Carrier.Parser.Church
 import Control.Effect.Parser.Notice
 import Control.Effect.Parser.Source
-import Control.Effect.Parser.Span hiding (line)
 import Debug.Trace
 import Prettyprinter (line)
 import Prettyprinter.Render.Text
@@ -17,7 +16,7 @@ import Text.Parser.Token
 
 parse :: Show a => ParserC (Either (Source, Err)) a -> String -> IO ()
 parse p s = do
-  let v = runParserWithString (Pos 0 0) s p
+  let v = runParserWithString 0 s p
   either (putDoc . (<> line) . prettyNotice . uncurry errToNotice) print v
 
 sig :: (TokenParsing m, Monad m) => m String

@@ -74,7 +74,7 @@ parserTests = testGroup "ParserC (Church)"
 
 
 parsesInto :: (Eq a, Show a) => ParserC (Either (Source, Err)) a -> String -> a -> Assertion
-parsesInto p s expected = case runParserWithString (Pos 0 0) s p of
+parsesInto p s expected = case runParserWithString 0 s p of
   Left  (s, e) -> assertFailure (show (errToNotice s e))
   Right actual -> actual @?= expected
 
