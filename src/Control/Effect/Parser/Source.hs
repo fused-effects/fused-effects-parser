@@ -4,6 +4,7 @@ module Control.Effect.Parser.Source
 ( Source(..)
 , span_
 , contents_
+, lines_
 , Line(..)
 , LineEnding(..)
 , sourceFromString
@@ -16,7 +17,7 @@ import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Span as Span
 import           Control.Exception (assert)
 import qualified Data.List.NonEmpty as NE
-import           Prelude hiding (span)
+import           Prelude hiding (lines, span)
 import qualified Prettyprinter as P
 
 data Source = Source
@@ -40,6 +41,10 @@ span_ = lens span $ \ e span -> e{ span }
 contents_ :: Lens' Source String
 contents_ = lens contents $ \ e contents -> e{ contents }
 {-# INLINE contents_ #-}
+
+lines_ :: Lens' Source (NE.NonEmpty Line)
+lines_ = lens lines $ \ e lines -> e{ lines }
+{-# INLINE lines_ #-}
 
 
 data Line = Line Int String LineEnding -- FIXME: use (byte? character?) ranges instead of copying the contents?
