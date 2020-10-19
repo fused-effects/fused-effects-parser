@@ -60,7 +60,7 @@ takeLine = go id where
 {-# INLINE takeLine #-}
 
 (!) :: Source -> Span.Pos -> Line
-Source _ lines ! pos = lines NE.!! Span.line pos
+src ! pos = NE.head $ src !.. Span.Span pos pos
 {-# INLINE (!) #-}
 
 infixl 9 !
