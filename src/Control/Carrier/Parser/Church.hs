@@ -77,7 +77,7 @@ runParserWith path input = runParser (const pure) failure failure input
 {-# INLINE runParserWith #-}
 
 runParserWithSource :: Has (Throw (Source, Err)) sig m => Source -> ParserC m a -> m a
-runParserWithSource src@(Source _ _ (Line line _ _:|_)) = runParser (const pure) failure failure input
+runParserWithSource src@(Source _ _ _ (Line line _ _:|_)) = runParser (const pure) failure failure input
   where
   input = Input (Pos line 0) (contents src)
   failure = throwError . (,) src

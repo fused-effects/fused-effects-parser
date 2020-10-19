@@ -16,6 +16,7 @@ import qualified Prettyprinter as P
 
 data Source = Source
   { path     :: Maybe FilePath
+  , span     :: Span.Span
   , contents :: String -- FIXME: Text
   , lines    :: NE.NonEmpty Line
   }
@@ -40,8 +41,13 @@ instance P.Pretty LineEnding where
 
 
 sourceFromString :: Maybe FilePath -> Int -> String -> Source
-sourceFromString path line = Source path <*> go line
+sourceFromString path line contents = Source path span contents lines
   where
+  span = Span.Span (Span.Pos line 0) (let Line i s e = NE.last lines in Span.Pos i (length s + case e of
+    EOF  -> 0
+    CRLF -> 2
+    _    -> 1))
+  lines = go line contents
   go i s = let (line, rest) = takeLine i s in maybe (NE.fromList [ line ]) (NE.cons line . go (succ i)) rest
 {-# INLINE sourceFromString #-}
 
@@ -68,7 +74,7 @@ src ! pos = NE.head $ src !.. Span.Span pos pos
 infixl 9 !
 
 (!..) :: Source -> Span.Span -> NE.NonEmpty Line
-Source _ _ lines !.. span
+Source _ _ _ lines !.. span
   = assert (endLine >= startLine)
   $ NE.fromList
   $ takeWhile (\ (Line i _ _) -> i <= endLine)

@@ -8,7 +8,7 @@ module Main
 import           Control.Applicative (Alternative(..))
 import           Control.Carrier.Parser.Church
 import           Control.Effect.Parser.Source
-import           Control.Effect.Parser.Span (Pos(..))
+import           Control.Effect.Parser.Span (Pos(..), Span(..))
 import           Data.List (isPrefixOf)
 import qualified Data.List.NonEmpty as NE
 import           Data.Set
@@ -28,9 +28,9 @@ main = defaultMain $ testGroup "unit tests"
   , testGroup "Source"
     [ testGroup "sourceFromString"
       [ testCase "returns the empty string for the empty string" $
-        sourceFromString Nothing 0 "" @?= Source Nothing "" (NE.fromList [Line 0 "" EOF])
+        sourceFromString Nothing 0 "" @?= Source Nothing (Span (Pos 0 0) (Pos 0 0)) "" (NE.fromList [Line 0 "" EOF])
       , testCase "returns two empty strings for a newline" $
-        sourceFromString Nothing 0 "\n" @?= Source Nothing "\n" (NE.fromList [Line 0 "" LF, Line 1 "" EOF])
+        sourceFromString Nothing 0 "\n" @?= Source Nothing (Span (Pos 0 0) (Pos 1 0)) "\n" (NE.fromList [Line 0 "" LF, Line 1 "" EOF])
       , testProperty "returns one more string than there are newlines" . property $ do
         s <- forAll (Gen.string (Range.linear 1 100)
           (Gen.frequency [ (5, Gen.unicode), (1, Gen.element "\t\r\n ") ]))
