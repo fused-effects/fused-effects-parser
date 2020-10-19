@@ -14,6 +14,7 @@ module Control.Carrier.Parser.Church
   runParserWithString
 , runParserWithFile
 , runParserWith
+, runParserWithSource
 , runParser
 , ParserC(ParserC)
 , emptyWith
@@ -50,6 +51,7 @@ import           Control.Monad.Trans.Class
 import           Data.Coerce (coerce)
 import           Data.Functor.Compose
 import           Data.Functor.Identity
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (fromMaybe)
 import           Data.Set (Set, singleton, toList)
 import           Prettyprinter
@@ -73,6 +75,13 @@ runParserWith path input = runParser (const pure) failure failure input
   src = sourceFromString path (Span.line (pos input)) (str input)
   failure = throwError . (,) src
 {-# INLINE runParserWith #-}
+
+runParserWithSource :: Has (Throw (Source, Err)) sig m => Source -> ParserC m a -> m a
+runParserWithSource src@(Source _ _ (Line line _ _:|_)) = runParser (const pure) failure failure input
+  where
+  input = Input (Pos line 0) (contents src)
+  failure = throwError . (,) src
+{-# INLINE runParserWithSource #-}
 
 runParser
   :: (Input -> a -> m r)
