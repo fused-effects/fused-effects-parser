@@ -65,8 +65,8 @@ runParserWithString pos str = runParserWith Nothing (Input pos str)
 
 runParserWithFile :: (Has (Throw (Source, Err)) sig m, MonadIO m) => FilePath -> ParserC m a -> m a
 runParserWithFile path p = do
-  input <- liftIO (readFile path)
-  runParserWith (Just path) (Input (Pos 0 0) input) p
+  src <- liftIO (readSourceFromFile path)
+  runParserWithSource src p
 {-# INLINE runParserWithFile #-}
 
 runParserWith :: Has (Throw (Source, Err)) sig m => Maybe FilePath -> Input -> ParserC m a -> m a
