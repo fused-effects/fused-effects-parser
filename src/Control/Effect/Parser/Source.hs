@@ -34,6 +34,9 @@ span_ :: Lens' Source Span.Span
 span_ = lens span $ \ e span -> e{ span }
 {-# INLINE span_ #-}
 
+-- | A lens over a 'Source'’s contents.
+--
+-- Note that it is the caller’s responsibility to ensure that these contents, the 'lines', and the 'span' are in agreement as to line contents/endings/numbers/etc.
 contents_ :: Lens' Source String
 contents_ = lens contents $ \ e contents -> e{ contents }
 {-# INLINE contents_ #-}
