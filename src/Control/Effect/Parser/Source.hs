@@ -70,8 +70,8 @@ infixl 9 !
 Source _ lines !.. span
   = assert (endLine >= startLine)
   $ NE.fromList
-  $ take (endLine - startLine + 1)
-  $ NE.drop startLine lines
+  $ takeWhile (\ (Line i _ _) -> i <= endLine)
+  $ NE.dropWhile (\ (Line i _ _) -> i < startLine) lines
   where
   startLine = Span.line (Span.start span)
   endLine   = Span.line (Span.end   span)
