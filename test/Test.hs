@@ -28,9 +28,9 @@ main = defaultMain $ testGroup "unit tests"
   , testGroup "Source"
     [ testGroup "sourceFromString"
       [ testCase "returns the empty string for the empty string" $
-        sourceFromString Nothing 0 "" @?= Source Nothing (NE.fromList [Line 0 "" EOF])
+        sourceFromString Nothing 0 "" @?= Source Nothing "" (NE.fromList [Line 0 "" EOF])
       , testCase "returns two empty strings for a newline" $
-        sourceFromString Nothing 0 "\n" @?= Source Nothing (NE.fromList [Line 0 "" LF, Line 1 "" EOF])
+        sourceFromString Nothing 0 "\n" @?= Source Nothing "\n" (NE.fromList [Line 0 "" LF, Line 1 "" EOF])
       , testProperty "returns one more string than there are newlines" . property $ do
         s <- forAll (Gen.string (Range.linear 1 100)
           (Gen.frequency [ (5, Gen.unicode), (1, Gen.element "\t\r\n ") ]))
