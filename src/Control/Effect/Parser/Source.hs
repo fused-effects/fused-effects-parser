@@ -1,6 +1,8 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module Control.Effect.Parser.Source
 ( Source(..)
+, span_
 , Line(..)
 , LineEnding(..)
 , sourceFromString
@@ -9,9 +11,11 @@ module Control.Effect.Parser.Source
 , (!..)
 ) where
 
+import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Span as Span
 import           Control.Exception (assert)
 import qualified Data.List.NonEmpty as NE
+import           Prelude hiding (span)
 import qualified Prettyprinter as P
 
 data Source = Source
@@ -21,6 +25,14 @@ data Source = Source
   , lines    :: NE.NonEmpty Line
   }
   deriving (Eq, Ord, Show)
+
+-- | Inject and project the 'Span.Span' from a 'Source'.
+--
+-- Note that it is the caller’s responsibility to ensure that this span and the 'lines' are in agreement as to line numbers.
+span_ :: Lens' Source Span.Span
+span_ = lens span $ \ e span -> e{ span }
+{-# INLINE span_ #-}
+
 
 data Line = Line Int String LineEnding -- FIXME: use (byte? character?) ranges instead of copying the contents?
   deriving (Eq, Ord, Show)
