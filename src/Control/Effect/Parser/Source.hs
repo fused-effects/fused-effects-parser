@@ -9,6 +9,7 @@ module Control.Effect.Parser.Source
 ) where
 
 import qualified Control.Effect.Parser.Span as Span
+import           Control.Exception (assert)
 import qualified Data.List.NonEmpty as NE
 import qualified Prettyprinter as P
 
@@ -60,7 +61,8 @@ infixl 9 !
 
 (!..) :: Source -> Span.Span -> NE.NonEmpty Line
 Source _ lines !.. span
-  = NE.fromList
+  = assert (endLine >= startLine)
+  $ NE.fromList
   $ take (endLine - startLine + 1)
   $ NE.drop startLine lines
   where
