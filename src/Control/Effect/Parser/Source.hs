@@ -3,6 +3,7 @@
 module Control.Effect.Parser.Source
 ( Source(..)
 , span_
+, contents_
 , Line(..)
 , LineEnding(..)
 , sourceFromString
@@ -32,6 +33,10 @@ data Source = Source
 span_ :: Lens' Source Span.Span
 span_ = lens span $ \ e span -> e{ span }
 {-# INLINE span_ #-}
+
+contents_ :: Lens' Source String
+contents_ = lens contents $ \ e contents -> e{ contents }
+{-# INLINE contents_ #-}
 
 
 data Line = Line Int String LineEnding -- FIXME: use (byte? character?) ranges instead of copying the contents?
