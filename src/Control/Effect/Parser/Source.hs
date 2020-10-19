@@ -4,6 +4,7 @@ module Control.Effect.Parser.Source
 , Line(..)
 , LineEnding(..)
 , sourceFromString
+, readSourceFromFile
 , (!)
 , (!..)
 ) where
@@ -42,6 +43,11 @@ sourceFromString path = Source path . go
   where
   go s = let (line, rest) = takeLine s in maybe (NE.fromList [ line ]) (NE.cons line . go) rest
 {-# INLINE sourceFromString #-}
+
+readSourceFromFile :: FilePath -> IO Source
+readSourceFromFile path = sourceFromString (Just path) <$> readFile path
+{-# INLINE readSourceFromFile #-}
+
 
 takeLine :: String -> (Line, Maybe String)
 takeLine = go id where
