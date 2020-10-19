@@ -42,6 +42,9 @@ contents_ :: Lens' Source String
 contents_ = lens contents $ \ e contents -> e{ contents }
 {-# INLINE contents_ #-}
 
+-- | A lens over a 'Source'’s lines.
+--
+-- Note that it is the caller’s responsibility to ensure that these, the 'contents', and the 'span' are in agreement as to line contents/endings/numbers/etc.
 lines_ :: Lens' Source (NE.NonEmpty Line)
 lines_ = lens lines $ \ e lines -> e{ lines }
 {-# INLINE lines_ #-}
