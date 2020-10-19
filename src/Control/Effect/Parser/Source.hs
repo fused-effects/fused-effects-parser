@@ -15,13 +15,12 @@ import qualified Data.List.NonEmpty as NE
 import qualified Prettyprinter as P
 
 data Source = Source
-  { path      :: Maybe FilePath
-  , startLine :: Int
-  , lines     :: NE.NonEmpty Line
+  { path  :: Maybe FilePath
+  , lines :: NE.NonEmpty Line
   }
   deriving (Eq, Ord, Show)
 
-data Line = Line String LineEnding
+data Line = Line Int String LineEnding
   deriving (Eq, Ord, Show)
 
 data LineEnding
@@ -40,9 +39,9 @@ instance P.Pretty LineEnding where
 
 
 sourceFromString :: Maybe FilePath -> Int -> String -> Source
-sourceFromString path line = Source path line . go
+sourceFromString path line = Source path . go line
   where
-  go s = let (line, rest) = takeLine s in maybe (NE.fromList [ line ]) (NE.cons line . go) rest
+  go i s = let (line, rest) = takeLine i s in maybe (NE.fromList [ line ]) (NE.cons line . go (succ i)) rest
 {-# INLINE sourceFromString #-}
 
 readSourceFromFile :: FilePath -> IO Source
@@ -50,13 +49,13 @@ readSourceFromFile path = sourceFromString (Just path) 0 <$> readFile path
 {-# INLINE readSourceFromFile #-}
 
 
-takeLine :: String -> (Line, Maybe String)
-takeLine = go id where
+takeLine :: Int -> String -> (Line, Maybe String)
+takeLine i = go id where
   go line = \case
-    ""             -> (Line (line "") EOF,  Nothing)
-    '\r':'\n':rest -> (Line (line "") CRLF, Just rest)
-    '\r':     rest -> (Line (line "") CR,   Just rest)
-    '\n':     rest -> (Line (line "") LF,   Just rest)
+    ""             -> (Line i (line "") EOF,  Nothing)
+    '\r':'\n':rest -> (Line i (line "") CRLF, Just rest)
+    '\r':     rest -> (Line i (line "") CR,   Just rest)
+    '\n':     rest -> (Line i (line "") LF,   Just rest)
     c   :     rest -> go (line . (c:)) rest
 {-# INLINE takeLine #-}
 
@@ -68,7 +67,7 @@ src ! pos = NE.head $ src !.. Span.Span pos pos
 infixl 9 !
 
 (!..) :: Source -> Span.Span -> NE.NonEmpty Line
-Source _ _ lines !.. span
+Source _ lines !.. span
   = assert (endLine >= startLine)
   $ NE.fromList
   $ take (endLine - startLine + 1)

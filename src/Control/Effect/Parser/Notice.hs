@@ -97,7 +97,7 @@ prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, 
     | sl    == el  = caretStyle (pretty (replicate (ec - sc) '~'))
     | otherwise    = caretStyle (pretty "^…")
 
-  prettyLine (Line line end) = pretty line <> eofStyle (pretty end)
+  prettyLine (Line _ line end) = pretty line <> eofStyle (pretty end)
 
 
 prettyNotice :: Notice a -> Doc a
