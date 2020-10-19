@@ -16,12 +16,12 @@ import qualified Prettyprinter as P
 
 data Source = Source
   { path     :: Maybe FilePath
-  , contents :: String
+  , contents :: String -- FIXME: Text
   , lines    :: NE.NonEmpty Line
   }
   deriving (Eq, Ord, Show)
 
-data Line = Line Int String LineEnding
+data Line = Line Int String LineEnding -- FIXME: use (byte? character?) ranges instead of copying the contents?
   deriving (Eq, Ord, Show)
 
 data LineEnding
