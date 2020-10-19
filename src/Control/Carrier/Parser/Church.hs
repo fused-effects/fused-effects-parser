@@ -262,6 +262,9 @@ cutfailWith a e = ParserC (\ _ _   fail i -> fail (Err i a e))
 {-# INLINE cutfailWith #-}
 
 
+-- FIXME: Text
+-- FIXME: rope of Text
+-- FIXME: a lazy stream/iteratee/whatever of ropes of Text
 data Input = Input
   { pos :: {-# UNPACK #-} !Pos
   , str :: !String
