@@ -12,12 +12,14 @@ module Control.Effect.Parser.Source
 , readSourceFromFile
 , (!)
 , (!..)
+, slice
 ) where
 
 import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Span as Span
 import           Control.Exception (assert)
 import qualified Data.List.NonEmpty as NE
+import           Data.Monoid (Endo(..))
 import           Prelude hiding (lines, span)
 import qualified Prettyprinter as P
 
@@ -118,3 +120,21 @@ Source _ _ _ lines !.. span
 {-# INLINE (!..) #-}
 
 infixl 9 !..
+
+
+slice :: Source -> Span.Span -> Source
+slice (Source path span _ lines) span' = Source path span' contents' lines'
+  where
+  contents' = appEndo (foldMap (\ (Line _ s e) -> Endo (s <>) <> case e of
+    EOF  -> mempty
+    CR   -> cr
+    LF   -> lf
+    CRLF -> cr <> lf) lines') ""
+  lines' = assert (endLine >= startLine)
+    $ NE.fromList
+    $ takeWhile    (\ (Line i _ _) -> i <= endLine)
+    $ NE.dropWhile (\ (Line i _ _) -> i < startLine) lines
+  startLine = Span.line (Span.start span)
+  endLine   = Span.line (Span.end   span)
+  cr = Endo ('\r':)
+  lf = Endo ('\n':)
