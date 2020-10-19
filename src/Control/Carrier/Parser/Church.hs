@@ -36,7 +36,6 @@ import           Control.Algebra
 import           Control.Effect.Cut
 import           Control.Effect.NonDet
 import           Control.Effect.Parser
-import           Control.Effect.Parser.Excerpt
 import           Control.Effect.Parser.Lens
 import qualified Control.Effect.Parser.Notice as Notice
 import           Control.Effect.Parser.Source as Source
@@ -308,7 +307,7 @@ expected_ = lens expected $ \ i expected -> i{ expected }
 errToNotice :: Source -> Err -> Notice.Notice a
 errToNotice source Err{ input = Input pos _, reason, expected } = Notice.Notice
   { level   = Just Notice.Error
-  , excerpt = fromSourceAndSpan source (Span pos pos)
+  , source  = slice source (Span pos pos)
   , reason  = fillSep (map pretty (words (fromMaybe "unknown error" reason))) <> if null expected then mempty else comma <+> fillSep (pretty "expected" <> colon : punctuate comma (map pretty (toList expected)))
   , context = []
   }

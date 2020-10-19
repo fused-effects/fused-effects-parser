@@ -4,7 +4,7 @@ module Control.Effect.Parser.Notice
 ( Level(..)
 , Notice(..)
 , level_
-, excerpt_
+, source_
 , reason_
 , context_
 , reAnnotateNotice
@@ -14,7 +14,6 @@ module Control.Effect.Parser.Notice
 , prettyNotice
 ) where
 
-import Control.Effect.Parser.Excerpt
 import Control.Effect.Parser.Lens
 import Control.Effect.Parser.Source
 import Control.Effect.Parser.Span as Span
@@ -35,7 +34,7 @@ instance Pretty Level where
 
 data Notice a = Notice
   { level   :: !(Maybe Level)
-  , excerpt :: {-# UNPACK #-} !Excerpt
+  , source  :: {-# UNPACK #-} !Source
   , reason  :: !(Doc a)
   , context :: ![Doc a]
   }
@@ -44,8 +43,8 @@ data Notice a = Notice
 level_ :: Lens' (Notice a) (Maybe Level)
 level_ = lens level $ \ n level -> n{ level }
 
-excerpt_ :: Lens' (Notice a) Excerpt
-excerpt_ = lens excerpt $ \ n excerpt -> n{ excerpt }
+source_ :: Lens' (Notice a) Source
+source_ = lens source $ \ n source -> n{ source }
 
 reason_ :: Lens' (Notice a) (Doc a)
 reason_ = lens reason $ \ n reason -> n{ reason }
@@ -54,7 +53,7 @@ context_ :: Lens' (Notice a) [Doc a]
 context_ = lens context $ \ n context -> n{ context }
 
 reAnnotateNotice :: (a -> b) -> (Notice a -> Notice b)
-reAnnotateNotice f Notice{ level, excerpt, reason, context} = Notice{ level, excerpt, reason = reAnnotate f reason, context = map (reAnnotate f) context }
+reAnnotateNotice f Notice{ level, source, reason, context} = Notice{ level, source, reason = reAnnotate f reason, context = map (reAnnotate f) context }
 
 
 data Style a = Style
@@ -77,7 +76,7 @@ identityStyle = Style
   }
 
 prettyNoticeWith :: Style a -> Notice a -> Doc a
-prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, caretStyle } (Notice level (Excerpt path (line:|_) span) reason context) = concatWith (surround hardline)
+prettyNoticeWith Style{ pathStyle, levelStyle, posStyle, gutterStyle, eofStyle, caretStyle } (Notice level (Source path span _ (line:|_)) reason context) = concatWith (surround hardline)
   ( nest 2 (group (fillSep
     [ pathStyle (pretty (fromMaybe "(interactive)" path)) <> colon <> pos (Span.start span) <> colon <> foldMap ((space <>) . (<> colon) . (levelStyle <*> pretty)) level
     , reason
