@@ -13,7 +13,6 @@ module Control.Carrier.Parser.Church
 ( -- * Parser carrier
   runParserWithString
 , runParserWithFile
-, runParserWith
 , runParserWithSource
 , runParser
 , ParserC(ParserC)
@@ -68,13 +67,6 @@ runParserWithFile path p = do
   src <- liftIO (readSourceFromFile path)
   runParserWithSource src p
 {-# INLINE runParserWithFile #-}
-
-runParserWith :: Has (Throw (Source, Err)) sig m => Maybe FilePath -> Input -> ParserC m a -> m a
-runParserWith path input = runParser (const pure) failure failure input
-  where
-  src = sourceFromString path (Span.line (pos input)) (str input)
-  failure = throwError . (,) src
-{-# INLINE runParserWith #-}
 
 runParserWithSource :: Has (Throw (Source, Err)) sig m => Source -> ParserC m a -> m a
 runParserWithSource src@(Source _ _ _ (Line line _ _:|_)) = runParser (const pure) failure failure input
