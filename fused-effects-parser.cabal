@@ -41,7 +41,6 @@ library
   exposed-modules:
     Control.Carrier.Parser.Church
     Control.Effect.Parser
-    Control.Effect.Parser.Excerpt
     Control.Effect.Parser.Notice
     Control.Effect.Parser.Source
     Control.Effect.Parser.Span
