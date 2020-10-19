@@ -28,13 +28,13 @@ main = defaultMain $ testGroup "unit tests"
   , testGroup "Source"
     [ testGroup "sourceFromString"
       [ testCase "returns the empty string for the empty string" $
-        sourceFromString Nothing "" @?= Source Nothing (NE.fromList [Line "" EOF])
+        sourceFromString Nothing 0 "" @?= Source Nothing 0 (NE.fromList [Line "" EOF])
       , testCase "returns two empty strings for a newline" $
-        sourceFromString Nothing "\n" @?= Source Nothing (NE.fromList [Line "" LF, Line "" EOF])
+        sourceFromString Nothing 0 "\n" @?= Source Nothing 0 (NE.fromList [Line "" LF, Line "" EOF])
       , testProperty "returns one more string than there are newlines" . property $ do
         s <- forAll (Gen.string (Range.linear 1 100)
           (Gen.frequency [ (5, Gen.unicode), (1, Gen.element "\t\r\n ") ]))
-        length (lines (sourceFromString Nothing s))
+        length (lines (sourceFromString Nothing 0 s))
           === length (Prelude.filter (`elem` "\r\n") (replace "\r\n" "\n" s)) + 1
       ]
     ]

@@ -70,7 +70,7 @@ runParserWithFile path p = do
 runParserWith :: Has (Throw (Source, Err)) sig m => Maybe FilePath -> Input -> ParserC m a -> m a
 runParserWith path input = runParser (const pure) failure failure input
   where
-  src = sourceFromString path (str input)
+  src = sourceFromString path (Span.line (pos input)) (str input)
   failure = throwError . (,) src
 {-# INLINE runParserWith #-}
 

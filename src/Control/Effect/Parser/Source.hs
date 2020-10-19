@@ -15,8 +15,9 @@ import qualified Data.List.NonEmpty as NE
 import qualified Prettyprinter as P
 
 data Source = Source
-  { path  :: Maybe FilePath
-  , lines :: NE.NonEmpty Line
+  { path      :: Maybe FilePath
+  , startLine :: Int
+  , lines     :: NE.NonEmpty Line
   }
   deriving (Eq, Ord, Show)
 
@@ -38,14 +39,14 @@ instance P.Pretty LineEnding where
     LF   -> "\\n"
 
 
-sourceFromString :: Maybe FilePath -> String -> Source
-sourceFromString path = Source path . go
+sourceFromString :: Maybe FilePath -> Int -> String -> Source
+sourceFromString path line = Source path line . go
   where
   go s = let (line, rest) = takeLine s in maybe (NE.fromList [ line ]) (NE.cons line . go) rest
 {-# INLINE sourceFromString #-}
 
 readSourceFromFile :: FilePath -> IO Source
-readSourceFromFile path = sourceFromString (Just path) <$> readFile path
+readSourceFromFile path = sourceFromString (Just path) 0 <$> readFile path
 {-# INLINE readSourceFromFile #-}
 
 
@@ -67,7 +68,7 @@ src ! pos = NE.head $ src !.. Span.Span pos pos
 infixl 9 !
 
 (!..) :: Source -> Span.Span -> NE.NonEmpty Line
-Source _ lines !.. span
+Source _ _ lines !.. span
   = assert (endLine >= startLine)
   $ NE.fromList
   $ take (endLine - startLine + 1)
