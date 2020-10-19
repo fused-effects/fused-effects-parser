@@ -2,6 +2,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Control.Effect.Parser.Source
 ( Source(..)
+, path_
 , span_
 , contents_
 , lines_
@@ -27,6 +28,10 @@ data Source = Source
   , lines    :: NE.NonEmpty Line
   }
   deriving (Eq, Ord, Show)
+
+path_ :: Lens' Source (Maybe FilePath)
+path_ = lens path $ \ e path -> e{ path }
+{-# INLINE path_ #-}
 
 -- | A lens over the 'Span.Span' from a 'Source'.
 --
