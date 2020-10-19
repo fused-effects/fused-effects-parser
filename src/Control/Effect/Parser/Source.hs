@@ -59,6 +59,7 @@ takeLine = go id where
     c   :     rest -> go (line . (c:)) rest
 {-# INLINE takeLine #-}
 
+
 (!) :: Source -> Span.Pos -> Line
 src ! pos = NE.head $ src !.. Span.Span pos pos
 {-# INLINE (!) #-}
